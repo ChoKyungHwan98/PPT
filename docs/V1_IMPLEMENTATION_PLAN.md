@@ -1,6 +1,6 @@
 # 기획서 디자이너 V1 구현 계획서
 
-상태: 단계 0~2 구현 완료 · 단계 3 승인 대기  
+상태: 단계 0 부분 완료 · 단계 1~3 완료 · 단계 4 승인 대기  
 작성 기준: V5 + V6 + Architecture Polish + 현재 저장소 조사 결과  
 원칙: 기존 코드를 최대한 재사용하고, Balance 전용 경로는 확장하지 않는다.
 
@@ -47,7 +47,15 @@
 9. 디자인 검토 AI는 최종 심판이 아니라 조언자다.
 10. 한 번의 선택을 곧바로 영구적인 디자인 규칙으로 만들지 않는다.
 
-## 3. 유지할 현재 코드
+## 3. 문서 우선순위
+
+현재 V1 구현에서 문서 간 내용이 충돌하면 이 `V1_IMPLEMENTATION_PLAN.md`를 우선 기준으로 사용한다.
+
+특히 기존 `EVAL.md`, `ROADMAP.md` 등에 남아 있는 강제 A/B, PDF-first, PPTX later 같은 과거 결정이 현재 V1 계획과 충돌하면 현재 계획을 따른다.
+
+단, 기존 문서에 있는 유효한 품질 기준과 Hard Gate 원칙은 유지한다. 이 우선순위는 유효한 검사 기준을 삭제하는 근거가 아니다.
+
+## 4. 유지할 현재 코드
 
 다음 기반은 새로 만들지 않고 현재 구현을 사용한다.
 
@@ -66,9 +74,15 @@
 
 V1에서는 기존 SlideIR을 Semantic IR 역할로 재사용한다. 별도의 `SemanticIR` 데이터 모델을 추가하지 않는다.
 
-## 4. 새로 필요한 최소 기능
+### SlideIR legacy boundary
 
-### 4.1 Information Plan
+현재 SlideIR의 `pagePreference`, `preferredProfile`, `primaryOutput`, `editablePptxRequired` 등은 기존 구조 재사용 때문에 남아 있는 legacy field다.
+
+V1의 Semantic Interpretation과 Information Design 단계에서는 이 field를 의미 판단에 사용하지 않는다. 필요하면 이후 Composition 또는 Export 책임으로 분리할 기술 부채로 기록하되, 지금은 대규모 IR 리팩터링을 하지 않는다.
+
+## 5. 새로 필요한 최소 기능
+
+### 5.1 Information Plan
 
 내용을 어떤 순서와 구조로 설명할지 기록한다.
 
@@ -83,7 +97,7 @@ V1에서는 기존 SlideIR을 Semantic IR 역할로 재사용한다. 별도의 `
 
 색상, 글꼴 크기, 좌표는 넣지 않는다.
 
-### 4.2 실행 관리자
+### 5.2 실행 관리자
 
 각 단계를 정해진 순서로 실행하고 결과를 저장한다.
 
@@ -103,7 +117,7 @@ V1에서는 기존 SlideIR을 Semantic IR 역할로 재사용한다. 별도의 `
 - 검색 결과 개수 상한 적용
 - context budget 초과 시 호출 중단
 
-### 4.3 통합 품질 검사
+### 5.3 통합 품질 검사
 
 기존의 여러 검사를 하나의 최종 통과·실패 결과로 묶는다. 단, 내부 검사는 다음 두 종류로 분리한다.
 
@@ -138,7 +152,7 @@ V1에서는 기존 SlideIR을 Semantic IR 역할로 재사용한다. 별도의 `
 
 하나라도 실패하면 전체 결과는 실패다.
 
-### 4.4 디자인 검토 결과
+### 5.4 디자인 검토 결과
 
 실제 생성된 화면을 보고 다음을 평가한다.
 
@@ -152,7 +166,7 @@ V1에서는 기존 SlideIR을 Semantic IR 역할로 재사용한다. 별도의 `
 
 검토 결과는 문제 위치, 문제 이유, 수정 제안으로 나누어 기록한다.
 
-### 4.5 부분 수정
+### 5.5 부분 수정
 
 검토 결과에 따라 전체를 다시 만들지 않고 문제가 있는 부분만 바꾼다.
 
@@ -172,9 +186,11 @@ V1에서는 기존 SlideIR을 Semantic IR 역할로 재사용한다. 별도의 `
 - 핵심 관계
 - 승인된 의미 해석
 
-## 5. 구현 순서
+## 6. 구현 순서
 
 ### 단계 0 — 기준 결과와 실패 조건 고정
+
+현재 상태: **부분 완료**. MEC-01 기준 fixture와 기존 baseline test는 고정됐지만, 사람이 문제를 미리 표시한 Critic fixture 3~5개는 아직 구현하거나 검증하지 않았다.
 
 - 기준 입력을 fixture로 고정한다.
 - 기존 Balance 결과는 Golden Case로 고정한다.
@@ -191,12 +207,15 @@ V1에서는 기존 SlideIR을 Semantic IR 역할로 재사용한다. 별도의 `
 
 각 fixture에서 사람이 표시한 실제 문제와 Critic이 발견한 문제를 비교한다.
 
+위 Critic fixture를 구현하고 검증하기 전에는 단계 0을 완료로 처리하지 않는다.
+
 완료 기준:
 
 - 기존 62개 테스트가 그대로 통과한다.
 - 첫 V1 입력과 기대 관계가 고정되어 있다.
 - Critic이 정상 결과를 무조건 실패로 처리하지 않는다.
 - Critic이 문제 fixture의 핵심 문제를 하나 이상 발견한다.
+- `pnpm verify`가 실제로 PASS한다.
 
 ### 단계 1 — 입력에서 내용 구조 만들기
 
@@ -215,13 +234,21 @@ V1에서는 기존 SlideIR을 Semantic IR 역할로 재사용한다. 별도의 `
 
 - 메커니즘 설명 구조를 선택한다.
 - BREAK를 전환점으로 표시한다.
-- 시간 정지와 추가 피해의 원인·결과 관계를 보존한다.
+- 시간 정지 → BREAK → 받는 피해 +50%의 관계를 보존한다.
 - 시각 스타일을 섞지 않고 설명 구조만 결정한다.
 
 완료 기준:
 
 - 원문 없이 Information Plan만 읽어도 설명 순서를 이해할 수 있다.
 - 색상이나 좌표 같은 화면 정보가 들어 있지 않다.
+
+### MEC-01 전용 scaffold boundary
+
+`interpretMec01Source()`와 `createMec01InformationPlan()`은 V1 vertical-slice를 검증하기 위한 scaffold/fixture 코드다.
+
+단계 3 이후 시스템은 `mec-01`, `break-state`, `damage-modifier` 같은 fixture-specific 이름이나 ID에 의존해서는 안 된다. 단계 3부터 Retrieval, Composition, Renderer는 반드시 범용 계약인 `SlideIR + InformationPlan`만 입력으로 사용한다.
+
+MEC-01 전용 Retrieval, Composition, Renderer 경로는 만들지 않는다.
 
 ### 단계 3 — 필요한 규칙과 참고 자료 선택
 
@@ -332,7 +359,20 @@ PPTX는 내부 원본이 아니라 호환용 출력이다.
 
 HTML, PDF, PNG, PPTX가 픽셀 단위로 완전히 같을 필요는 없다.
 
-## 6. V1에서 만들지 않는 것
+## 7. 공통 검증과 완료 보고
+
+모든 구현 단계의 완료 조건에는 `pnpm verify` 실행과 실제 PASS 결과가 포함된다.
+
+작업 완료 보고에는 다음을 반드시 남긴다.
+
+- 실행한 검증 명령
+- 실제 PASS/FAIL 결과
+- 테스트 파일과 테스트 개수
+- 실패가 있었다면 원인과 해결 여부
+
+GitHub CI는 이번 V1 작업의 필수 구현 대상이 아니다. 다만 추후 과제로 기록하고, 로컬 `pnpm verify`를 현재의 기준 검사로 사용한다.
+
+## 8. V1에서 만들지 않는 것
 
 - 전체 기획서 자동 생성
 - 여러 장의 덱 자동 구성
@@ -346,7 +386,7 @@ HTML, PDF, PNG, PPTX가 픽셀 단위로 완전히 같을 필요는 없다.
 - Balance 전용 경로 확장
 - 여러 번 반복하는 자동 수정
 
-## 7. AI 사용 방식
+## 9. AI 사용 방식
 
 첫 구현에서는 다음 두 실행 방식만 사용한다.
 
@@ -365,7 +405,7 @@ HTML, PDF, PNG, PPTX가 픽셀 단위로 완전히 같을 필요는 없다.
 
 Local과 OpenRouter 중 무엇을 먼저 붙일지는 실제 시험 결과와 비용을 보고 결정한다. 특정 모델 이름을 프로그램 구조에 고정하지 않는다.
 
-## 8. UI 적용 범위
+## 10. UI 적용 범위
 
 현재 단계에서는 UI를 다시 디자인하지 않는다.
 
@@ -398,7 +438,7 @@ Local과 OpenRouter 중 무엇을 먼저 붙일지는 실제 시험 결과와 �
 
 내부 용어인 SlideIR, Information Plan, Harness, Model Router는 일반 사용자 화면에 표시하지 않는다.
 
-## 9. 예상 코드 변경 범위
+## 11. 예상 코드 변경 범위
 
 기존 package를 우선 수정한다.
 
@@ -415,7 +455,7 @@ Local과 OpenRouter 중 무엇을 먼저 붙일지는 실제 시험 결과와 �
 
 Balance 전용 `story-planner`, `html-exporter`, `pptx-exporter`는 Golden Case 보호에 필요한 수정 외에는 확장하지 않는다.
 
-## 10. 전체 완료 조건
+## 12. 전체 완료 조건
 
 다음 조건을 모두 만족해야 첫 Vertical Slice가 끝난다.
 
@@ -431,8 +471,9 @@ Balance 전용 `story-planner`, `html-exporter`, `pptx-exporter`는 Golden Case 
 10. PNG, HTML, PDF, 편집 가능한 PPTX 한 장이 Output Parity를 만족한다.
 11. Balance Golden Case가 깨지지 않는다.
 12. 기존 테스트와 신규 테스트가 모두 통과한다.
+13. `pnpm verify`의 실제 PASS 결과가 완료 보고에 남아 있다.
 
-## 11. 작업 중 중단하고 사용자에게 확인할 상황
+## 13. 작업 중 중단하고 사용자에게 확인할 상황
 
 다음 상황에서는 임의로 결정하지 않고 작업을 멈춘다.
 
@@ -444,7 +485,7 @@ Balance 전용 `story-planner`, `html-exporter`, `pptx-exporter`는 Golden Case 
 - 테이블 디자이너 저장소와 실제 코드를 공유해야 하는 경우
 - 계획에 없는 대규모 UI 변경이 필요한 경우
 
-## 12. 승인 후 첫 작업 묶음
+## 14. 승인 후 첫 작업 묶음
 
 승인 직후에는 단계 0부터 단계 2까지만 먼저 구현한다.
 

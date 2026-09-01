@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { contentHash } from './hash.js';
+import { validateInformationPlan, type InformationPlan } from './information-plan.js';
 import type { SlideIR } from './slide-ir.js';
 
 export const DensityBandSchema = z.enum(['sparse', 'balanced', 'dense']);
@@ -174,6 +175,81 @@ export function buildReferenceRetrievalBrief(input: {
     schemaVersion: '0.1',
     briefId: 'brief-' + contentHash(stableFields).slice(0, 16),
     ...stableFields,
+  });
+}
+
+function primaryArtifactForInformationShape(shape: InformationPlan['semanticShape']): string {
+  switch (shape) {
+    case 'causal-chain':
+      return 'mechanism-flow';
+    case 'sequence':
+      return 'sequence-flow';
+    case 'comparison':
+      return 'comparison-field';
+    case 'state-transition':
+      return 'state-map';
+    case 'hierarchy':
+      return 'hierarchy-map';
+    case 'metric':
+      return 'metric-highlight';
+    case 'hybrid':
+      return 'visual-synthesis';
+  }
+}
+
+function readingPathCandidatesForInformationShape(
+  shape: InformationPlan['semanticShape'],
+): z.infer<typeof ReadingPathSchema>[] {
+  switch (shape) {
+    case 'causal-chain':
+    case 'sequence':
+      return ['guided-sequence', 'left-to-right'];
+    case 'comparison':
+      return ['before-after', 'left-to-right'];
+    case 'state-transition':
+      return ['guided-sequence', 'center-out'];
+    case 'hierarchy':
+      return ['top-to-bottom', 'center-out'];
+    case 'metric':
+      return ['center-out', 'top-to-bottom'];
+    case 'hybrid':
+      return ['guided-sequence', 'top-to-bottom'];
+  }
+}
+
+function densityBandForBlockCount(blockCount: number): z.infer<typeof DensityBandSchema> {
+  if (blockCount <= 3) return 'sparse';
+  if (blockCount <= 6) return 'balanced';
+  return 'dense';
+}
+
+/**
+ * 단계 3의 범용 Retrieval bridge다. 기존 SlideIR과 InformationPlan만으로 검색 조건을 만든다.
+ * SlideIR의 legacy output field와 fixture-specific block ID에는 의존하지 않는다.
+ */
+export function buildReferenceRetrievalBriefFromInformationPlan(input: {
+  slide: SlideIR;
+  informationPlan: InformationPlan;
+  corpus: ReferenceRecord[];
+  audience: string;
+  outputProfile: z.infer<typeof ReferenceRetrievalBriefSchema>['outputProfile'];
+  avoidSignatures?: string[];
+}): ReferenceRetrievalBrief {
+  const informationIssues = validateInformationPlan(input.informationPlan, input.slide);
+  if (informationIssues.length > 0) {
+    throw new Error(`유효하지 않은 InformationPlan으로는 reference를 검색할 수 없습니다: ${informationIssues[0]!.message}`);
+  }
+
+  return buildReferenceRetrievalBrief({
+    slide: input.slide,
+    corpus: input.corpus,
+    semanticShape: input.informationPlan.semanticShape,
+    primaryArtifact: primaryArtifactForInformationShape(input.informationPlan.semanticShape),
+    densityBand: densityBandForBlockCount(input.informationPlan.readingOrder.length),
+    readingPathCandidates: readingPathCandidatesForInformationShape(input.informationPlan.semanticShape),
+    audience: input.audience,
+    outputProfile: input.outputProfile,
+    ...(input.avoidSignatures === undefined ? {} : { avoidSignatures: input.avoidSignatures }),
   });
 }
 

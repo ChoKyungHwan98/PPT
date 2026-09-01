@@ -1,10 +1,15 @@
 import { createHash } from 'node:crypto';
 import {
+  buildReferenceRetrievalBriefFromInformationPlan,
   corpusSnapshotHash,
   retrieveReferences,
+  type InformationPlan,
   type ReferenceRecord,
   type ReferenceRetrievalBrief,
+  type SlideIR,
 } from '@game-presentation/contracts';
+
+export const MAX_REFERENCE_RETRIEVAL_RESULTS = 5;
 
 export type ReferenceIndexEntry = {
   referenceId: string;
@@ -115,4 +120,35 @@ export function searchReferenceIndex(input: {
     .filter((result) => result.score > 0)
     .sort((left, right) => right.score - left.score || left.referenceId.localeCompare(right.referenceId))
     .slice(0, input.limit);
+}
+
+/**
+ * InformationPlan을 기준으로 기존 local reference index를 검색한다.
+ * 이 함수는 검색만 수행하며 Composition, Render, Critic 단계로 진행하지 않는다.
+ */
+export function retrieveReferencesForInformationPlan(input: {
+  slide: SlideIR;
+  informationPlan: InformationPlan;
+  corpus: ReferenceRecord[];
+  audience: string;
+  outputProfile: ReferenceRetrievalBrief['outputProfile'];
+  limit: number;
+  avoidSignatures?: string[];
+}): { brief: ReferenceRetrievalBrief; results: ReferenceSearchResult[] } {
+  if (!Number.isInteger(input.limit) || input.limit <= 0 || input.limit > MAX_REFERENCE_RETRIEVAL_RESULTS) {
+    throw new Error(`reference retrieval 결과는 1~${MAX_REFERENCE_RETRIEVAL_RESULTS}개여야 합니다.`);
+  }
+  const brief = buildReferenceRetrievalBriefFromInformationPlan({
+    slide: input.slide,
+    informationPlan: input.informationPlan,
+    corpus: input.corpus,
+    audience: input.audience,
+    outputProfile: input.outputProfile,
+    ...(input.avoidSignatures === undefined ? {} : { avoidSignatures: input.avoidSignatures }),
+  });
+  const index = buildReferenceIndex(input.corpus);
+  return {
+    brief,
+    results: searchReferenceIndex({ brief, corpus: input.corpus, index, limit: input.limit }),
+  };
 }
