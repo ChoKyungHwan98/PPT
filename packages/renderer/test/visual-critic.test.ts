@@ -1,0 +1,171 @@
+import { describe, expect, it } from 'vitest';
+import {
+  FakeAIProvider,
+  VisualCriticFixtureSchema,
+  VisualCritiqueReportSchema,
+  type AIProvider,
+  type ProviderRequest,
+} from '@game-presentation/contracts';
+import { createMec01InformationPlan, interpretMec01Source } from '../../source-ingestion/src/mec-01-semantic.js';
+import type { HardGateResult } from '../src/hard-gate.js';
+import {
+  benchmarkCriticReport,
+  criticGuardrailIssues,
+  runVisualCritic,
+} from '../src/visual-critic.js';
+
+const rawText = '회피 ×3 → 시간 파편 획득 → 시간 정지 5초 → BREAK → 받는 피해 +50%';
+
+function passedGate(): HardGateResult {
+  return { passed: true, programFindings: [], sourceFidelityFindings: [], findings: [] };
+}
+
+function report(artifactId: string) {
+  return VisualCritiqueReportSchema.parse({
+    schemaVersion: '0.1',
+    artifactId,
+    firstFixation: { target: 'BREAK', assessment: '전환점으로 먼저 보인다.' },
+    readingPathAssessment: '왼쪽에서 오른쪽으로 자연스럽다.',
+    submissionReadiness: 'not-ready',
+    findings: [{
+      findingId: 'finding-density',
+      issueType: 'density',
+      severity: 'error',
+      target: { kind: 'page', ids: ['page'] },
+      problem: '다섯 단계가 중앙의 좁은 영역에 몰려 있다.',
+      reason: '단계 사이의 구분과 전환점 인지가 늦어진다.',
+      revisionDirection: '각 단계 사이의 가로 간격을 늘리고 buildup과 결과 영역을 분리한다.',
+    }],
+    sourceChangeSuggested: false,
+    hardGateStatus: 'passed',
+  });
+}
+
+describe('visual critic benchmark', () => {
+  it('matches human-labelled core issue and checks suggestion specificity', () => {
+    const fixture = VisualCriticFixtureSchema.parse({
+      schemaVersion: '0.1',
+      fixtureId: 'density-problem',
+      title: '정보 과밀',
+      artifactId: 'render-density',
+      labelCoverage: 'core-only',
+      expectedFindings: [{
+        issueType: 'density',
+        acceptableIssueTypes: ['grouping'],
+        severity: 'error',
+        target: { kind: 'page', ids: ['page'] },
+        humanReason: '중앙에 정보가 몰려 있다.',
+      }],
+      expectedSubmissionReadiness: 'not-ready',
+    });
+    const result = benchmarkCriticReport(fixture, report('render-density'));
+    expect(result.problemRecall).toBe(1);
+    expect(result.falsePositiveCount).toBeNull();
+    expect(result.unmatchedActionableCount).toBe(0);
+    expect(result.severityExactCount).toBe(1);
+    expect(result.specificSuggestionCount).toBe(1);
+  });
+
+  it('does not force a finding on the clean fixture', () => {
+    const fixture = VisualCriticFixtureSchema.parse({
+      schemaVersion: '0.1',
+      fixtureId: 'clean-result',
+      title: '정상 결과',
+      artifactId: 'render-clean',
+      labelCoverage: 'exhaustive',
+      expectedFindings: [],
+      expectedSubmissionReadiness: 'ready',
+    });
+    const cleanReport = VisualCritiqueReportSchema.parse({
+      schemaVersion: '0.1',
+      artifactId: 'render-clean',
+      firstFixation: { target: 'BREAK', assessment: '핵심 전환점으로 보인다.' },
+      readingPathAssessment: '순서가 명확하다.',
+      submissionReadiness: 'ready',
+      findings: [],
+      sourceChangeSuggested: false,
+      hardGateStatus: 'passed',
+    });
+    expect(benchmarkCriticReport(fixture, cleanReport).normalFixturePassed).toBe(true);
+  });
+
+  it('flags source-copy changes and generic revision language', () => {
+    const unsafe = report('render-density');
+    unsafe.findings[0]!.revisionDirection = '원문을 수정하고 전반적으로 개선한다.';
+    expect(criticGuardrailIssues(unsafe)).toHaveLength(2);
+  });
+});
+
+describe('visual critic execution boundary', () => {
+  it('never sends a Hard Gate FAIL render to a provider', async () => {
+    const slide = interpretMec01Source({ rawText, createdAt: '2026-08-29T00:00:00.000Z' });
+    const provider = new FakeAIProvider('fixture-model', new Map());
+    await expect(runVisualCritic({
+      provider,
+      pngBytes: new Uint8Array([1, 2, 3]),
+      artifactId: 'render-fail',
+      goal: '순서와 전환점을 보여준다.',
+      slide,
+      informationPlan: createMec01InformationPlan(slide),
+      hardGate: { passed: false, programFindings: [], sourceFidelityFindings: [], findings: [] },
+    })).rejects.toThrow('Hard Gate FAIL');
+  });
+
+  it('hands off only the allowlisted compact context and actual PNG', async () => {
+    const slide = interpretMec01Source({ rawText, createdAt: '2026-08-29T00:00:00.000Z' });
+    let captured: ProviderRequest | undefined;
+    const provider: AIProvider = {
+      kind: 'fake',
+      model: 'capturing-fixture',
+      async capabilities() {
+        return { structuredOutput: true, vision: true, localExecution: true, promptCaching: false };
+      },
+      async generateStructured(request, schema) {
+        captured = request;
+        return {
+          value: schema.parse({
+            artifactId: 'render-compact',
+            firstFixation: { target: 'BREAK', assessment: '전환점으로 보인다.' },
+            readingPathAssessment: '좌에서 우로 읽힌다.',
+            submissionReadiness: 'ready',
+            findings: [],
+            sourceChangeSuggested: false,
+            hardGateStatus: 'passed',
+          }),
+          run: {
+            requestId: request.requestId,
+            provider: 'fake',
+            model: 'capturing-fixture',
+            cacheHit: false,
+            inputBytes: 1,
+            outputBytes: 1,
+            estimatedCostUsd: 0,
+            contextArtifactIds: request.contextArtifactIds ?? [],
+            startedAt: new Date(0).toISOString(),
+            completedAt: new Date(0).toISOString(),
+          },
+        };
+      },
+    };
+    const result = await runVisualCritic({
+      provider,
+      pngBytes: new Uint8Array([1, 2, 3, 4]),
+      artifactId: 'render-compact',
+      goal: '순서와 전환점을 보여준다.',
+      slide,
+      informationPlan: createMec01InformationPlan(slide),
+      hardGate: passedGate(),
+    });
+    expect(captured?.imageEvidence?.bytes).toEqual(new Uint8Array([1, 2, 3, 4]));
+    expect(Object.keys(captured?.compactState as object)).toEqual([
+      'artifactId',
+      'pageGoal',
+      'semanticSummary',
+      'informationPlan',
+      'rubric',
+      'hardGate',
+    ]);
+    expect(JSON.stringify(captured?.compactState)).not.toContain('repository');
+    expect(result.inputTrace.includedFields).toHaveLength(6);
+  });
+});

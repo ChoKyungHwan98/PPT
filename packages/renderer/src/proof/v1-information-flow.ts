@@ -25,35 +25,44 @@ async function main(): Promise<void> {
     avoidSignatures: ['card-dashboard'],
     limit: 3,
   });
-  const plan = createCompositionPlanFromInformationPlan({
-    slide,
-    informationPlan,
-    retrieval,
-    fragments: SEED_PATTERN_FRAGMENTS,
-  });
   const fonts = await loadSystemPretendard();
   const browser = await launchRenderBrowser();
   try {
-    const measures = await measureTextBatch(
-      browser,
-      fonts,
-      informationMeasureRequests({ slide, informationPlan, plan }),
-    );
-    const tree = buildInformationRenderTree({ slide, informationPlan, plan, measures, fonts });
-    const hardGate = runHardGate({ slide, informationPlan, tree });
-    if (!hardGate.passed) {
-      throw new Error(`Hard Gate 실패: ${JSON.stringify(hardGate.findings)}`);
+    const candidates = [
+      { id: 'threshold', fragmentId: 'pattern-break-threshold-field' },
+      { id: 'causal-spine', fragmentId: 'pattern-editorial-causal-spine' },
+    ];
+    const results = [];
+    for (const candidate of candidates) {
+      const plan = createCompositionPlanFromInformationPlan({
+        slide,
+        informationPlan,
+        retrieval,
+        fragments: SEED_PATTERN_FRAGMENTS.filter((fragment) => fragment.fragmentId === candidate.fragmentId),
+      });
+      const measures = await measureTextBatch(
+        browser,
+        fonts,
+        informationMeasureRequests({ slide, informationPlan, plan }),
+      );
+      const tree = buildInformationRenderTree({ slide, informationPlan, plan, measures, fonts });
+      const hardGate = runHardGate({ slide, informationPlan, tree });
+      if (!hardGate.passed) {
+        throw new Error(`Hard Gate 실패 (${candidate.id}): ${JSON.stringify(hardGate.findings)}`);
+      }
+      const basename = `mec-01-${candidate.id}`;
+      const outputs = await exportRenderTree({
+        browser,
+        tree,
+        fonts,
+        outputDir: resolve('output', 'v1-information-flow'),
+        basename,
+      });
+      const compositionPlanPath = resolve('output', 'v1-information-flow', `${basename}.composition-plan.json`);
+      await writeFile(compositionPlanPath, JSON.stringify(plan, null, 2) + '\n', 'utf8');
+      results.push({ id: candidate.id, plan, hardGate, outputs: { ...outputs, compositionPlanPath } });
     }
-    const outputs = await exportRenderTree({
-      browser,
-      tree,
-      fonts,
-      outputDir: resolve('output', 'v1-information-flow'),
-      basename: 'mec-01-generic-flow',
-    });
-    const compositionPlanPath = resolve('output', 'v1-information-flow', 'mec-01-composition-plan.json');
-    await writeFile(compositionPlanPath, JSON.stringify(plan, null, 2) + '\n', 'utf8');
-    process.stdout.write(JSON.stringify({ retrieval, plan, hardGate, outputs: { ...outputs, compositionPlanPath } }, null, 2) + '\n');
+    process.stdout.write(JSON.stringify({ retrieval, results }, null, 2) + '\n');
   } finally {
     await browser.close();
   }

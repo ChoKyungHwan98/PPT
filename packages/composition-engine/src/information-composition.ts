@@ -35,6 +35,27 @@ function flowForGroup(group: InformationPlan['groups'][number], informationPlan:
   return group.blockIds.length > 1 ? 'row' as const : 'column' as const;
 }
 
+function regionDesignForGroup(input: {
+  group: InformationPlan['groups'][number];
+  informationPlan: InformationPlan;
+  fragment: PatternFragment;
+}) {
+  const isPrimary = input.group.blockIds.includes(input.informationPlan.primaryArtifactBlockId);
+  const isConsequence = input.group.role === 'consequence' || input.group.role === 'evidence';
+  const isThreshold = input.fragment.topology.family === 'threshold-field';
+  const isSpine = input.fragment.topology.family === 'editorial-causal-spine';
+  return {
+    flow: flowForGroup(input.group, input.informationPlan),
+    weight: isPrimary
+      ? isThreshold ? 0.82 : isSpine ? 0.8 : 1.1
+      : isConsequence
+        ? isThreshold ? 1.05 : isSpine ? 1.15 : 0.9
+        : isThreshold ? Math.max(1.8, input.group.blockIds.length * 0.72) : Math.max(2, input.group.blockIds.length * 0.78),
+    gapToken: input.group.blockIds.length > 1 ? 'open' as const : 'tight' as const,
+    paddingToken: isPrimary ? 'tight' as const : isConsequence ? 'open' as const : 'normal' as const,
+  };
+}
+
 function matchingFragment(input: {
   slide: SlideIR;
   informationPlan: InformationPlan;
@@ -125,11 +146,8 @@ export function createCompositionPlanFromInformationPlan(input: {
         .map((group) => ({
           regionId: `group-${group.groupId}`,
           role: roleForGroup(group, input.informationPlan),
-          flow: flowForGroup(group, input.informationPlan),
           order: group.order + 1,
-          weight: group.blockIds.includes(input.informationPlan.primaryArtifactBlockId) ? 1.45 : Math.max(0.7, group.blockIds.length * 0.55),
-          gapToken: group.blockIds.length > 1 ? 'normal' : 'tight',
-          paddingToken: group.blockIds.includes(input.informationPlan.primaryArtifactBlockId) ? 'open' : 'normal',
+          ...regionDesignForGroup({ group, informationPlan: input.informationPlan, fragment: selected.fragment }),
         })),
     ],
     bindings: input.informationPlan.readingOrder.map((blockId, readingOrder) => {

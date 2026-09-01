@@ -22,6 +22,8 @@ export type ProviderRequest = {
   sourceSpans?: { id: string; text: string }[];
   compactState: unknown;
   imageEvidence?: { mimeType: 'image/png'; bytes: Uint8Array };
+  contextArtifactIds?: string[];
+  contextBudgetBytes?: number;
   maxOutputTokens: number;
 };
 
@@ -33,6 +35,11 @@ export type ProviderRunRecord = {
   inputBytes: number;
   outputBytes: number;
   estimatedCostUsd: number;
+  inputTokens?: number;
+  outputTokens?: number;
+  reasoningTokens?: number;
+  totalTokens?: number;
+  contextArtifactIds: string[];
   startedAt: string;
   completedAt: string;
 };
@@ -85,6 +92,11 @@ export class FakeAIProvider implements AIProvider {
         inputBytes: Buffer.byteLength(JSON.stringify(request.compactState), 'utf8'),
         outputBytes: Buffer.byteLength(JSON.stringify(value), 'utf8'),
         estimatedCostUsd: 0,
+        inputTokens: 0,
+        outputTokens: 0,
+        reasoningTokens: 0,
+        totalTokens: 0,
+        contextArtifactIds: request.contextArtifactIds ?? [],
         startedAt,
         completedAt,
       },

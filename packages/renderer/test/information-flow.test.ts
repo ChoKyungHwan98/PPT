@@ -85,7 +85,8 @@ describe('generic InformationPlan composition and render flow', () => {
     if (primaryText?.kind !== 'text') throw new Error('fixture error');
     expect(primaryText.font.size).toBe(plan.styleIntent.hierarchy.primaryTextSize);
     expect(primaryText.color).toBe(plan.styleIntent.accent.color);
-    expect(tree.nodes.some((node) => node.nodeId === 'motif-threshold-plane')).toBe(true);
+    expect(tree.nodes.some((node) => node.nodeId === 'motif-threshold-marker')).toBe(true);
+    expect(tree.nodes.some((node) => node.nodeId === 'connector-marker-dodge-step')).toBe(true);
   });
 
   it('creates structurally different RenderTrees for two allowed topology families', () => {
@@ -94,7 +95,7 @@ describe('generic InformationPlan composition and render flow', () => {
 
     expect(threshold.plan.layout.layoutFamily).toBe('threshold-field');
     expect(editorial.plan.layout.layoutFamily).toBe('editorial-causal-spine');
-    expect(threshold.tree.nodes.some((node) => node.nodeId === 'motif-threshold-plane')).toBe(true);
+    expect(threshold.tree.nodes.some((node) => node.nodeId === 'motif-threshold-marker')).toBe(true);
     expect(editorial.tree.nodes.some((node) => node.nodeId === 'motif-causal-spine')).toBe(true);
 
     const thresholdRegions = threshold.tree.nodes
@@ -110,6 +111,26 @@ describe('generic InformationPlan composition and render flow', () => {
     expect(thresholdBreak?.box).not.toEqual(editorialBreak?.box);
     expect(runHardGate({ slide: threshold.slide, informationPlan: threshold.informationPlan, tree: threshold.tree }).passed).toBe(true);
     expect(runHardGate({ slide: editorial.slide, informationPlan: editorial.informationPlan, tree: editorial.tree }).passed).toBe(true);
+  });
+
+  it('keeps the threshold as a transition marker and makes the causal spine visibly sequential', () => {
+    const threshold = validArtifacts('pattern-break-threshold-field');
+    const spine = validArtifacts('pattern-editorial-causal-spine');
+    const marker = threshold.tree.nodes.find((node) => node.nodeId === 'motif-threshold-marker');
+    const thresholdRegion = threshold.tree.nodes.find((node) => node.nodeId === 'region-group-break-transition');
+    if (marker?.kind !== 'shape' || thresholdRegion?.kind !== 'group') throw new Error('fixture error');
+    expect(marker.box.height).toBeLessThan(thresholdRegion.box.height);
+    expect(marker.box.width).toBeLessThan(thresholdRegion.box.width);
+
+    const fragment = spine.tree.nodes.find((node) => node.nodeId === 'text-fragment-resource-0');
+    const dodge = spine.tree.nodes.find((node) => node.nodeId === 'text-dodge-step-0');
+    const breakText = spine.tree.nodes.find((node) => node.nodeId === 'text-break-state-0');
+    const spineMarker = spine.tree.nodes.find((node) => node.nodeId === 'motif-spine-threshold');
+    if (fragment?.kind !== 'text' || dodge?.kind !== 'text' || breakText?.kind !== 'text' || spineMarker?.kind !== 'shape') {
+      throw new Error('fixture error');
+    }
+    expect(fragment.box.y).toBeGreaterThan(dodge.box.y);
+    expect(breakText.box.y + breakText.box.height).toBeLessThan(spineMarker.box.y + spineMarker.box.height);
   });
 
   it('fails Source Fidelity when a rendered number or relation is altered', () => {

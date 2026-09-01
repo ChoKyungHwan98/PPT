@@ -167,19 +167,19 @@ function thresholdFieldRegions(plan: CompositionPlan, contentRegions: Region[]):
   if (primary === undefined) {
     return allocateHorizontal(contentRegions, { x: width * 0.06, y: height * 0.18, width: width * 0.88, height: height * 0.68 }, width * 0.018);
   }
-  const primaryCenterRatio = plan.layout.readingPath === 'center-out' ? 0.6 : 0.52;
-  const primaryWidth = clamp(width * (0.105 + primary.weight * 0.025), width * 0.13, width * 0.2);
+  const primaryCenterRatio = plan.layout.readingPath === 'center-out' ? 0.61 : 0.52;
+  const primaryWidth = clamp(width * (0.075 + primary.weight * 0.025), width * 0.105, width * 0.145);
   const primaryBox: Box = {
     x: width * primaryCenterRatio - primaryWidth / 2,
-    y: height * 0.12,
+    y: height * 0.36,
     width: primaryWidth,
-    height: height * 0.76,
+    height: height * 0.22,
   };
   const before = contentRegions.filter((region) => region.order < primary.order);
   const after = contentRegions.filter((region) => region.order > primary.order);
-  const sideY = height * 0.2;
-  const sideHeight = height * 0.62;
-  const gutter = width * 0.035;
+  const sideY = height * 0.31;
+  const sideHeight = height * 0.34;
+  const gutter = width * 0.045;
   const leftBox: Box = {
     x: width * 0.06,
     y: sideY,
@@ -205,11 +205,9 @@ function causalSpineRegions(plan: CompositionPlan, contentRegions: Region[]): Re
   const height = plan.pageProfile.height;
   return allocateHorizontal(
     contentRegions,
-    { x: width * 0.055, y: height * 0.19, width: width * 0.89, height: height * 0.66 },
-    width * 0.018,
-  ).map((placement) => placement.region.role === 'primary-artifact'
-    ? { ...placement, box: { x: placement.box.x, y: height * 0.135, width: placement.box.width, height: height * 0.77 } }
-    : placement);
+    { x: width * 0.065, y: height * 0.4, width: width * 0.87, height: height * 0.18 },
+    width * 0.03,
+  );
 }
 
 /** layoutFamily chooses topology; region order, weight, and role determine actual boxes. */
@@ -305,15 +303,25 @@ function motifNodes(input: {
   const motif = input.plan.styleIntent.motif;
   const accent = input.plan.styleIntent.accent;
   const target = input.regions.find((placement) => placement.region.role === accent.targetRole);
+  const buildup = input.regions.find((placement) => placement.region.role === 'support');
+  const consequence = input.regions.find((placement) => placement.region.role === 'evidence');
   const contentBlocks = input.blocks.filter((block) => !['message', 'navigation', 'annotation'].includes(block.region.role));
   if (target === undefined || contentBlocks.length === 0) return [];
   if (motif.family === 'threshold-plane') {
+    const focusWidth = Math.min(target.box.width * 0.88, input.plan.pageProfile.width * 0.105);
+    const focusHeight = Math.min(target.box.height * 0.58, input.plan.pageProfile.height * 0.12);
+    const focusBox: Box = {
+      x: target.box.x + (target.box.width - focusWidth) / 2,
+      y: target.box.y + (target.box.height - focusHeight) / 2,
+      width: focusWidth,
+      height: focusHeight,
+    };
     return [
       vectorNode({
-        nodeId: 'motif-threshold-plane',
+        nodeId: 'motif-threshold-marker',
         parentId: `region-${target.region.regionId}`,
-        shape: 'rect',
-        box: target.box,
+        shape: 'round-rect',
+        box: focusBox,
         fill: accent.softColor,
         zIndex: 0,
       }),
@@ -321,25 +329,97 @@ function motifNodes(input: {
         nodeId: 'motif-threshold-rule',
         parentId: `region-${target.region.regionId}`,
         shape: 'line',
-        box: { x: target.box.x, y: target.box.y, width: 1, height: target.box.height },
+        box: {
+          x: target.box.x + target.box.width / 2,
+          y: target.box.y - input.plan.pageProfile.height * 0.045,
+          width: 1,
+          height: target.box.height + input.plan.pageProfile.height * 0.09,
+        },
         stroke: motif.color,
-        strokeWidth: motif.strokeWidth,
+        strokeWidth: Math.max(2, motif.strokeWidth * 0.6),
+        opacity: 0.78,
         zIndex: 1,
       }),
+      ...(buildup === undefined ? [] : [
+        vectorNode({
+          nodeId: 'motif-buildup-field',
+          parentId: `region-${buildup.region.regionId}`,
+          shape: 'rect',
+          box: buildup.box,
+          fill: '#EEEBE4',
+          opacity: 0.82,
+          zIndex: 0,
+        }),
+        vectorNode({
+          nodeId: 'motif-buildup-rule',
+          parentId: `region-${buildup.region.regionId}`,
+          shape: 'line',
+          box: {
+            x: buildup.box.x + buildup.box.width * 0.08,
+            y: contentBlocks[0]!.connectorY,
+            width: buildup.box.width * 0.84,
+            height: 1,
+          },
+          stroke: input.plan.styleIntent.palette.connector,
+          strokeWidth: 2,
+          opacity: 0.55,
+          zIndex: 0,
+        }),
+      ]),
+      ...(consequence === undefined ? [] : [
+        vectorNode({
+          nodeId: 'motif-consequence-field',
+          parentId: `region-${consequence.region.regionId}`,
+          shape: 'rect',
+          box: consequence.box,
+          fill: '#F6EEEA',
+          opacity: 0.9,
+          zIndex: 0,
+        }),
+        vectorNode({
+          nodeId: 'motif-consequence-rule',
+          parentId: `region-${consequence.region.regionId}`,
+          shape: 'line',
+          box: {
+            x: consequence.box.x + input.plan.pageProfile.width * 0.012,
+            y: consequence.box.y + consequence.box.height * 0.18,
+            width: 1,
+            height: consequence.box.height * 0.64,
+          },
+          stroke: accent.color,
+          strokeWidth: Math.max(2, motif.strokeWidth * 0.7),
+          zIndex: 1,
+        }),
+      ]),
     ];
   }
   if (motif.family === 'causal-spine') {
     const left = Math.min(...contentBlocks.map((block) => block.x));
     const right = Math.max(...contentBlocks.map((block) => block.x));
     const y = contentBlocks.reduce((sum, block) => sum + block.connectorY, 0) / contentBlocks.length;
-    return [vectorNode({
-      nodeId: 'motif-causal-spine',
-      shape: 'line',
-      box: { x: left, y, width: Math.max(1, right - left), height: 1 },
-      stroke: motif.color,
-      strokeWidth: motif.strokeWidth,
-      zIndex: 1,
-    })];
+    const primary = input.blocks.find((block) => block.region.role === 'primary-artifact');
+    return [
+      vectorNode({
+        nodeId: 'motif-causal-spine',
+        shape: 'line',
+        box: { x: left, y, width: Math.max(1, right - left), height: 1 },
+        stroke: motif.color,
+        strokeWidth: motif.strokeWidth,
+        opacity: 0.55,
+        zIndex: 0,
+      }),
+      ...(primary === undefined ? [] : [vectorNode({
+        nodeId: 'motif-spine-threshold',
+        parentId: primary.parentId,
+        semanticBlockId: primary.binding.blockId,
+        shape: 'ellipse',
+        box: { x: primary.x - 22, y: y - 22, width: 44, height: 44 },
+        fill: accent.softColor,
+        stroke: accent.color,
+        strokeWidth: motif.strokeWidth,
+        zIndex: 1,
+      })]),
+    ];
   }
   if (motif.family === 'editorial-rule') {
     return [vectorNode({
@@ -363,35 +443,100 @@ function motifNodes(input: {
   })];
 }
 
-function relationNode(input: {
+function relationNodes(input: {
   relationId: string;
   nodeId: string;
   from: BlockPlacement;
   to: BlockPlacement;
   plan: CompositionPlan;
-}): RenderNode {
+}): RenderNode[] {
   const targetRole = input.plan.styleIntent.accent.targetRole;
   const accented = input.from.region.role === targetRole || input.to.region.role === targetRole;
   const fromX = input.from.x;
   const fromY = input.from.connectorY;
   const toX = input.to.x;
   const toY = input.to.connectorY;
-  const middleX = (fromX + toX) / 2;
-  return vectorNode({
-    nodeId: input.nodeId,
-    shape: 'path',
-    box: {
-      x: Math.min(fromX, toX),
-      y: Math.min(fromY, toY),
-      width: Math.max(1, Math.abs(toX - fromX)),
-      height: Math.max(1, Math.abs(toY - fromY)),
-    },
-    pathData: `M ${fromX} ${fromY} C ${middleX} ${fromY}, ${middleX} ${toY}, ${toX} ${toY}`,
-    stroke: accented ? input.plan.styleIntent.accent.color : input.plan.styleIntent.palette.connector,
-    strokeWidth: accented ? input.plan.styleIntent.motif.strokeWidth : Math.max(2, input.plan.styleIntent.motif.strokeWidth * 0.55),
-    relationId: input.relationId,
-    zIndex: 1,
-  });
+  const orderedConnector = ['threshold-field', 'editorial-causal-spine'].includes(input.plan.layout.layoutFamily);
+  const color = accented ? input.plan.styleIntent.accent.color : input.plan.styleIntent.palette.connector;
+  const strokeWidth = accented ? input.plan.styleIntent.motif.strokeWidth : Math.max(2, input.plan.styleIntent.motif.strokeWidth * 0.55);
+  if (!orderedConnector) {
+    const middleX = (fromX + toX) / 2;
+    return [vectorNode({
+      nodeId: input.nodeId,
+      shape: 'path',
+      box: {
+        x: Math.min(fromX, toX),
+        y: Math.min(fromY, toY),
+        width: Math.max(1, Math.abs(toX - fromX)),
+        height: Math.max(1, Math.abs(toY - fromY)),
+      },
+      pathData: `M ${fromX} ${fromY} C ${middleX} ${fromY}, ${middleX} ${toY}, ${toX} ${toY}`,
+      stroke: color,
+      strokeWidth,
+      relationId: input.relationId,
+      zIndex: 1,
+    })];
+  }
+
+  const direction = toX >= fromX ? 1 : -1;
+  const inset = 24 * (input.plan.pageProfile.width / 1920);
+  const startX = fromX + direction * inset;
+  const endX = toX - direction * inset;
+  const y = (fromY + toY) / 2;
+  const arrowSize = 10 * (input.plan.pageProfile.width / 1920);
+  return [
+    vectorNode({
+      nodeId: input.nodeId,
+      shape: 'line',
+      box: {
+        x: Math.min(startX, endX),
+        y,
+        width: Math.max(1, Math.abs(endX - startX)),
+        height: 1,
+      },
+      stroke: color,
+      strokeWidth,
+      relationId: input.relationId,
+      zIndex: 1,
+    }),
+    vectorNode({
+      nodeId: `${input.nodeId}-arrow`,
+      shape: 'path',
+      box: {
+        x: Math.min(endX - direction * arrowSize, endX),
+        y: y - arrowSize,
+        width: arrowSize,
+        height: arrowSize * 2,
+      },
+      pathData: `M ${endX - direction * arrowSize} ${y - arrowSize} L ${endX} ${y} L ${endX - direction * arrowSize} ${y + arrowSize}`,
+      stroke: color,
+      strokeWidth,
+      relationId: input.relationId,
+      zIndex: 1,
+    }),
+  ];
+}
+
+function connectorMarkers(plan: CompositionPlan, blocks: BlockPlacement[]): RenderNode[] {
+  if (!['threshold-field', 'editorial-causal-spine'].includes(plan.layout.layoutFamily)) return [];
+  return blocks
+    .filter((block) => !(plan.layout.layoutFamily === 'editorial-causal-spine' && block.region.role === 'primary-artifact'))
+    .map((block) => {
+      const isResult = block.region.role === 'evidence';
+      const isPrimary = block.region.role === 'primary-artifact';
+      const diameter = isResult ? 16 : isPrimary ? 18 : 11;
+      return vectorNode({
+        nodeId: `connector-marker-${block.binding.blockId}`,
+        parentId: block.parentId,
+        semanticBlockId: block.binding.blockId,
+        shape: 'ellipse',
+        box: { x: block.x - diameter / 2, y: block.connectorY - diameter / 2, width: diameter, height: diameter },
+        fill: isResult || isPrimary ? plan.styleIntent.accent.color : plan.styleIntent.palette.background,
+        stroke: isResult || isPrimary ? plan.styleIntent.accent.color : plan.styleIntent.palette.connector,
+        strokeWidth: isResult || isPrimary ? 2 : 3,
+        zIndex: 2,
+      });
+    });
 }
 
 /**
@@ -414,11 +559,29 @@ export function buildInformationRenderTree(input: {
     bucket.push(binding);
     bindingsByRegion.set(binding.regionId, bucket);
   }
-  const blockPlacements = placements.flatMap((placement) => placementsInRegion({
+  const rawBlockPlacements = placements.flatMap((placement) => placementsInRegion({
     plan: input.plan,
     placement,
     bindings: bindingsByRegion.get(placement.region.regionId) ?? [],
   }));
+  const sharedConnectorY = input.plan.layout.layoutFamily === 'threshold-field'
+    ? input.plan.pageProfile.height * 0.61
+    : input.plan.layout.layoutFamily === 'editorial-causal-spine'
+      ? input.plan.pageProfile.height * 0.62
+      : undefined;
+  const blockPlacements = sharedConnectorY === undefined
+    ? rawBlockPlacements
+    : rawBlockPlacements.map((placement) => {
+        if (input.plan.layout.layoutFamily !== 'editorial-causal-spine') {
+          return { ...placement, connectorY: sharedConnectorY };
+        }
+        const spineBaseline = placement.region.role === 'primary-artifact'
+          ? input.plan.pageProfile.height * 0.56
+          : placement.region.role === 'support' && placement.binding.readingOrder % 2 === 1
+            ? input.plan.pageProfile.height * 0.74
+            : input.plan.pageProfile.height * 0.46;
+        return { ...placement, baselineY: spineBaseline, connectorY: sharedConnectorY };
+      });
   const placementByBlockId = new Map(blockPlacements.map((placement) => [placement.binding.blockId, placement]));
 
   const nodes: RenderNode[] = placements.map(regionGroupNode);
@@ -427,8 +590,9 @@ export function buildInformationRenderTree(input: {
     const from = placementByBlockId.get(relation.fromBlockId);
     const to = placementByBlockId.get(relation.toBlockId);
     if (from === undefined || to === undefined) continue;
-    nodes.push(relationNode({ relationId: relation.id, nodeId: `relation-${relation.id}`, from, to, plan: input.plan }));
+    nodes.push(...relationNodes({ relationId: relation.id, nodeId: `relation-${relation.id}`, from, to, plan: input.plan }));
   }
+  nodes.push(...connectorMarkers(input.plan, blockPlacements));
 
   for (const blockPlacement of blockPlacements) {
     const block = input.slide.blocks.find((candidate) => candidate.id === blockPlacement.binding.blockId);
@@ -446,6 +610,7 @@ export function buildInformationRenderTree(input: {
     const accented = blockPlacement.region.role === input.plan.styleIntent.accent.targetRole;
     refs.forEach((ref, refIndex) => {
       const measurement = measured[refIndex]!;
+      const isResultValue = blockPlacement.binding.fragmentRole === 'modifier' && refIndex === 1;
       nodes.push(measuredTextNode({
         nodeId: `text-${block.id}-${refIndex}`,
         parentId: blockPlacement.parentId,
@@ -455,7 +620,7 @@ export function buildInformationRenderTree(input: {
         x: blockPlacement.x,
         baselineY: baseline,
         align: 'center',
-        color: accented
+        color: accented || isResultValue
           ? input.plan.styleIntent.accent.color
           : blockPlacement.binding.prominence <= 2
             ? input.plan.styleIntent.palette.mutedInk

@@ -14,3 +14,4 @@ export * from './seed-corpus.js';
 export * from './seed-patterns.js';
 export * from './slide-ir.js';
 export * from './source-ledger.js';
+export * from './visual-critique.js';

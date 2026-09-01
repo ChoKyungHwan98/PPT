@@ -190,7 +190,7 @@ V1의 Semantic Interpretation과 Information Design 단계에서는 이 field를
 
 ### 단계 0 — 기준 결과와 실패 조건 고정
 
-현재 상태: **부분 완료**. MEC-01 기준 fixture와 기존 baseline test는 고정됐지만, 사람이 문제를 미리 표시한 Critic fixture 3~5개는 아직 구현하거나 검증하지 않았다.
+현재 상태: **완료**. MEC-01 기준 fixture와 baseline test에 더해 정보 위계, 정보 과밀, 읽는 순서, 정상 결과의 human-labelled visual fixture 4개를 실제 PNG로 고정했다. 각 fixture는 Hard Gate를 통과하고, OpenRouter Critic 결과와 사람의 핵심 finding을 비교할 수 있다.
 
 - 기준 입력을 fixture로 고정한다.
 - 기존 Balance 결과는 Golden Case로 고정한다.
@@ -289,6 +289,8 @@ MEC-01 전용 Retrieval, Composition, Renderer 경로는 만들지 않는다.
 - 정상 fixture만 다음 단계로 넘어간다.
 
 ### 단계 6 — 실제 화면 디자인 검토
+
+현재 상태: **완료**. 실제 PNG, 작은 의미 요약, InformationPlan 핵심 구조, rubric, Hard Gate PASS만 전달하는 Visual Critic과 human-labelled fixture benchmark를 구현했다. Critic은 진단만 수행하며 단계 7 자동 수정은 시작하지 않는다.
 
 - 실제 PNG와 작은 구조 요약만 AI에 전달한다.
 - 디자인 품질을 정해진 항목으로 평가한다.

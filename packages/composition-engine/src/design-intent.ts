@@ -10,21 +10,21 @@ export function styleIntentForPattern(fragment: PatternFragment): CompositionPla
       tone: 'focused temporal mechanism stage',
       contrastModel: 'high-contrast-stage',
       hierarchy: {
-        primaryTextSize: 78,
-        supportTextSize: 30,
-        evidenceTextSize: 44,
+        primaryTextSize: 58,
+        supportTextSize: 34,
+        evidenceTextSize: 46,
         primaryWeight: 800,
         supportWeight: 600,
       },
       accent: {
         targetRole: 'primary-artifact',
         color: '#B43E32',
-        softColor: '#F3D7D1',
+        softColor: '#F8E6E1',
       },
       motif: {
         family: 'threshold-plane',
         color: '#D75043',
-        strokeWidth: 8,
+        strokeWidth: 5,
       },
       palette: {
         background: '#F6F3ED',
@@ -40,21 +40,21 @@ export function styleIntentForPattern(fragment: PatternFragment): CompositionPla
       tone: 'warm editorial game-design proof',
       contrastModel: 'editorial-hierarchy',
       hierarchy: {
-        primaryTextSize: 70,
-        supportTextSize: 32,
-        evidenceTextSize: 42,
+        primaryTextSize: 56,
+        supportTextSize: 34,
+        evidenceTextSize: 46,
         primaryWeight: 800,
         supportWeight: 500,
       },
       accent: {
         targetRole: 'primary-artifact',
         color: '#2F6964',
-        softColor: '#DCE9E4',
+        softColor: '#E2EEEA',
       },
       motif: {
         family: 'causal-spine',
         color: '#3F7772',
-        strokeWidth: 5,
+        strokeWidth: 4,
       },
       palette: {
         background: '#F7F4EE',

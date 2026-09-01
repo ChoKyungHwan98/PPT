@@ -12,6 +12,7 @@
     "proof:candidates": "tsx packages/renderer/src/proof/mec-01-candidates.ts",
     "proof:review": "tsx packages/review-surface/src/proof/mec-01.ts",
     "proof:v1-information-flow": "tsx packages/renderer/src/proof/v1-information-flow.ts",
+    "proof:v1-visual-critic": "tsx packages/renderer/src/proof/v1-visual-critic.ts",
     "export:selected": "tsx packages/renderer/src/proof/export-selected-mec-01.ts",
     "author:balance": "tsx packages/authoring-cli/src/main.ts",
     "dev:workbench": "pnpm --filter @game-presentation/workbench dev",
