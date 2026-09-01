@@ -3,6 +3,7 @@ export * from './authoring.js';
 export * from './composition.js';
 export * from './finding.js';
 export * from './hash.js';
+export * from './information-plan.js';
 export * from './preference.js';
 export * from './comparison.js';
 export * from './external-evidence.js';
