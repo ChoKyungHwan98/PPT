@@ -14,6 +14,7 @@ import {
 import { buildReferenceIndex, searchReferenceIndex } from '@game-presentation/reference-engine';
 import { buildCandidateComparison, generateCompositionCandidates } from '@game-presentation/composition-engine';
 import { MEC_01_SLIDE_IR } from '../../../contracts/fixtures/mec-01.js';
+import { createMec01InformationPlan } from '../../../source-ingestion/src/mec-01-semantic.js';
 import { launchRenderBrowser } from '../browser.js';
 import { loadSystemPretendard } from '../font.js';
 import { validateLayout } from '../layout-validation.js';
@@ -45,6 +46,7 @@ async function main(): Promise<void> {
   });
   const candidates = generateCompositionCandidates({
     slide: MEC_01_SLIDE_IR,
+    informationPlan: createMec01InformationPlan(MEC_01_SLIDE_IR),
     brief,
     rankedReferences,
     fragments: SEED_PATTERN_FRAGMENTS,
@@ -70,6 +72,7 @@ async function main(): Promise<void> {
       const planIssues = validateCompositionPlan(
         candidate.plan,
         MEC_01_SLIDE_IR,
+        createMec01InformationPlan(MEC_01_SLIDE_IR),
         SEED_PATTERN_FRAGMENTS,
         SEED_REFERENCE_CORPUS,
       );

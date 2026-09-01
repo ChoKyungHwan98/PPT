@@ -6,6 +6,7 @@ import {
 } from '../src/composition.js';
 import { RenderTreeSchema, validateRenderTreeAgainstSlide } from '../src/render-tree.js';
 import { MEC_01_SLIDE_IR } from '../fixtures/mec-01.js';
+import { InformationPlanSchema } from '../src/information-plan.js';
 import { SEED_PATTERN_FRAGMENTS } from '../src/seed-patterns.js';
 import { SEED_REFERENCE_CORPUS } from '../src/seed-corpus.js';
 
@@ -134,21 +135,41 @@ describe('RenderTree contract', () => {
 
 describe('CompositionPlan contract', () => {
   it('binds every authored block through permitted abstract references', () => {
+    const informationPlan = InformationPlanSchema.parse({
+      schemaVersion: '0.1',
+      informationPlanId: 'information-mec-01',
+      slideId: MEC_01_SLIDE_IR.slideId,
+      semanticShape: 'causal-chain',
+      grammarId: 'mechanism-causal-chain-v1',
+      message: {
+        text: MEC_01_SLIDE_IR.source.rawText,
+        sourceSpanIds: ['source-all'],
+        locked: true,
+        transform: { kind: 'exact' },
+      },
+      primaryArtifactBlockId: 'break-state',
+      readingOrder: MEC_01_SLIDE_IR.blocks.map((block) => block.id),
+      groups: [
+        { groupId: 'setup', role: 'setup', order: 0, blockIds: ['dodge-step', 'fragment-resource', 'freeze-step'] },
+        { groupId: 'transition', role: 'transition', order: 1, blockIds: ['break-state'] },
+        { groupId: 'consequence', role: 'consequence', order: 2, blockIds: ['damage-modifier'] },
+      ],
+      relationIds: MEC_01_SLIDE_IR.relations.map((relation) => relation.id),
+      interpretation: { author: 'deterministic-planner', confidence: 1, ambiguityIds: [] },
+    });
     const plan = CompositionPlanSchema.parse({
       schemaVersion: '0.1',
       planId: 'plan-mec-01-a',
       slideId: MEC_01_SLIDE_IR.slideId,
+      informationPlanId: informationPlan.informationPlanId,
       seed: 17,
       pageProfile: PAGE_PROFILES.pdfPresentation,
       retrievalBriefId: 'brief-mec-01',
       referenceIds: ['ref-oh-my-ppt-layout', 'ref-marp-reproducible'],
       patternFragmentIds: ['pattern-editorial-causal-spine'],
-      hypothesis: {
-        hypothesisId: 'hypothesis-causal-spine',
-        topologyFamily: 'editorial-causal-spine',
+      layout: {
+        layoutFamily: 'editorial-causal-spine',
         readingPath: 'left-to-right',
-        primaryArtifactBlockId: 'break-state',
-        message: 'The accumulated sequence culminates in BREAK and its damage consequence.',
         rationale: 'The authored content is a causal chain with one dominant state transition.',
       },
       regions: [
@@ -184,7 +205,7 @@ describe('CompositionPlan contract', () => {
     });
 
     expect(
-      validateCompositionPlan(plan, MEC_01_SLIDE_IR, SEED_PATTERN_FRAGMENTS, SEED_REFERENCE_CORPUS),
+      validateCompositionPlan(plan, MEC_01_SLIDE_IR, informationPlan, SEED_PATTERN_FRAGMENTS, SEED_REFERENCE_CORPUS),
     ).toEqual([]);
   });
 });

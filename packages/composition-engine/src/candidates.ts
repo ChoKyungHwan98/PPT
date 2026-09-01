@@ -6,6 +6,7 @@ import {
   scoreCandidateForContext,
   type CandidateSignature,
   type CompositionPlan,
+  type InformationPlan,
   type PairwisePreferenceRecord,
   type PatternFragment,
   type PreferenceContext,
@@ -88,6 +89,7 @@ function signatureFor(fragment: PatternFragment, planId: string): CandidateSigna
 
 export function generateCompositionCandidates(input: {
   slide: SlideIR;
+  informationPlan: InformationPlan;
   brief: ReferenceRetrievalBrief;
   rankedReferences: ReferenceSearchResult[];
   fragments: PatternFragment[];
@@ -128,6 +130,7 @@ export function generateCompositionCandidates(input: {
         schemaVersion: '0.1',
         planId,
         slideId: input.slide.slideId,
+        informationPlanId: input.informationPlan.informationPlanId,
         seed,
         pageProfile:
           input.brief.outputProfile === 'html-presentation'
@@ -138,12 +141,9 @@ export function generateCompositionCandidates(input: {
           allowedReferenceIds.has(referenceId),
         ),
         patternFragmentIds: [fragment.fragmentId],
-        hypothesis: {
-          hypothesisId: 'hypothesis-' + stableId,
-          topologyFamily: fragment.topology.family,
+        layout: {
+          layoutFamily: fragment.topology.family,
           readingPath: fragment.readingPath,
-          primaryArtifactBlockId: grammar.focusBlockId,
-          message: input.slide.intent.primaryMessage.text,
           rationale: fragment.topology.emphasisRule + ' ' + fragment.topology.groupingRule,
         },
         regions,

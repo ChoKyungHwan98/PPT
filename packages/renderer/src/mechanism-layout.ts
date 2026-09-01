@@ -79,7 +79,7 @@ export function mechanismMeasureRequests(
 ): TextMeasureRequest[] {
   const atoms = mechanismAtoms(slide);
   return plans.flatMap((plan) => {
-    const family = plan.hypothesis.topologyFamily;
+    const family = plan.layout.layoutFamily;
     if (!(family in TYPOGRAPHY)) return [];
     const typography = TYPOGRAPHY[family as keyof typeof TYPOGRAPHY];
     const requests = [
@@ -583,11 +583,11 @@ export function buildMechanismRenderTree(input: {
   measures: Map<string, TextMeasurement>;
   fonts: FontAsset[];
 }): RenderTree {
-  if (input.plan.hypothesis.topologyFamily === 'editorial-causal-spine') {
+  if (input.plan.layout.layoutFamily === 'editorial-causal-spine') {
     return editorialTree(input);
   }
-  if (input.plan.hypothesis.topologyFamily === 'threshold-field') {
+  if (input.plan.layout.layoutFamily === 'threshold-field') {
     return thresholdTree(input);
   }
-  throw new Error('지원하지 않는 mechanism topology입니다: ' + input.plan.hypothesis.topologyFamily);
+  throw new Error('지원하지 않는 mechanism topology입니다: ' + input.plan.layout.layoutFamily);
 }

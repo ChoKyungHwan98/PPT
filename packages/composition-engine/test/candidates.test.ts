@@ -9,11 +9,13 @@ import {
   preferenceContextHash,
 } from '@game-presentation/contracts';
 import { MEC_01_SLIDE_IR } from '../../contracts/fixtures/mec-01.js';
+import { createMec01InformationPlan } from '../../source-ingestion/src/mec-01-semantic.js';
 import { buildReferenceIndex, searchReferenceIndex } from '@game-presentation/reference-engine';
 import { generateCompositionCandidates } from '../src/candidates.js';
 import { parseMechanismGrammar } from '../src/mechanism-grammar.js';
 
 function inputs() {
+  const informationPlan = createMec01InformationPlan(MEC_01_SLIDE_IR);
   const brief = buildReferenceRetrievalBrief({
     slide: MEC_01_SLIDE_IR,
     corpus: SEED_REFERENCE_CORPUS,
@@ -31,7 +33,7 @@ function inputs() {
     index: buildReferenceIndex(SEED_REFERENCE_CORPUS),
     limit: 4,
   });
-  return { brief, rankedReferences };
+  return { brief, rankedReferences, informationPlan };
 }
 
 describe('mechanism composition search', () => {

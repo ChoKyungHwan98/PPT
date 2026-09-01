@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import type { PatternFragment, ReferenceRecord } from './reference.js';
 import { ReadingPathSchema } from './reference.js';
+import { validateInformationPlan, type InformationPlan } from './information-plan.js';
 import type { SlideIR } from './slide-ir.js';
 
 export const PageProfileSchema = z.strictObject({
@@ -72,17 +73,15 @@ export const CompositionPlanSchema = z.strictObject({
   schemaVersion: z.literal('0.1'),
   planId: z.string().min(1),
   slideId: z.string().min(1),
+  informationPlanId: z.string().min(1),
   seed: z.number().int().nonnegative(),
   pageProfile: PageProfileSchema,
   retrievalBriefId: z.string().min(1),
   referenceIds: z.array(z.string().min(1)).min(1),
   patternFragmentIds: z.array(z.string().min(1)).min(1),
-  hypothesis: z.strictObject({
-    hypothesisId: z.string().min(1),
-    topologyFamily: z.string().min(1),
+  layout: z.strictObject({
+    layoutFamily: z.string().min(1),
     readingPath: ReadingPathSchema,
-    primaryArtifactBlockId: z.string().min(1),
-    message: z.string().min(1),
     rationale: z.string().min(1),
   }),
   regions: z.array(RegionSchema).min(1),
@@ -111,6 +110,7 @@ export type CompositionContractIssue = {
 export function validateCompositionPlan(
   plan: CompositionPlan,
   slide: SlideIR,
+  informationPlan: InformationPlan,
   fragments: PatternFragment[],
   references: ReferenceRecord[],
 ): CompositionContractIssue[] {
@@ -120,12 +120,16 @@ export function validateCompositionPlan(
   const regionIds = new Set(plan.regions.map((region) => region.regionId));
   const fragmentIds = new Set(fragments.map((fragment) => fragment.fragmentId));
   const referenceMap = new Map(references.map((reference) => [reference.referenceId, reference]));
+  const informationIssues = validateInformationPlan(informationPlan, slide);
 
   if (plan.slideId !== slide.slideId) {
     issues.push({ path: 'slideId', message: 'CompositionPlan이 다른 SlideIR을 가리킵니다.' });
   }
-  if (!blockIds.has(plan.hypothesis.primaryArtifactBlockId)) {
-    issues.push({ path: 'hypothesis.primaryArtifactBlockId', message: '주요 대상 block이 존재하지 않습니다.' });
+  if (plan.informationPlanId !== informationPlan.informationPlanId) {
+    issues.push({ path: 'informationPlanId', message: 'CompositionPlan이 다른 InformationPlan을 가리킵니다.' });
+  }
+  for (const issue of informationIssues) {
+    issues.push({ path: `informationPlan.${issue.path}`, message: issue.message });
   }
   for (const blockId of blockIds) {
     if (!boundBlockIds.has(blockId)) {
@@ -139,6 +143,13 @@ export function validateCompositionPlan(
     if (!regionIds.has(binding.regionId)) {
       issues.push({ path: 'bindings.' + index + '.regionId', message: '존재하지 않는 region입니다.' });
     }
+  }
+  const bindingsByOrder = [...plan.bindings].sort((left, right) => left.readingOrder - right.readingOrder);
+  if (
+    bindingsByOrder.length !== informationPlan.readingOrder.length ||
+    bindingsByOrder.some((binding, index) => binding.blockId !== informationPlan.readingOrder[index])
+  ) {
+    issues.push({ path: 'bindings.readingOrder', message: 'CompositionPlan의 읽는 순서가 InformationPlan과 다릅니다.' });
   }
   for (const [index, region] of plan.regions.entries()) {
     if (region.parentRegionId !== undefined && !regionIds.has(region.parentRegionId)) {
