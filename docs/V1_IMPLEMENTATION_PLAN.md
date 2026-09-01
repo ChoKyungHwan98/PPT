@@ -1,6 +1,6 @@
 # 기획서 디자이너 V1 구현 계획서
 
-상태: 단계 0 부분 완료 · 단계 1~5 완료 · 단계 6 승인 대기  
+상태: 단계 0 부분 완료 · 단계 1~5 완료 · 단계 6 미완료
 작성 기준: V5 + V6 + Architecture Polish + 현재 저장소 조사 결과  
 원칙: 기존 코드를 최대한 재사용하고, Balance 전용 경로는 확장하지 않는다.
 
@@ -190,10 +190,10 @@ V1의 Semantic Interpretation과 Information Design 단계에서는 이 field를
 
 ### 단계 0 — 기준 결과와 실패 조건 고정
 
-현재 상태: **완료**. MEC-01 기준 fixture와 baseline test에 더해 정보 위계, 정보 과밀, 읽는 순서, 정상 결과의 human-labelled visual fixture 4개를 실제 PNG로 고정했다. 각 fixture는 Hard Gate를 통과하고, OpenRouter Critic 결과와 사람의 핵심 finding을 비교할 수 있다.
+현재 상태: **부분 완료**. failure fixture 3개, rough-but-readable 1개, intermediate fixture 1개와 실제 PNG 비교 구조는 고정했다. 사용자가 실제 이미지를 보고 명시적으로 승인한 `ready` Positive Fixture는 아직 없으므로 단계 0은 완료 처리하지 않는다.
 
 - 기준 입력을 fixture로 고정한다.
-- 기존 Balance 결과는 Golden Case로 고정한다.
+- 기존 Balance 결과는 중간 품질 baseline으로 보존한다. 사용자가 명시적으로 승인하기 전에는 `ready` Golden Case로 등록하지 않는다.
 - 현재 테스트를 기준선으로 남긴다.
 - 좋은 결과와 실패 결과의 판단 항목을 테스트로 작성한다.
 - 사람이 문제를 미리 표시한 Critic fixture 3~5개를 만든다.
@@ -215,6 +215,7 @@ V1의 Semantic Interpretation과 Information Design 단계에서는 이 field를
 - 첫 V1 입력과 기대 관계가 고정되어 있다.
 - Critic이 정상 결과를 무조건 실패로 처리하지 않는다.
 - Critic이 문제 fixture의 핵심 문제를 하나 이상 발견한다.
+- 사용자가 실제 이미지를 보고 승인한 `ready` Positive Fixture가 존재한다.
 - `pnpm verify`가 실제로 PASS한다.
 
 ### 단계 1 — 입력에서 내용 구조 만들기
@@ -290,7 +291,7 @@ MEC-01 전용 Retrieval, Composition, Renderer 경로는 만들지 않는다.
 
 ### 단계 6 — 실제 화면 디자인 검토
 
-현재 상태: **완료**. 실제 PNG, 작은 의미 요약, InformationPlan 핵심 구조, rubric, Hard Gate PASS만 전달하는 Visual Critic과 human-labelled fixture benchmark를 구현했다. Critic은 진단만 수행하며 단계 7 자동 수정은 시작하지 않는다.
+현재 상태: **미완료**. 실제 PNG 입력, 작은 context, 구조화 결과, token·비용 trace는 구현됐다. 그러나 사용자 승인 Positive가 없으므로 calibration을 완료할 수 없다. 단계 7 자동 수정은 시작하지 않는다.
 
 - 실제 PNG와 작은 구조 요약만 AI에 전달한다.
 - 디자인 품질을 정해진 항목으로 평가한다.
@@ -455,7 +456,7 @@ Local과 OpenRouter 중 무엇을 먼저 붙일지는 실제 시험 결과와 �
 
 새 package는 실행 순서를 관리하는 `authoring-harness` 하나만 허용한다.
 
-Balance 전용 `story-planner`, `html-exporter`, `pptx-exporter`는 Golden Case 보호에 필요한 수정 외에는 확장하지 않는다.
+Balance 전용 `story-planner`, `html-exporter`, `pptx-exporter`는 기존 baseline 보호에 필요한 수정 외에는 확장하지 않는다.
 
 ## 12. 전체 완료 조건
 
@@ -471,7 +472,7 @@ Balance 전용 `story-planner`, `html-exporter`, `pptx-exporter`는 Golden Case 
 8. 사용자가 승인하거나 거절할 수 있다.
 9. 선택 결과가 Preference Event로 저장된다.
 10. PNG, HTML, PDF, 편집 가능한 PPTX 한 장이 Output Parity를 만족한다.
-11. Balance Golden Case가 깨지지 않는다.
+11. Balance baseline이 깨지지 않는다.
 12. 기존 테스트와 신규 테스트가 모두 통과한다.
 13. `pnpm verify`의 실제 PASS 결과가 완료 보고에 남아 있다.
 

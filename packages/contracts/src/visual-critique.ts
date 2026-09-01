@@ -61,6 +61,32 @@ export const HumanExpectedFindingSchema = z.strictObject({
 
 export type HumanExpectedFinding = z.infer<typeof HumanExpectedFindingSchema>;
 
+export const UserPositiveApprovalSchema = z.strictObject({
+  approvalId: z.string().min(1),
+  approvedBy: z.literal('user'),
+  approvedArtifactId: z.string().min(1),
+  approvedAt: z.iso.datetime(),
+  approvalStatement: z.string().min(1),
+});
+
+export type UserPositiveApproval = z.infer<typeof UserPositiveApprovalSchema>;
+
+export const PositiveFixtureAuditSchema = z.strictObject({
+  hierarchyClear: z.literal(true),
+  readingOrderClear: z.literal(true),
+  spaceUseAppropriate: z.literal(true),
+  groupingClear: z.literal(true),
+  typographyHierarchyAppropriate: z.literal(true),
+  relationClear: z.literal(true),
+  decorationNonInterfering: z.literal(true),
+  notPrototypeLike: z.literal(true),
+  humanReason: z.string().min(1),
+  evidenceIds: z.array(z.string().min(1)).min(1),
+  userApproval: UserPositiveApprovalSchema,
+});
+
+export type PositiveFixtureAudit = z.infer<typeof PositiveFixtureAuditSchema>;
+
 export const VisualCriticFixtureSchema = z.strictObject({
   schemaVersion: z.literal('0.1'),
   fixtureId: z.string().min(1),
@@ -69,6 +95,30 @@ export const VisualCriticFixtureSchema = z.strictObject({
   labelCoverage: z.enum(['core-only', 'exhaustive']),
   expectedFindings: z.array(HumanExpectedFindingSchema),
   expectedSubmissionReadiness: z.enum(['ready', 'needs-review', 'not-ready']),
+  positiveAudit: PositiveFixtureAuditSchema.optional(),
+}).superRefine((fixture, context) => {
+  if (fixture.expectedSubmissionReadiness === 'ready' && fixture.positiveAudit === undefined) {
+    context.addIssue({
+      code: 'custom',
+      path: ['positiveAudit'],
+      message: 'ready fixture에는 사람의 제출 승인 audit가 필요합니다.',
+    });
+  }
+  if (fixture.expectedSubmissionReadiness !== 'ready' && fixture.positiveAudit !== undefined) {
+    context.addIssue({
+      code: 'custom',
+      path: ['positiveAudit'],
+      message: 'positiveAudit는 ready fixture에만 사용할 수 있습니다.',
+    });
+  }
+  if (fixture.positiveAudit !== undefined
+    && fixture.positiveAudit.userApproval.approvedArtifactId !== fixture.artifactId) {
+    context.addIssue({
+      code: 'custom',
+      path: ['positiveAudit', 'userApproval', 'approvedArtifactId'],
+      message: '사용자 승인 기록은 현재 fixture artifact와 정확히 일치해야 합니다.',
+    });
+  }
 });
 
 export type VisualCriticFixture = z.infer<typeof VisualCriticFixtureSchema>;

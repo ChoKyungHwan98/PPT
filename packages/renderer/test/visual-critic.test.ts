@@ -66,19 +66,38 @@ describe('visual critic benchmark', () => {
     expect(result.specificSuggestionCount).toBe(1);
   });
 
-  it('does not force a finding on the clean fixture', () => {
+  it('requires exact ready calibration and zero findings on the approved positive fixture', () => {
     const fixture = VisualCriticFixtureSchema.parse({
       schemaVersion: '0.1',
-      fixtureId: 'clean-result',
-      title: '정상 결과',
-      artifactId: 'render-clean',
+      fixtureId: 'user-approved-positive',
+      title: '사람이 승인한 정상 결과',
+      artifactId: 'render-user-approved',
       labelCoverage: 'exhaustive',
       expectedFindings: [],
       expectedSubmissionReadiness: 'ready',
+      positiveAudit: {
+        hierarchyClear: true,
+        readingOrderClear: true,
+        spaceUseAppropriate: true,
+        groupingClear: true,
+        typographyHierarchyAppropriate: true,
+        relationClear: true,
+        decorationNonInterfering: true,
+        notPrototypeLike: true,
+        humanReason: '사람이 실제 제출 가능한 결과로 승인했다.',
+        evidenceIds: ['golden.png'],
+        userApproval: {
+          approvalId: 'approval-user-001',
+          approvedBy: 'user',
+          approvedArtifactId: 'render-user-approved',
+          approvedAt: '2026-09-02T00:00:00.000Z',
+          approvalStatement: '이 이미지를 실제 제출 가능한 ready 기준으로 승인한다.',
+        },
+      },
     });
     const cleanReport = VisualCritiqueReportSchema.parse({
       schemaVersion: '0.1',
-      artifactId: 'render-clean',
+      artifactId: 'render-user-approved',
       firstFixation: { target: 'BREAK', assessment: '핵심 전환점으로 보인다.' },
       readingPathAssessment: '순서가 명확하다.',
       submissionReadiness: 'ready',
@@ -86,7 +105,25 @@ describe('visual critic benchmark', () => {
       sourceChangeSuggested: false,
       hardGateStatus: 'passed',
     });
-    expect(benchmarkCriticReport(fixture, cleanReport).normalFixturePassed).toBe(true);
+    expect(benchmarkCriticReport(fixture, cleanReport).positiveFixturePassed).toBe(true);
+
+    const underCalibrated = { ...cleanReport, submissionReadiness: 'needs-review' as const };
+    const failed = benchmarkCriticReport(fixture, underCalibrated);
+    expect(failed.readinessMatched).toBe(false);
+    expect(failed.positiveFixturePassed).toBe(false);
+    expect(failed.fixturePassed).toBe(false);
+  });
+
+  it('rejects a ready fixture without a matching user approval record', () => {
+    expect(() => VisualCriticFixtureSchema.parse({
+      schemaVersion: '0.1',
+      fixtureId: 'unapproved-positive',
+      title: '승인 없는 후보',
+      artifactId: 'render-unapproved',
+      labelCoverage: 'exhaustive',
+      expectedFindings: [],
+      expectedSubmissionReadiness: 'ready',
+    })).toThrow('ready fixture에는 사람의 제출 승인 audit가 필요합니다.');
   });
 
   it('flags source-copy changes and generic revision language', () => {
@@ -163,9 +200,10 @@ describe('visual critic execution boundary', () => {
       'semanticSummary',
       'informationPlan',
       'rubric',
+      'submissionReadinessAnchors',
       'hardGate',
     ]);
     expect(JSON.stringify(captured?.compactState)).not.toContain('repository');
-    expect(result.inputTrace.includedFields).toHaveLength(6);
+    expect(result.inputTrace.includedFields).toHaveLength(7);
   });
 });

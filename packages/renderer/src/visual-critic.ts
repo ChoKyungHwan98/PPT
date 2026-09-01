@@ -23,15 +23,27 @@ export const VISUAL_CRITIC_RUBRIC = [
   { id: 'typography-hierarchy', question: '글자 크기·굵기·정렬이 역할 차이를 보여주는가?' },
   { id: 'relation-clarity', question: '원인·전환·결과 관계가 선명한가?' },
   { id: 'decorative-interference', question: '장식이 정보보다 강하게 보이지 않는가?' },
-  { id: 'submission-readiness', question: '실제 제출물에 넣을 수 있는 완성도인가?' },
+  {
+    id: 'submission-readiness',
+    question: '전문적인 게임 기획서/발표자료로 보이며, 임시 와이어프레임이나 자동 배치 prototype처럼 보이지 않고, 정보량 대비 공간 활용과 시각적 완성도·cohesion이 실제 제출 수준인가?',
+  },
 ] as const;
+
+export const SUBMISSION_READINESS_ANCHORS = {
+  ready: '실제 제출물에 그대로 넣을 수 있다. 명백한 hierarchy, space, grouping, typography, relation 문제가 없고 prototype 또는 wireframe처럼 보이지 않는다.',
+  'needs-review': '내용은 이해할 수 있고 치명적 오류는 없지만 시각적 완성도, 공간 활용, 위계, 정렬 또는 그룹화에 사람이 손볼 부분이 남아 있다.',
+  'not-ready': '읽는 순서, 위계, 그룹화, 밀도, 공간 사용 또는 시각 구조에 명확한 문제가 있어 제출용으로 사용할 수 없다.',
+} as const;
 
 const SYSTEM_INSTRUCTION = `당신은 게임 기획서의 실제 렌더 화면만 검수하는 Visual Critic이다.
 주어진 PNG를 반드시 직접 보고, 함께 제공된 작은 의미 요약과 설명 구조는 의도 확인에만 사용한다.
 Hard Gate는 이미 통과했다. 원문, 숫자, 단위, 관계를 고치거나 새 내용을 쓰지 않는다.
 각 finding은 화면에서 확인되는 구체적인 문제, 그 이유, 내용 변경 없이 가능한 시각 수정 방향을 적는다.
 "예쁘게 만든다", "개선한다" 같은 추상적인 조언은 금지한다.
-문제가 제출을 막을 정도가 아니면 severity를 과장하지 않는다. 제출 가능한 정상 결과라면 findings를 비워도 된다.
+submissionReadiness는 제공된 세 단계 기준을 엄격하게 적용한다. 내용이 읽힌다는 이유만으로 ready를 주지 않는다.
+ready는 실제 제출물에 그대로 넣을 수 있고 명백한 시각 문제가 없을 때만 선택하며, 이 경우 findings를 비운다.
+needs-review는 이해 가능하지만 사람이 시각적으로 손볼 부분이 남은 결과다. not-ready는 구조적 문제가 제출을 막는 결과다.
+문제가 제출을 막을 정도가 아니면 severity를 과장하지 않는다.
 target에는 제공된 block/group ID를 우선 사용하고, 특정할 수 없으면 kind=page, ids=["page"]를 사용한다.`;
 
 function blockTexts(block: SemanticBlock): string[] {
@@ -138,6 +150,7 @@ export async function runVisualCritic(input: {
   informationPlan: InformationPlan;
   hardGate: HardGateResult;
   contextBudgetBytes?: number;
+  requestIdSalt?: string;
 }): Promise<VisualCriticRun> {
   if (!input.hardGate.passed) {
     throw new Error('Hard Gate FAIL 결과는 Visual Critic으로 보낼 수 없습니다.');
@@ -153,6 +166,7 @@ export async function runVisualCritic(input: {
     semanticSummary: semanticSummary(input.slide),
     informationPlan: informationStructure(input.informationPlan),
     rubric: VISUAL_CRITIC_RUBRIC,
+    submissionReadinessAnchors: SUBMISSION_READINESS_ANCHORS,
     hardGate: {
       status: 'passed',
       programFindingCount: 0,
@@ -165,6 +179,7 @@ export async function runVisualCritic(input: {
     imageSha256,
     compactState,
     model: input.provider.model,
+    requestIdSalt: input.requestIdSalt ?? '',
   }).slice(0, 20)}`;
   const contextArtifactIds = [
     input.slide.slideId,
@@ -203,7 +218,7 @@ export async function runVisualCritic(input: {
       compactContextBytes,
       contextBudgetBytes,
       contextArtifactIds,
-      includedFields: ['actual PNG', 'page goal', 'semantic summary', 'InformationPlan core', 'rubric', 'Hard Gate PASS'],
+      includedFields: ['actual PNG', 'page goal', 'semantic summary', 'InformationPlan core', 'rubric', 'readiness anchors', 'Hard Gate PASS'],
     },
     guardrailIssues: criticGuardrailIssues(report),
   };
@@ -227,16 +242,21 @@ function specificSuggestion(finding: VisualCriticFinding): boolean {
 export type CriticBenchmarkResult = {
   fixtureId: string;
   expectedCount: number;
+  actualFindingCount: number;
   actualActionableCount: number;
   matchedExpectedCount: number;
   problemRecall: number | null;
   unmatchedActionableCount: number;
   falsePositiveCount: number | null;
   falsePositiveRate: number | null;
+  readinessMatched: boolean;
+  expectedSubmissionReadiness: VisualCriticFixture['expectedSubmissionReadiness'];
+  actualSubmissionReadiness: VisualCritiqueReport['submissionReadiness'];
   severityExactCount: number;
   severityAppropriateCount: number;
   specificSuggestionCount: number;
-  normalFixturePassed: boolean | null;
+  positiveFixturePassed: boolean | null;
+  fixturePassed: boolean;
   guardrailIssues: string[];
   matches: Array<{
     expectedIssueType: string;
@@ -263,20 +283,35 @@ export function benchmarkCriticReport(
     };
   });
   const unmatchedActionableCount = actionable.filter((finding) => !consumed.has(finding.findingId)).length;
-  const falsePositiveCount = fixture.labelCoverage === 'exhaustive' ? unmatchedActionableCount : null;
+  const unmatchedFindingCount = report.findings.filter((finding) => !consumed.has(finding.findingId)).length;
+  const falsePositiveCount = fixture.labelCoverage === 'exhaustive' ? unmatchedFindingCount : null;
   const expectedCount = fixture.expectedFindings.length;
+  const readinessMatched = fixture.expectedSubmissionReadiness === report.submissionReadiness;
+  const matchedExpectedCount = matches.filter((match) => match.actualFindingId !== null).length;
+  const severityExactCount = matches.filter((match) => match.severityExact).length;
+  const specificSuggestionCount = matches.filter((match) => match.suggestionSpecific).length;
+  const positiveFixturePassed = fixture.expectedSubmissionReadiness === 'ready'
+    ? fixture.positiveAudit !== undefined
+      && report.findings.length === 0
+      && report.submissionReadiness === 'ready'
+    : null;
+  const guardrailIssues = criticGuardrailIssues(report);
   return {
     fixtureId: fixture.fixtureId,
     expectedCount,
+    actualFindingCount: report.findings.length,
     actualActionableCount: actionable.length,
-    matchedExpectedCount: matches.filter((match) => match.actualFindingId !== null).length,
-    problemRecall: expectedCount === 0 ? null : matches.filter((match) => match.actualFindingId !== null).length / expectedCount,
+    matchedExpectedCount,
+    problemRecall: expectedCount === 0 ? null : matchedExpectedCount / expectedCount,
     unmatchedActionableCount,
     falsePositiveCount,
     falsePositiveRate: falsePositiveCount === null
       ? null
-      : actionable.length === 0 ? 0 : falsePositiveCount / actionable.length,
-    severityExactCount: matches.filter((match) => match.severityExact).length,
+      : report.findings.length === 0 ? 0 : falsePositiveCount / report.findings.length,
+    readinessMatched,
+    expectedSubmissionReadiness: fixture.expectedSubmissionReadiness,
+    actualSubmissionReadiness: report.submissionReadiness,
+    severityExactCount,
     severityAppropriateCount: matches.filter((match) => {
       if (match.actualFindingId === null) return false;
       const expected = fixture.expectedFindings.find((finding) => finding.issueType === match.expectedIssueType);
@@ -285,11 +320,16 @@ export function benchmarkCriticReport(
       const ranks = { info: 0, warning: 1, error: 2 } as const;
       return Math.abs(ranks[expected.severity] - ranks[actual.severity]) <= 1;
     }).length,
-    specificSuggestionCount: matches.filter((match) => match.suggestionSpecific).length,
-    normalFixturePassed: expectedCount === 0
-      ? actionable.length === 0 && report.submissionReadiness !== 'not-ready'
-      : null,
-    guardrailIssues: criticGuardrailIssues(report),
+    specificSuggestionCount,
+    positiveFixturePassed,
+    fixturePassed: matchedExpectedCount === expectedCount
+      && (falsePositiveCount ?? 0) === 0
+      && readinessMatched
+      && severityExactCount === expectedCount
+      && specificSuggestionCount === expectedCount
+      && (positiveFixturePassed ?? true)
+      && guardrailIssues.length === 0,
+    guardrailIssues,
     matches,
   };
 }

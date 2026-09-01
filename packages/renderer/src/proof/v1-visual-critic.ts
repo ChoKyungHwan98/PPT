@@ -1,14 +1,15 @@
-import { readFile, writeFile } from 'node:fs/promises';
+import { copyFile, mkdir, readFile, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
-import { VisualCritiqueReportSchema } from '@game-presentation/contracts';
+import { VisualCritiqueReportSchema, type ProviderRunRecord } from '@game-presentation/contracts';
 import { launchRenderBrowser } from '../browser.js';
-import { createCriticFixtureArtifacts, CRITIC_FIXTURE_PAGE_GOAL } from '../critic-fixtures.js';
+import { createCriticFixtureArtifacts, CRITIC_FIXTURE_PAGE_GOAL, type CriticFixtureArtifact } from '../critic-fixtures.js';
 import { exportRenderTree } from '../export.js';
 import { loadSystemPretendard } from '../font.js';
 import { OpenRouterAIProvider } from '../openrouter-provider.js';
 import { benchmarkCriticReport, criticGuardrailIssues, runVisualCritic, type VisualCriticRun } from '../visual-critic.js';
 
-type ReasoningEffort = 'none' | 'minimal' | 'low' | 'medium' | 'high';
+type ComparedReasoningEffort = 'low' | 'medium';
+const COMPARED_REASONING: readonly ComparedReasoningEffort[] = ['low', 'medium'];
 
 async function loadLocalEnvironment(): Promise<void> {
   const path = resolve('.env.local');
@@ -30,14 +31,6 @@ function requiredEnvironment(name: string): string {
   return value;
 }
 
-function reasoningEffort(): ReasoningEffort {
-  const value = process.env.CRITIC_REASONING?.trim() ?? 'low';
-  if (!['none', 'minimal', 'low', 'medium', 'high'].includes(value)) {
-    throw new Error('CRITIC_REASONING은 none|minimal|low|medium|high 중 하나여야 합니다.');
-  }
-  return value as ReasoningEffort;
-}
-
 async function replayCritic(path: string, artifactId: string): Promise<VisualCriticRun> {
   const stored = JSON.parse(await readFile(path, 'utf8')) as Partial<VisualCriticRun>;
   const report = VisualCritiqueReportSchema.parse(stored.report);
@@ -52,142 +45,214 @@ async function replayCritic(path: string, artifactId: string): Promise<VisualCri
   };
 }
 
+function usageTotals(runs: ProviderRunRecord[]) {
+  return {
+    inputTokens: runs.reduce((sum, run) => sum + (run.inputTokens ?? 0), 0),
+    outputTokens: runs.reduce((sum, run) => sum + (run.outputTokens ?? 0), 0),
+    reasoningTokens: runs.reduce((sum, run) => sum + (run.reasoningTokens ?? 0), 0),
+    totalTokens: runs.reduce((sum, run) => sum + (run.totalTokens ?? 0), 0),
+    estimatedCostUsd: runs.reduce((sum, run) => sum + run.estimatedCostUsd, 0),
+  };
+}
+
+function aggregateResults(results: Array<ReturnType<typeof benchmarkCriticReport>>, runs: ProviderRunRecord[]) {
+  const problemResults = results.filter((result) => result.expectedCount > 0);
+  const expectedCount = problemResults.reduce((sum, result) => sum + result.expectedCount, 0);
+  const matchedCount = problemResults.reduce((sum, result) => sum + result.matchedExpectedCount, 0);
+  const actualFindingCount = results.reduce((sum, result) => sum + result.actualFindingCount, 0);
+  const falsePositiveCount = results.reduce((sum, result) => sum + (result.falsePositiveCount ?? 0), 0);
+  const severityDenominator = results.reduce((sum, result) => sum + result.matchedExpectedCount, 0);
+  const severityExactCount = results.reduce((sum, result) => sum + result.severityExactCount, 0);
+  const specificSuggestionCount = results.reduce((sum, result) => sum + result.specificSuggestionCount, 0);
+  const readinessMatchedCount = results.filter((result) => result.readinessMatched).length;
+  const positiveResults = results.filter((result) => result.expectedSubmissionReadiness === 'ready');
+  const positiveFixturePresent = positiveResults.length > 0;
+  return {
+    problemRecall: expectedCount === 0 ? null : matchedCount / expectedCount,
+    matchedExpectedCount: matchedCount,
+    expectedCount,
+    falsePositiveCount,
+    falsePositiveRate: actualFindingCount === 0 ? 0 : falsePositiveCount / actualFindingCount,
+    readinessAccuracy: results.length === 0 ? null : readinessMatchedCount / results.length,
+    readinessMatchedCount,
+    readinessFixtureCount: results.length,
+    severityAccuracy: severityDenominator === 0 ? null : severityExactCount / severityDenominator,
+    severityExactCount,
+    severityDenominator,
+    revisionSuggestionSpecificity: severityDenominator === 0 ? null : specificSuggestionCount / severityDenominator,
+    specificSuggestionCount,
+    positiveFixturePresent,
+    positiveFixturePassed: positiveFixturePresent
+      ? positiveResults.every((result) => result.positiveFixturePassed === true)
+      : null,
+    everyFixturePassed: positiveFixturePresent && results.every((result) => result.fixturePassed),
+    allGuardrailsPassed: results.every((result) => result.guardrailIssues.length === 0),
+    tokenUsage: usageTotals(runs),
+  };
+}
+
+function shouldAdoptMedium(
+  low: ReturnType<typeof aggregateResults>,
+  medium: ReturnType<typeof aggregateResults>,
+): boolean {
+  const lowReadiness = low.readinessAccuracy ?? 0;
+  const mediumReadiness = medium.readinessAccuracy ?? 0;
+  const lowRecall = low.problemRecall ?? 0;
+  const mediumRecall = medium.problemRecall ?? 0;
+  return mediumReadiness >= lowReadiness
+    && mediumRecall >= lowRecall
+    && (mediumReadiness > lowReadiness || mediumRecall > lowRecall);
+}
+
+async function fixturePng(input: {
+  artifact: CriticFixtureArtifact;
+  outputDir: string;
+  browser: Awaited<ReturnType<typeof launchRenderBrowser>>;
+  fonts: Awaited<ReturnType<typeof loadSystemPretendard>>;
+}) {
+  const { artifact, outputDir, browser, fonts } = input;
+  await writeFile(
+    resolve(outputDir, `${artifact.fixture.fixtureId}.human-label.json`),
+    JSON.stringify(artifact.fixture, null, 2) + '\n',
+    'utf8',
+  );
+  await writeFile(
+    resolve(outputDir, `${artifact.fixture.fixtureId}.composition-plan.json`),
+    JSON.stringify(artifact.compositionPlan, null, 2) + '\n',
+    'utf8',
+  );
+  if (artifact.pngSourcePath !== undefined) {
+    const pngPath = resolve(outputDir, `${artifact.fixture.fixtureId}.png`);
+    await copyFile(resolve(artifact.pngSourcePath), pngPath);
+    return { pngPath, sourcePngPath: resolve(artifact.pngSourcePath) };
+  }
+  return exportRenderTree({
+    browser,
+    tree: artifact.tree,
+    fonts,
+    outputDir,
+    basename: artifact.fixture.fixtureId,
+  });
+}
+
 async function main(): Promise<void> {
   await loadLocalEnvironment();
   const providerKind = requiredEnvironment('CRITIC_PROVIDER');
   if (providerKind !== 'openrouter') throw new Error('이번 proof는 CRITIC_PROVIDER=openrouter만 지원합니다.');
   const replay = process.env.CRITIC_REPLAY === '1';
   const model = requiredEnvironment('CRITIC_MODEL_ID');
-  const provider = replay ? undefined : new OpenRouterAIProvider({
-    apiKey: requiredEnvironment('OPENROUTER_API_KEY'),
-    model,
-    reasoningEffort: reasoningEffort(),
-  });
+  const apiKey = replay ? '' : requiredEnvironment('OPENROUTER_API_KEY');
   const outputDir = resolve('output', 'v1-visual-critic');
+  await mkdir(outputDir, { recursive: true });
   const fonts = await loadSystemPretendard();
   const browser = await launchRenderBrowser();
   try {
     const artifacts = await createCriticFixtureArtifacts({ browser, fonts });
-    const fixtureResults = [];
+    const prepared = [];
     for (const artifact of artifacts) {
-      const outputs = await exportRenderTree({
-        browser,
-        tree: artifact.tree,
-        fonts,
-        outputDir,
-        basename: artifact.fixture.fixtureId,
-      });
-      await writeFile(
-        resolve(outputDir, `${artifact.fixture.fixtureId}.composition-plan.json`),
-        JSON.stringify(artifact.compositionPlan, null, 2) + '\n',
-        'utf8',
-      );
-      const pngBytes = new Uint8Array(await readFile(outputs.pngPath));
-      const criticPath = resolve(outputDir, `${artifact.fixture.fixtureId}.critic.json`);
-      const critic = replay
-        ? await replayCritic(criticPath, artifact.fixture.artifactId)
-        : await runVisualCritic({
-            provider: provider!,
-            pngBytes,
-            artifactId: artifact.fixture.artifactId,
-            goal: CRITIC_FIXTURE_PAGE_GOAL,
-            slide: artifact.slide,
-            informationPlan: artifact.informationPlan,
-            hardGate: artifact.hardGate,
-          });
-      const benchmark = benchmarkCriticReport(artifact.fixture, critic.report);
-      fixtureResults.push({
-        fixture: artifact.fixture,
-        outputs,
-        hardGate: {
-          passed: artifact.hardGate.passed,
-          programFindingCount: artifact.hardGate.programFindings.length,
-          sourceFidelityFindingCount: artifact.hardGate.sourceFidelityFindings.length,
-        },
-        critic,
-        benchmark,
-      });
-      await writeFile(
-        criticPath,
-        JSON.stringify({ report: critic.report, run: critic.run, inputTrace: critic.inputTrace, guardrailIssues: critic.guardrailIssues }, null, 2) + '\n',
-        'utf8',
-      );
+      const outputs = await fixturePng({ artifact, outputDir, browser, fonts });
+      prepared.push({ artifact, outputs, pngBytes: new Uint8Array(await readFile(outputs.pngPath)) });
     }
 
-    const currentArtifact = artifacts.find((artifact) => artifact.fixture.fixtureId === 'clean-result');
-    if (currentArtifact === undefined) throw new Error('정상 Critic fixture를 찾을 수 없습니다.');
-    const currentPngPath = resolve('output', 'v1-information-flow', 'mec-01-threshold.png');
-    const currentPngBytes = new Uint8Array(await readFile(currentPngPath));
-    const currentCriticPath = resolve(outputDir, 'current-v1-threshold.critic.json');
-    const currentCritic = replay
-      ? await replayCritic(currentCriticPath, 'current-v1-threshold-render')
-      : await runVisualCritic({
-          provider: provider!,
-          pngBytes: currentPngBytes,
-          artifactId: 'current-v1-threshold-render',
-          goal: CRITIC_FIXTURE_PAGE_GOAL,
-          slide: currentArtifact.slide,
-          informationPlan: currentArtifact.informationPlan,
-          hardGate: currentArtifact.hardGate,
-        });
-    const currentReport = VisualCritiqueReportSchema.parse(currentCritic.report);
-    await writeFile(
-      currentCriticPath,
-      JSON.stringify({ pngPath: currentPngPath, report: currentReport, run: currentCritic.run, inputTrace: currentCritic.inputTrace, guardrailIssues: currentCritic.guardrailIssues }, null, 2) + '\n',
-      'utf8',
-    );
+    const comparisons: Record<ComparedReasoningEffort, {
+      fixtureResults: Array<{
+        fixture: CriticFixtureArtifact['fixture'];
+        outputs: (typeof prepared)[number]['outputs'];
+        hardGate: { passed: boolean; programFindingCount: number; sourceFidelityFindingCount: number };
+        critic: VisualCriticRun;
+        benchmark: ReturnType<typeof benchmarkCriticReport>;
+      }>;
+      aggregate: ReturnType<typeof aggregateResults>;
+    }> = {} as never;
 
-    const problemFixtures = fixtureResults.filter((result) => result.fixture.expectedFindings.length > 0);
-    const expectedTotal = problemFixtures.reduce((sum, result) => sum + result.benchmark.expectedCount, 0);
-    const matchedTotal = problemFixtures.reduce((sum, result) => sum + result.benchmark.matchedExpectedCount, 0);
-    const exhaustiveBenchmarks = fixtureResults.filter((result) => result.benchmark.falsePositiveCount !== null);
-    const falsePositiveTotal = exhaustiveBenchmarks.reduce((sum, result) => sum + (result.benchmark.falsePositiveCount ?? 0), 0);
-    const exhaustiveActionableTotal = exhaustiveBenchmarks.reduce((sum, result) => sum + result.benchmark.actualActionableCount, 0);
-    const aggregate = {
-      problemRecall: expectedTotal === 0 ? null : matchedTotal / expectedTotal,
-      matchedExpectedCount: matchedTotal,
-      expectedCount: expectedTotal,
-      falsePositiveCount: falsePositiveTotal,
-      falsePositiveRate: exhaustiveActionableTotal === 0 ? 0 : falsePositiveTotal / exhaustiveActionableTotal,
-      normalFixturePassed: fixtureResults.find((result) => result.fixture.fixtureId === 'clean-result')?.benchmark.normalFixturePassed ?? false,
-      allGuardrailsPassed: fixtureResults.every((result) => result.critic.guardrailIssues.length === 0)
-        && currentCritic.guardrailIssues.length === 0,
-      model,
-      reasoning: reasoningEffort(),
-      replayedFromStoredEvidence: replay,
-      tokenUsage: {
-        inputTokens: [...fixtureResults.map((result) => result.critic.run), currentCritic.run]
-          .reduce((sum, run) => sum + (run.inputTokens ?? 0), 0),
-        outputTokens: [...fixtureResults.map((result) => result.critic.run), currentCritic.run]
-          .reduce((sum, run) => sum + (run.outputTokens ?? 0), 0),
-        reasoningTokens: [...fixtureResults.map((result) => result.critic.run), currentCritic.run]
-          .reduce((sum, run) => sum + (run.reasoningTokens ?? 0), 0),
-        totalTokens: [...fixtureResults.map((result) => result.critic.run), currentCritic.run]
-          .reduce((sum, run) => sum + (run.totalTokens ?? 0), 0),
-        estimatedCostUsd: [...fixtureResults.map((result) => result.critic.run), currentCritic.run]
-          .reduce((sum, run) => sum + run.estimatedCostUsd, 0),
-      },
-    };
+    for (const effort of COMPARED_REASONING) {
+      const provider = replay ? undefined : new OpenRouterAIProvider({ apiKey, model, reasoningEffort: effort });
+      const fixtureResults = [];
+      for (const item of prepared) {
+        const { artifact, outputs, pngBytes } = item;
+        const criticPath = resolve(outputDir, `${artifact.fixture.fixtureId}.${effort}.critic.json`);
+        const critic = replay
+          ? await replayCritic(criticPath, artifact.fixture.artifactId)
+          : await runVisualCritic({
+              provider: provider!,
+              pngBytes,
+              artifactId: artifact.fixture.artifactId,
+              goal: CRITIC_FIXTURE_PAGE_GOAL,
+              slide: artifact.slide,
+              informationPlan: artifact.informationPlan,
+              hardGate: artifact.hardGate,
+              requestIdSalt: effort,
+            });
+        const benchmark = benchmarkCriticReport(artifact.fixture, critic.report);
+        fixtureResults.push({
+          fixture: artifact.fixture,
+          outputs,
+          hardGate: {
+            passed: artifact.hardGate.passed,
+            programFindingCount: artifact.hardGate.programFindings.length,
+            sourceFidelityFindingCount: artifact.hardGate.sourceFidelityFindings.length,
+          },
+          critic,
+          benchmark,
+        });
+        await writeFile(
+          criticPath,
+          JSON.stringify({
+            reasoningEffort: effort,
+            report: critic.report,
+            run: critic.run,
+            inputTrace: critic.inputTrace,
+            guardrailIssues: critic.guardrailIssues,
+          }, null, 2) + '\n',
+          'utf8',
+        );
+      }
+      comparisons[effort] = {
+        fixtureResults,
+        aggregate: aggregateResults(
+          fixtureResults.map((result) => result.benchmark),
+          fixtureResults.map((result) => result.critic.run),
+        ),
+      };
+    }
+
+    const adoptedReasoning = shouldAdoptMedium(comparisons.low.aggregate, comparisons.medium.aggregate)
+      ? 'medium'
+      : 'low';
     const report = {
-      schemaVersion: '0.1',
-      fixtureResults,
-      currentV1: {
-        pngPath: currentPngPath,
-        critic: currentCritic,
+      schemaVersion: '0.2',
+      benchmarkPolicy: {
+        labelCoverage: 'exhaustive',
+        readinessComparison: 'exact',
+        positiveRequiresReadyAndZeroFindings: true,
+        mediumAdoptionRule: 'Medium은 Readiness Accuracy와 Problem Recall을 악화시키지 않으면서 둘 중 하나 이상을 개선할 때만 채택한다.',
       },
-      aggregate,
+      model,
+      replayedFromStoredEvidence: replay,
+      comparisons,
+      adoptedReasoning,
+      currentV1FixtureId: 'rough-but-readable',
+      positiveFixtureId: null,
+      intermediateFixtureId: 'intermediate-golden-case',
+      totalActualCostUsd: comparisons.low.aggregate.tokenUsage.estimatedCostUsd
+        + comparisons.medium.aggregate.tokenUsage.estimatedCostUsd,
     };
     await writeFile(resolve(outputDir, 'benchmark-report.json'), JSON.stringify(report, null, 2) + '\n', 'utf8');
     process.stdout.write(JSON.stringify({
       outputDir,
-      fixtures: fixtureResults.map((result) => ({
-        fixtureId: result.fixture.fixtureId,
-        hardGatePassed: result.hardGate.passed,
-        benchmark: result.benchmark,
-        usage: result.critic.run,
-      })),
-      currentV1: { report: currentReport, usage: currentCritic.run, guardrailIssues: currentCritic.guardrailIssues },
-      aggregate,
+      model,
+      adoptedReasoning,
+      low: comparisons.low.aggregate,
+      medium: comparisons.medium.aggregate,
+      currentV1: {
+        low: comparisons.low.fixtureResults.find((result) => result.fixture.fixtureId === 'rough-but-readable')?.critic.report,
+        medium: comparisons.medium.fixtureResults.find((result) => result.fixture.fixtureId === 'rough-but-readable')?.critic.report,
+      },
+      intermediate: {
+        low: comparisons.low.fixtureResults.find((result) => result.fixture.fixtureId === 'intermediate-golden-case')?.critic.report,
+        medium: comparisons.medium.fixtureResults.find((result) => result.fixture.fixtureId === 'intermediate-golden-case')?.critic.report,
+      },
+      totalActualCostUsd: report.totalActualCostUsd,
     }, null, 2) + '\n');
   } finally {
     await browser.close();

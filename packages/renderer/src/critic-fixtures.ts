@@ -30,6 +30,7 @@ export type CriticFixtureArtifact = {
   compositionPlan: CompositionPlan;
   tree: RenderTree;
   hardGate: HardGateResult;
+  pngSourcePath?: string;
 };
 
 function fixtureDefinition(input: {
@@ -317,63 +318,163 @@ export async function createCriticFixtureArtifacts(input: {
   rebuildRelationPaths(readingTreeDraft, slide);
   const readingTree = finalizeMutatedTree(readingTreeDraft, 'reading-order');
 
-  const cleanPlan = withPlanId(thresholdBase, 'composition-critic-clean');
-  const cleanTree = await renderFromPlan({ browser: input.browser, fonts: input.fonts, slide, informationPlan, plan: cleanPlan });
+  const roughPlan = withPlanId(thresholdBase, 'composition-critic-rough');
+  const roughTree = await renderFromPlan({ browser: input.browser, fonts: input.fonts, slide, informationPlan, plan: roughPlan });
 
   const definitions = [
     {
       fixtureId: 'hierarchy-problem',
       title: '정보 위계 문제',
-      labelCoverage: 'core-only' as const,
+      labelCoverage: 'exhaustive' as const,
       plan: hierarchyPlan,
       tree: hierarchyTree,
       expectedFindings: [{
         issueType: 'hierarchy' as const,
-        acceptableIssueTypes: ['first-fixation', 'typography-hierarchy'] as const,
+        acceptableIssueTypes: [] as const,
         severity: 'error' as const,
         target: { kind: 'page' as const, ids: ['page'] },
         humanReason: '모든 단계의 글자 크기와 굵기가 같고 buildup이 강조되어 BREAK 전환점과 +50% 결과가 핵심으로 읽히지 않는다.',
+      }, {
+        issueType: 'space-use' as const,
+        acceptableIssueTypes: [] as const,
+        severity: 'warning' as const,
+        target: { kind: 'page' as const, ids: ['page'] },
+        humanReason: '정보는 가운데 한 줄에만 머물고 상하 공간이 크게 비어 있어 정보량 대비 화면 사용이 설득력 없고 임시 배치처럼 보인다.',
+      }, {
+        issueType: 'relation-clarity' as const,
+        acceptableIssueTypes: [] as const,
+        severity: 'warning' as const,
+        target: { kind: 'page' as const, ids: ['page'] },
+        humanReason: '축적 단계, BREAK 전환점, 피해 결과의 역할 차이가 타이포와 영역 구분으로 충분히 드러나지 않는다.',
+      }, {
+        issueType: 'submission-readiness' as const,
+        acceptableIssueTypes: [] as const,
+        severity: 'error' as const,
+        target: { kind: 'page' as const, ids: ['page'] },
+        humanReason: '핵심 메시지 위계와 화면 구성의 마감이 부족해 실제 제출 자료로 사용할 수준이 아니다.',
       }],
       expectedSubmissionReadiness: 'not-ready' as const,
     },
     {
       fixtureId: 'density-problem',
-      title: '정보 과밀',
-      labelCoverage: 'core-only' as const,
+      title: '밀도·공간 활용 문제',
+      labelCoverage: 'exhaustive' as const,
       plan: densePlan,
       tree: denseTree,
       expectedFindings: [{
         issueType: 'density' as const,
-        acceptableIssueTypes: ['grouping', 'space-use'] as const,
+        acceptableIssueTypes: [] as const,
         severity: 'error' as const,
         target: { kind: 'page' as const, ids: ['page'] },
         humanReason: '다섯 단계와 네 관계가 중앙의 좁은 덩어리에 큰 글자로 몰려 단계 간 숨 쉴 공간과 그룹 경계가 없다.',
+      }, {
+        issueType: 'space-use' as const,
+        acceptableIssueTypes: [] as const,
+        severity: 'error' as const,
+        target: { kind: 'page' as const, ids: ['page'] },
+        humanReason: '세로로 좁은 중앙 열만 사용하고 좌우 대부분을 비워 16:9 화면과 정보 구조가 맞지 않는다.',
+      }, {
+        issueType: 'grouping' as const,
+        acceptableIssueTypes: [] as const,
+        severity: 'warning' as const,
+        target: { kind: 'page' as const, ids: ['page'] },
+        humanReason: 'buildup 세 단계, BREAK, 결과가 하나의 동일한 세로 목록처럼 보여 역할별 묶음이 약하다.',
+      }, {
+        issueType: 'submission-readiness' as const,
+        acceptableIssueTypes: [] as const,
+        severity: 'error' as const,
+        target: { kind: 'page' as const, ids: ['page'] },
+        humanReason: '과도한 중앙 집중과 빈 좌우 공간 때문에 제출용 레이아웃으로 볼 수 없다.',
       }],
       expectedSubmissionReadiness: 'not-ready' as const,
     },
     {
       fixtureId: 'reading-order-problem',
       title: '읽는 순서 문제',
-      labelCoverage: 'core-only' as const,
+      labelCoverage: 'exhaustive' as const,
       plan: readingPlan,
       tree: readingTree,
       expectedFindings: [{
         issueType: 'reading-order' as const,
-        acceptableIssueTypes: ['relation-clarity'] as const,
+        acceptableIssueTypes: [] as const,
         severity: 'error' as const,
         target: { kind: 'page' as const, ids: ['page'] },
         humanReason: '단계가 위아래로 크게 교차하고 연결선이 지그재그로 화면을 가로질러 좌→우 인과 흐름을 한 번에 따라가기 어렵다.',
+      }, {
+        issueType: 'relation-clarity' as const,
+        acceptableIssueTypes: [] as const,
+        severity: 'error' as const,
+        target: { kind: 'page' as const, ids: ['page'] },
+        humanReason: '긴 대각선이 서로 다른 높이의 항목을 잇고 있어 축적→전환→결과 관계보다 선의 움직임이 먼저 보인다.',
+      }, {
+        issueType: 'grouping' as const,
+        acceptableIssueTypes: [] as const,
+        severity: 'warning' as const,
+        target: { kind: 'page' as const, ids: ['page'] },
+        humanReason: '다섯 단계가 넓게 흩어져 buildup, threshold, consequence라는 의미 묶음을 공간적으로 확인하기 어렵다.',
+      }, {
+        issueType: 'submission-readiness' as const,
+        acceptableIssueTypes: [] as const,
+        severity: 'error' as const,
+        target: { kind: 'page' as const, ids: ['page'] },
+        humanReason: '독자가 연결선을 해독해야 하므로 실제 제출용 정보 도식으로 사용할 수 없다.',
       }],
       expectedSubmissionReadiness: 'not-ready' as const,
     },
     {
-      fixtureId: 'clean-result',
-      title: '정상 결과',
+      fixtureId: 'rough-but-readable',
+      title: '읽히지만 미완성인 현재 V1 결과',
       labelCoverage: 'exhaustive' as const,
-      plan: cleanPlan,
-      tree: cleanTree,
-      expectedFindings: [],
-      expectedSubmissionReadiness: 'ready' as const,
+      plan: roughPlan,
+      tree: roughTree,
+      expectedFindings: [{
+        issueType: 'space-use' as const,
+        acceptableIssueTypes: [] as const,
+        severity: 'warning' as const,
+        target: { kind: 'page' as const, ids: ['page'] },
+        humanReason: '정보가 가운데의 얇은 가로 띠에만 배치되고 상하 대부분이 비어 정보량 대비 공간 활용이 약하다.',
+      }, {
+        issueType: 'hierarchy' as const,
+        acceptableIssueTypes: [] as const,
+        severity: 'warning' as const,
+        target: { kind: 'page' as const, ids: ['page'] },
+        humanReason: '페이지의 핵심 주장이나 제목이 없고 BREAK와 +50%만 부분적으로 강조되어 전체 메시지의 위계가 완성되지 않았다.',
+      }, {
+        issueType: 'grouping' as const,
+        acceptableIssueTypes: [] as const,
+        severity: 'warning' as const,
+        target: { kind: 'page' as const, ids: ['page'] },
+        humanReason: 'buildup, threshold, result 영역은 구분되지만 세 buildup 단계의 축적감과 threshold 전후의 의미 차이가 충분히 응집되지 않는다.',
+      }, {
+        issueType: 'typography-hierarchy' as const,
+        acceptableIssueTypes: [] as const,
+        severity: 'warning' as const,
+        target: { kind: 'page' as const, ids: ['page'] },
+        humanReason: '작은 보조 라벨과 단계 문구 외에 주장·단계·결과를 구분하는 완성된 타입 체계가 보이지 않는다.',
+      }, {
+        issueType: 'submission-readiness' as const,
+        acceptableIssueTypes: [] as const,
+        severity: 'warning' as const,
+        target: { kind: 'page' as const, ids: ['page'] },
+        humanReason: '내용은 이해되지만 자동 배치 prototype 또는 wireframe 같은 인상이 남아 사람이 시각 마감을 해야 한다.',
+      }],
+      expectedSubmissionReadiness: 'needs-review' as const,
+    },
+    {
+      fixtureId: 'intermediate-golden-case',
+      title: '기존 Golden Case — 중간 품질 기준',
+      labelCoverage: 'exhaustive' as const,
+      plan: roughPlan,
+      tree: roughTree,
+      pngSourcePath: 'vertical-slice/break-mechanism/evidence/artifact-render.png',
+      expectedFindings: [{
+        issueType: 'submission-readiness' as const,
+        acceptableIssueTypes: [] as const,
+        severity: 'warning' as const,
+        target: { kind: 'page' as const, ids: ['page'] },
+        humanReason: '현재 이미지는 사용자가 최종 제출 가능한 품질 기준으로 승인하지 않았으므로 ready Positive가 아니라 추가 검토가 필요한 중간 기준이다.',
+      }],
+      expectedSubmissionReadiness: 'needs-review' as const,
     },
   ];
 
@@ -383,7 +484,9 @@ export async function createCriticFixtureArtifacts(input: {
       fixture: fixtureDefinition({
         fixtureId: definition.fixtureId,
         title: definition.title,
-        artifactId: definition.tree.renderTreeId,
+        artifactId: definition.fixtureId === 'intermediate-golden-case'
+          ? 'render-critic-intermediate-golden-case'
+          : definition.tree.renderTreeId,
         labelCoverage: definition.labelCoverage,
         expectedFindings: definition.expectedFindings.map((finding) => ({
           ...finding,
@@ -396,6 +499,7 @@ export async function createCriticFixtureArtifacts(input: {
       compositionPlan: definition.plan,
       tree: definition.tree,
       hardGate,
+      ...('pngSourcePath' in definition ? { pngSourcePath: definition.pngSourcePath } : {}),
     };
   });
 }
