@@ -16,6 +16,7 @@ import {
 } from '@game-presentation/contracts';
 import type { ReferenceSearchResult } from '@game-presentation/reference-engine';
 import { parseMechanismGrammar } from './mechanism-grammar.js';
+import { styleIntentForPattern } from './design-intent.js';
 
 export type CompositionCandidate = {
   plan: CompositionPlan;
@@ -54,23 +55,6 @@ function regionForBlock(
     return fragment.topology.family === 'editorial-causal-spine' ? 'consequence' : 'result-field';
   }
   return fragment.topology.family === 'editorial-causal-spine' ? 'buildup' : 'lead-in';
-}
-
-function styleIntent(fragment: PatternFragment): CompositionPlan['styleIntent'] {
-  if (fragment.topology.family === 'editorial-causal-spine') {
-    return {
-      tone: 'warm editorial game-design proof',
-      contrastModel: 'editorial-hierarchy',
-      accentPurpose: 'mark the BREAK threshold and consequence only',
-      motif: 'asymmetric evidence columns crossing one threshold rule',
-    };
-  }
-  return {
-    tone: 'focused temporal mechanism stage',
-    contrastModel: 'high-contrast-stage',
-    accentPurpose: 'separate accumulated cause from BREAK state',
-    motif: 'time field interrupted by one fracture',
-  };
 }
 
 function signatureFor(fragment: PatternFragment, planId: string): CandidateSignature {
@@ -154,7 +138,7 @@ export function generateCompositionCandidates(input: {
           prominence: block.importance,
           readingOrder: index,
         })),
-        styleIntent: styleIntent(fragment),
+        styleIntent: styleIntentForPattern(fragment),
         qualityFloor: {
           requireAllBlocks: true,
           requireAllRelations: true,

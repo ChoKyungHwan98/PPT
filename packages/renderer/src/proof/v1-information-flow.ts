@@ -1,4 +1,5 @@
 import { resolve } from 'node:path';
+import { writeFile } from 'node:fs/promises';
 import { SEED_PATTERN_FRAGMENTS, SEED_REFERENCE_CORPUS } from '@game-presentation/contracts';
 import { createCompositionPlanFromInformationPlan } from '@game-presentation/composition-engine';
 import { retrieveReferencesForInformationPlan } from '@game-presentation/reference-engine';
@@ -50,7 +51,9 @@ async function main(): Promise<void> {
       outputDir: resolve('output', 'v1-information-flow'),
       basename: 'mec-01-generic-flow',
     });
-    process.stdout.write(JSON.stringify({ retrieval, plan, hardGate, outputs }, null, 2) + '\n');
+    const compositionPlanPath = resolve('output', 'v1-information-flow', 'mec-01-composition-plan.json');
+    await writeFile(compositionPlanPath, JSON.stringify(plan, null, 2) + '\n', 'utf8');
+    process.stdout.write(JSON.stringify({ retrieval, plan, hardGate, outputs: { ...outputs, compositionPlanPath } }, null, 2) + '\n');
   } finally {
     await browser.close();
   }

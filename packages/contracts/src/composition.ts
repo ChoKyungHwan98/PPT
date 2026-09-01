@@ -50,10 +50,12 @@ export const PAGE_PROFILES = {
   }),
 } as const;
 
+const RegionRoleSchema = z.enum(['message', 'primary-artifact', 'support', 'evidence', 'navigation', 'annotation']);
+
 const RegionSchema = z.strictObject({
   regionId: z.string().min(1),
   parentRegionId: z.string().min(1).optional(),
-  role: z.enum(['message', 'primary-artifact', 'support', 'evidence', 'navigation', 'annotation']),
+  role: RegionRoleSchema,
   flow: z.enum(['row', 'column', 'overlay', 'radial', 'free-composition']),
   order: z.number().int().nonnegative(),
   weight: z.number().positive(),
@@ -89,8 +91,29 @@ export const CompositionPlanSchema = z.strictObject({
   styleIntent: z.strictObject({
     tone: z.string().min(1),
     contrastModel: z.enum(['quiet-field-strong-focus', 'high-contrast-stage', 'editorial-hierarchy']),
-    accentPurpose: z.string().min(1),
-    motif: z.string().min(1),
+    hierarchy: z.strictObject({
+      primaryTextSize: z.number().min(32).max(120),
+      supportTextSize: z.number().min(16).max(72),
+      evidenceTextSize: z.number().min(20).max(96),
+      primaryWeight: z.number().int().min(100).max(900),
+      supportWeight: z.number().int().min(100).max(900),
+    }),
+    accent: z.strictObject({
+      targetRole: RegionRoleSchema,
+      color: z.string().regex(/^#[A-Fa-f0-9]{6}$/),
+      softColor: z.string().regex(/^#[A-Fa-f0-9]{6}$/),
+    }),
+    motif: z.strictObject({
+      family: z.enum(['threshold-plane', 'causal-spine', 'editorial-rule', 'focus-field']),
+      color: z.string().regex(/^#[A-Fa-f0-9]{6}$/),
+      strokeWidth: z.number().positive().max(24),
+    }),
+    palette: z.strictObject({
+      background: z.string().regex(/^#[A-Fa-f0-9]{6}$/),
+      ink: z.string().regex(/^#[A-Fa-f0-9]{6}$/),
+      mutedInk: z.string().regex(/^#[A-Fa-f0-9]{6}$/),
+      connector: z.string().regex(/^#[A-Fa-f0-9]{6}$/),
+    }),
   }),
   qualityFloor: z.strictObject({
     requireAllBlocks: z.literal(true),
@@ -119,6 +142,7 @@ export function validateCompositionPlan(
   const boundBlockIds = new Set(plan.bindings.map((binding) => binding.blockId));
   const regionIds = new Set(plan.regions.map((region) => region.regionId));
   const fragmentIds = new Set(fragments.map((fragment) => fragment.fragmentId));
+  const fragmentMap = new Map(fragments.map((fragment) => [fragment.fragmentId, fragment]));
   const referenceMap = new Map(references.map((reference) => [reference.referenceId, reference]));
   const informationIssues = validateInformationPlan(informationPlan, slide);
 
@@ -161,6 +185,22 @@ export function validateCompositionPlan(
       issues.push({ path: 'patternFragmentIds', message: '존재하지 않는 pattern fragment입니다: ' + fragmentId });
     }
   }
+  const selectedFragments = plan.patternFragmentIds
+    .map((fragmentId) => fragmentMap.get(fragmentId))
+    .filter((fragment): fragment is PatternFragment => fragment !== undefined);
+  if (
+    selectedFragments.length > 0 &&
+    !selectedFragments.some(
+      (fragment) =>
+        fragment.topology.family === plan.layout.layoutFamily &&
+        fragment.readingPath === plan.layout.readingPath,
+    )
+  ) {
+    issues.push({
+      path: 'layout',
+      message: '선택한 pattern fragment의 topology와 Composition layout이 일치하지 않습니다.',
+    });
+  }
   for (const referenceId of plan.referenceIds) {
     const reference = referenceMap.get(referenceId);
     if (reference === undefined) {
@@ -169,6 +209,15 @@ export function validateCompositionPlan(
     }
     if (!reference.allowedUse.analyze || !reference.allowedUse.deriveAbstractPattern) {
       issues.push({ path: 'referenceIds', message: '구조 추출이 허용되지 않은 reference입니다: ' + referenceId });
+    }
+    if (
+      selectedFragments.length > 0 &&
+      !selectedFragments.some((fragment) => fragment.sourceReferenceIds.includes(referenceId))
+    ) {
+      issues.push({
+        path: 'referenceIds',
+        message: '선택한 pattern fragment로 역추적되지 않는 reference입니다: ' + referenceId,
+      });
     }
   }
   return issues;

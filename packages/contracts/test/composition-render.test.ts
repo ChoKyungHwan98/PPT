@@ -193,8 +193,29 @@ describe('CompositionPlan contract', () => {
       styleIntent: {
         tone: 'professional game-design document',
         contrastModel: 'quiet-field-strong-focus',
-        accentPurpose: 'mark the BREAK threshold only',
-        motif: 'one accumulating causal line',
+        hierarchy: {
+          primaryTextSize: 68,
+          supportTextSize: 30,
+          evidenceTextSize: 40,
+          primaryWeight: 800,
+          supportWeight: 500,
+        },
+        accent: {
+          targetRole: 'primary-artifact',
+          color: '#5B5C8D',
+          softColor: '#E3E2F0',
+        },
+        motif: {
+          family: 'causal-spine',
+          color: '#6A6B9B',
+          strokeWidth: 5,
+        },
+        palette: {
+          background: '#F5F3EE',
+          ink: '#222522',
+          mutedInk: '#686C68',
+          connector: '#777A76',
+        },
       },
       qualityFloor: {
         requireAllBlocks: true,

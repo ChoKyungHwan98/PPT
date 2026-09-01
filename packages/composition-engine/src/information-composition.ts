@@ -10,6 +10,7 @@ import {
   type SlideIR,
 } from '@game-presentation/contracts';
 import type { ReferenceSearchResult } from '@game-presentation/reference-engine';
+import { styleIntentForPattern } from './design-intent.js';
 
 function pageProfileFor(outputProfile: ReferenceRetrievalBrief['outputProfile']) {
   switch (outputProfile) {
@@ -143,12 +144,7 @@ export function createCompositionPlanFromInformationPlan(input: {
         readingOrder,
       };
     }),
-    styleIntent: {
-      tone: 'content-shaped game-design document',
-      contrastModel: selected.fragment.topology.family.includes('threshold') ? 'high-contrast-stage' : 'editorial-hierarchy',
-      accentPurpose: 'separate the InformationPlan primary artifact from supporting evidence',
-      motif: selected.fragment.topology.emphasisRule,
-    },
+    styleIntent: styleIntentForPattern(selected.fragment),
     qualityFloor: {
       requireAllBlocks: true,
       requireAllRelations: true,

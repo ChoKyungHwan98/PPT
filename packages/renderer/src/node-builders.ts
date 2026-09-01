@@ -14,6 +14,7 @@ export function fontHashForWeight(fonts: FontAsset[], weight: number): string {
 
 export function measuredTextNode(input: {
   nodeId: string;
+  parentId?: string;
   semanticBlockId?: string;
   text: string;
   sourceSpanIds: string[];
@@ -36,6 +37,7 @@ export function measuredTextNode(input: {
   return {
     nodeId: input.nodeId,
     kind: 'text',
+    ...(input.parentId === undefined ? {} : { parentId: input.parentId }),
     ...(input.semanticBlockId === undefined ? {} : { semanticBlockId: input.semanticBlockId }),
     zIndex: input.zIndex ?? 5,
     box: {
@@ -72,6 +74,7 @@ export function measuredTextNode(input: {
 
 export function vectorNode(input: {
   nodeId: string;
+  parentId?: string;
   shape: 'rect' | 'round-rect' | 'ellipse' | 'line' | 'path';
   box: { x: number; y: number; width: number; height: number };
   fill?: string;
@@ -86,6 +89,7 @@ export function vectorNode(input: {
   return {
     nodeId: input.nodeId,
     kind: 'shape',
+    ...(input.parentId === undefined ? {} : { parentId: input.parentId }),
     ...(input.semanticBlockId === undefined ? {} : { semanticBlockId: input.semanticBlockId }),
     ...(input.relationId === undefined ? {} : { relationId: input.relationId }),
     zIndex: input.zIndex ?? 2,

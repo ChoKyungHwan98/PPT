@@ -32,7 +32,7 @@ function measurements(requests: ReturnType<typeof informationMeasureRequests>): 
   }]));
 }
 
-function validArtifacts() {
+function validArtifacts(fragmentId?: string) {
   const slide = interpretMec01Source({ rawText, createdAt: '2026-08-29T00:00:00.000Z' });
   const informationPlan = createMec01InformationPlan(slide);
   const retrieval = retrieveReferencesForInformationPlan({
@@ -48,7 +48,9 @@ function validArtifacts() {
     slide,
     informationPlan,
     retrieval,
-    fragments: SEED_PATTERN_FRAGMENTS,
+    fragments: fragmentId === undefined
+      ? SEED_PATTERN_FRAGMENTS
+      : SEED_PATTERN_FRAGMENTS.filter((fragment) => fragment.fragmentId === fragmentId),
   });
   const tree = buildInformationRenderTree({
     slide,
@@ -71,12 +73,43 @@ describe('generic InformationPlan composition and render flow', () => {
   });
 
   it('renders a fully traceable generic RenderTree that passes both Hard Gate validators', () => {
-    const { slide, informationPlan, tree } = validArtifacts();
+    const { slide, informationPlan, plan, tree } = validArtifacts();
     const gate = runHardGate({ slide, informationPlan, tree });
 
     expect(gate.passed).toBe(true);
     expect(gate.programFindings).toEqual([]);
     expect(gate.sourceFidelityFindings).toEqual([]);
+    expect(tree.nodes.find((node) => node.nodeId === 'region-group-break-transition')?.kind).toBe('group');
+    expect(tree.nodes.find((node) => node.nodeId === 'text-break-state-0')?.parentId).toBe('region-group-break-transition');
+    const primaryText = tree.nodes.find((node) => node.nodeId === 'text-break-state-0');
+    if (primaryText?.kind !== 'text') throw new Error('fixture error');
+    expect(primaryText.font.size).toBe(plan.styleIntent.hierarchy.primaryTextSize);
+    expect(primaryText.color).toBe(plan.styleIntent.accent.color);
+    expect(tree.nodes.some((node) => node.nodeId === 'motif-threshold-plane')).toBe(true);
+  });
+
+  it('creates structurally different RenderTrees for two allowed topology families', () => {
+    const threshold = validArtifacts('pattern-break-threshold-field');
+    const editorial = validArtifacts('pattern-editorial-causal-spine');
+
+    expect(threshold.plan.layout.layoutFamily).toBe('threshold-field');
+    expect(editorial.plan.layout.layoutFamily).toBe('editorial-causal-spine');
+    expect(threshold.tree.nodes.some((node) => node.nodeId === 'motif-threshold-plane')).toBe(true);
+    expect(editorial.tree.nodes.some((node) => node.nodeId === 'motif-causal-spine')).toBe(true);
+
+    const thresholdRegions = threshold.tree.nodes
+      .filter((node) => node.kind === 'group')
+      .map((node) => ({ nodeId: node.nodeId, box: node.box }));
+    const editorialRegions = editorial.tree.nodes
+      .filter((node) => node.kind === 'group')
+      .map((node) => ({ nodeId: node.nodeId, box: node.box }));
+    expect(thresholdRegions).not.toEqual(editorialRegions);
+
+    const thresholdBreak = threshold.tree.nodes.find((node) => node.nodeId === 'text-break-state-0');
+    const editorialBreak = editorial.tree.nodes.find((node) => node.nodeId === 'text-break-state-0');
+    expect(thresholdBreak?.box).not.toEqual(editorialBreak?.box);
+    expect(runHardGate({ slide: threshold.slide, informationPlan: threshold.informationPlan, tree: threshold.tree }).passed).toBe(true);
+    expect(runHardGate({ slide: editorial.slide, informationPlan: editorial.informationPlan, tree: editorial.tree }).passed).toBe(true);
   });
 
   it('fails Source Fidelity when a rendered number or relation is altered', () => {
