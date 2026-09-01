@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Candidate A - Editorial Information Design</title>
+  <style>
+    * { box-sizing: border-box; }
+    :root { --desk:#e7e5e0; --surface:#f7f7f4; --paper:#fff; --ink:#20252b; --muted:#69717a; --rule:#c9ccd0; --accent:#176b87; }
+    html, body { width:100%; height:100%; margin:0; overflow:hidden; }
+    body { background:var(--desk); color:var(--ink); font-family:"Noto Sans KR","Malgun Gothic",sans-serif; text-rendering:geometricPrecision; }
+    a { color:inherit; text-decoration:none; }
+    .app { height:100dvh; display:grid; grid-template-rows:50px 1fr 38px; }
+    .topbar { display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:18px; padding:0 20px; border-bottom:1px solid var(--rule); background:rgba(247,247,244,.97); }
+    .brand { display:flex; align-items:baseline; gap:12px; white-space:nowrap; }
+    .brand strong { font-size:13px; } .brand span { color:var(--muted); font-size:12px; }
+    .switch { display:flex; align-items:center; gap:3px; padding:3px; border:1px solid #bfc3c6; border-radius:7px; background:#ecece8; }
+    .switch a { min-width:34px; padding:5px 11px 6px; border-radius:4px; color:#687079; font:600 12px Bahnschrift,"Noto Sans KR",sans-serif; text-align:center; }
+    .switch .active { background:#fff; color:var(--ink); box-shadow:0 1px 2px rgba(32,37,43,.12); }
+    .actions { justify-self:end; display:flex; align-items:center; gap:7px; font-size:12px; }
+    .actions a, .actions span { min-height:30px; padding:6px 10px; border:1px solid transparent; border-radius:5px; }
+    .actions a { border-color:#bfc3c6; background:#fff; }
+    .workspace { min-height:0; display:flex; align-items:center; justify-content:center; padding:18px 32px 14px; }
+    .slide-frame { width:min(calc(100vw - 96px), calc((100vh - 136px) * 16 / 9), 1500px); aspect-ratio:16/9; box-shadow:0 22px 55px rgba(47,49,51,.22),0 2px 4px rgba(32,37,43,.18); }
+    .slide { position:relative; width:100%; height:100%; overflow:hidden; container-type:inline-size; background:#f4f5f2; color:#152839; }
+    .kicker { position:absolute; left:6.2%; top:7.5%; font-size:1.02cqw; font-weight:700; letter-spacing:.15em; color:#4e7894; }
+    .folio { position:absolute; right:5.5%; top:8%; color:#69747a; font:600 .96cqw Bahnschrift,sans-serif; }
+    .left-copy { position:absolute; left:6.2%; top:18%; bottom:11%; width:37%; display:flex; flex-direction:column; }
+    .title { margin:0; font-family:Batang,"Noto Sans KR",serif; font-size:4.25cqw; line-height:1.16; letter-spacing:-.065em; font-weight:700; }
+    .title strong { display:block; color:#d24b38; font-weight:700; }
+    .thesis { width:78%; margin-top:auto; padding-top:1.3cqw; border-top:1px solid #c6cbc9; color:#586169; font-size:1.03cqw; line-height:1.55; }
+    .thesis b { color:#152839; }
+    .sequence { position:absolute; left:50%; right:6.2%; top:17%; bottom:11%; display:grid; grid-template-rows:repeat(5,1fr); padding-left:3.2cqw; }
+    .sequence::before { content:""; position:absolute; left:.54cqw; top:7%; bottom:7%; width:1px; background:#9eb4c2; }
+    .seq-row { position:relative; display:grid; grid-template-columns:8.2cqw minmax(0,1fr) auto; align-items:center; gap:1.15cqw; }
+    .seq-row::before { content:""; position:absolute; left:-2.92cqw; width:.74cqw; height:.74cqw; border:1px solid #4e7894; border-radius:50%; background:#f4f5f2; }
+    .seq-role { color:#4e7894; font:600 .84cqw Bahnschrift,"Noto Sans KR",sans-serif; letter-spacing:.08em; }
+    .seq-fact { font-size:1.45cqw; line-height:1.25; font-weight:700; letter-spacing:-.025em; }
+    .seq-index { color:#92999d; font:500 1cqw Bahnschrift,sans-serif; }
+    .seq-row.break-row::before { border-color:#d24b38; background:#d24b38; }
+    .break-word { color:#d24b38; font:700 3.15cqw Bahnschrift,sans-serif; letter-spacing:.06em; transform:translateX(-1.1cqw) rotate(-3deg); transform-origin:left center; }
+    .break-row::after { content:""; position:absolute; left:5.8cqw; right:0; top:50%; height:2px; background:#d24b38; transform:rotate(-3deg); transform-origin:left; opacity:.7; }
+    .break-row .seq-role,.break-row .seq-index { color:#b45c50; }
+    .outcome { color:#152839; }
+    .status { display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:18px; padding:0 20px; border-top:1px solid var(--rule); background:var(--surface); color:#606870; font-size:11px; }
+    .status strong { color:#273139; font-weight:600; } .status-center { display:flex; gap:18px; }
+    .status-right { justify-self:end; color:#737b81; }
+    @media (max-width:1400px) { .topbar{padding-inline:14px}.workspace{padding-inline:20px}.slide-frame{width:min(calc(100vw - 56px),calc((100vh - 132px)*16/9),1500px)} }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand"><strong>GAME PPT DESIGNER</strong><span>후보 A 크게 보기</span></div>
+      <nav class="switch" aria-label="후보 전환"><a class="active" href="index.html">A</a><a href="../b-mechanism/index.html">B</a><a href="../c-professional/index.html">C</a></nav>
+      <div class="actions"><span>화면 맞춤</span><a href="../compare/index.html">세 안 비교</a></div>
+    </header>
+    <main class="workspace">
+      <article class="slide-frame" aria-label="Editorial Information Design 실제 슬라이드">
+        <div class="slide">
+          <div class="kicker">전투 메커니즘</div>
+          <div class="folio">EDITORIAL RULE SHEET</div>
+          <section class="left-copy">
+            <h1 class="title">회피 세 번이<br>만든 <strong>5초</strong></h1>
+            <p class="thesis"><b>세 번의 입력</b>이 시간 파편을 만들고, 정지된 시간은 BREAK 이후 피해 증가로 이어진다.</p>
+          </section>
+          <section class="sequence" aria-label="mechanism reading sequence">
+            <div class="seq-row"><span class="seq-role">INPUT</span><span class="seq-fact">회피 ×3</span><span class="seq-index">01</span></div>
+            <div class="seq-row"><span class="seq-role">RESOURCE</span><span class="seq-fact">시간 파편 획득</span><span class="seq-index">02</span></div>
+            <div class="seq-row"><span class="seq-role">STATE</span><span class="seq-fact">시간 정지 5초</span><span class="seq-index">03</span></div>
+            <div class="seq-row break-row"><span class="seq-role">SHIFT</span><span class="break-word">BREAK</span><span class="seq-index">04</span></div>
+            <div class="seq-row"><span class="seq-role">OUTCOME</span><span class="seq-fact outcome">받는 피해 +50%</span><span class="seq-index">05</span></div>
+          </section>
+        </div>
+      </article>
+    </main>
+    <footer class="status"><span><strong>A</strong> Editorial / Information Design</span><span class="status-center"><span><strong>사실 5/5</strong></span><span><strong>관계 4/4</strong></span><span>Critic 상세 닫힘</span></span><span class="status-right">Variance 7 · Density 5 · Editoriality 9</span></footer>
+  </div>
+</body>
+</html>

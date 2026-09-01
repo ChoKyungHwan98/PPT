@@ -1,0 +1,51 @@
+{"kind":"slide","id":"sl/9w6quj","slide":1,"title":"전투 시스템 · 시간 파편 메커니즘","textShapes":29}
+{"kind":"shape","id":"sh/8n2tcjul","slide":1,"name":"mechanism-axis","bbox":[94,419,1082,0]}
+{"kind":"shape","id":"sh/7mts3etg","slide":1,"name":"mechanism-axis-arrow","bbox":[1171,410,17,18]}
+{"kind":"shape","id":"sh/mlkba9cv","slide":1,"name":"time-stop-field","bbox":[424,263,350,286]}
+{"kind":"shape","id":"sh/hcva9obi","slide":1,"name":"time-stop-field-top","bbox":[424,263,350,0]}
+{"kind":"textbox","id":"sh/wbmtgjux","slide":1,"name":"section-label","text":"전투 시스템 · 시간 파편 메커니즘","textPreview":"전투 시스템 · 시간 파편 메커니즘","textChars":19,"textLines":1,"bbox":[72,42,420,24]}
+{"kind":"textbox","id":"sh/vads7etc","slide":1,"name":"slide-number","text":"01 / 01","textPreview":"01 / 01","textChars":7,"textLines":1,"bbox":[1116,43,92,22]}
+{"kind":"textbox","id":"sh/u94be9cr","slide":1,"name":"headline","text":"회피 3회가 5초의 시간 정지를 열고,\nBREAK에서 받는 피해를 +50% 높인다","textPreview":"회피 3회가 5초의 시간 정지를 열고, | BREAK에서 받는 피해를 +50% 높인다","textChars":45,"textLines":2,"bbox":[72,82,1110,116]}
+{"kind":"shape","id":"sh/xgbax4vy","slide":1,"name":"header-rule","bbox":[72,218,1136,0]}
+{"kind":"textbox","id":"sh/cfit4zut","slide":1,"name":"evade-label","text":"회피","textPreview":"회피","textChars":2,"textLines":1,"bbox":[88,282,150,28]}
+{"kind":"textbox","id":"sh/2dozidg3","slide":1,"name":"evade-count","text":"×3","textPreview":"×3","textChars":2,"textLines":1,"bbox":[88,310,150,54]}
+{"kind":"shape","id":"sh/3ehgrix8","slide":1,"name":"evade-mark-1","bbox":[104,392,18,55]}
+{"kind":"textbox","id":"sh/4fqhk3yt","slide":1,"name":"evade-index-1","text":"01","textPreview":"01","textChars":2,"textLines":1,"bbox":[97,458,34,18]}
+{"kind":"shape","id":"sh/pgzyt8fe","slide":1,"name":"evade-mark-2","bbox":[148,392,18,55]}
+{"kind":"textbox","id":"sh/qh8zmdgz","slide":1,"name":"evade-index-2","text":"02","textPreview":"02","textChars":2,"textLines":1,"bbox":[141,458,34,18]}
+{"kind":"shape","id":"sh/rihgvixk","slide":1,"name":"evade-mark-3","bbox":[192,392,18,55]}
+{"kind":"textbox","id":"sh/cjqhone5","slide":1,"name":"evade-index-3","text":"03","textPreview":"03","textChars":2,"textLines":1,"bbox":[185,458,34,18]}
+{"kind":"shape","id":"sh/dkzyxsfq","slide":1,"name":"shard-orbit","bbox":[269,365,108,108]}
+{"kind":"shape","id":"sh/el8zqxwv","slide":1,"name":"shard-core","bbox":[304,400,38,38]}
+{"kind":"textbox","id":"sh/zm1gz2xg","slide":1,"name":"shard-label","text":"시간 파편","textPreview":"시간 파편","textChars":5,"textLines":1,"bbox":[249,292,150,28]}
+{"kind":"textbox","id":"sh/ba1gn2do","slide":1,"name":"shard-state","text":"획득","textPreview":"획득","textChars":2,"textLines":1,"bbox":[269,327,108,22]}
+{"kind":"textbox","id":"sh/a9sfexc3","slide":1,"name":"time-stop-label","text":"시간 정지","textPreview":"시간 정지","textChars":5,"textLines":1,"bbox":[452,292,180,28]}
+{"kind":"textbox","id":"sh/xcjypcvu","slide":1,"name":"time-stop-duration","text":"5","textPreview":"5","textChars":1,"textLines":1,"bbox":[452,321,100,92]}
+{"kind":"textbox","id":"sh/wbaxg7u9","slide":1,"name":"time-stop-unit","text":"초","textPreview":"초","textChars":1,"textLines":1,"bbox":[543,362,44,40]}
+{"kind":"shape","id":"sh/nm1gjids","slide":1,"name":"second-tick-1","bbox":[460,454,0,33]}
+{"kind":"textbox","id":"sh/ml8fadc7","slide":1,"name":"second-number-1","text":"1","textPreview":"1","textChars":1,"textLines":1,"bbox":[447,496,26,18]}
+{"kind":"shape","id":"sh/9ojylsvi","slide":1,"name":"second-tick-2","bbox":[522,454,0,33]}
+{"kind":"textbox","id":"sh/onaxcnud","slide":1,"name":"second-number-2","text":"2","textPreview":"2","textChars":1,"textLines":1,"bbox":[509,496,26,18]}
+{"kind":"shape","id":"sh/zihwfidg","slide":1,"name":"second-tick-3","bbox":[584,454,0,33]}
+{"kind":"textbox","id":"sh/eh8f6dcv","slide":1,"name":"second-number-3","text":"3","textPreview":"3","textChars":1,"textLines":1,"bbox":[571,496,26,18]}
+{"kind":"shape","id":"sh/4n6dgjat","slide":1,"name":"second-tick-4","bbox":[646,454,0,33]}
+{"kind":"textbox","id":"sh/pofupobe","slide":1,"name":"second-number-4","text":"4","textPreview":"4","textChars":1,"textLines":1,"bbox":[633,496,26,18]}
+{"kind":"shape","id":"sh/2l4ve9sn","slide":1,"name":"second-tick-5","bbox":[708,454,0,33]}
+{"kind":"textbox","id":"sh/3mxcnet8","slide":1,"name":"second-number-5","text":"5","textPreview":"5","textChars":1,"textLines":1,"bbox":[695,496,26,18]}
+{"kind":"shape","id":"sh/cr6dkja5","slide":1,"name":"break-cut-shadow","bbox":[798,259,14,295]}
+{"kind":"shape","id":"sh/dsfutoba","slide":1,"name":"break-cut","bbox":[808,250,8,312]}
+{"kind":"textbox","id":"sh/qpovi9sz","slide":1,"name":"break-label","text":"BREAK","textPreview":"BREAK","textChars":5,"textLines":1,"bbox":[760,332,150,52]}
+{"kind":"textbox","id":"sh/rqxcretk","slide":1,"name":"break-state","text":"전환","textPreview":"전환","textChars":2,"textLines":1,"bbox":[791,389,88,22]}
+{"kind":"textbox","id":"sh/8vmt8zal","slide":1,"name":"damage-label","text":"받는 피해","textPreview":"받는 피해","textChars":5,"textLines":1,"bbox":[924,294,240,30]}
+{"kind":"textbox","id":"sh/twvuh4b6","slide":1,"name":"damage-modifier","text":"+50%","textPreview":"+50%","textChars":4,"textLines":1,"bbox":[918,329,286,100]}
+{"kind":"shape","id":"sh/lorexofm","slide":1,"name":"damage-baseline","bbox":[924,449,252,0]}
+{"kind":"textbox","id":"sh/knyd4je1","slide":1,"name":"damage-state","text":"BREAK 이후 적용","textPreview":"BREAK 이후 적용","textChars":11,"textLines":1,"bbox":[924,468,252,24]}
+{"kind":"shape","id":"sh/zmpcvexw","slide":1,"name":"footer-rule","bbox":[72,604,1136,0]}
+{"kind":"textbox","id":"sh/y1gv29wb","slide":1,"name":"footer-label-1","text":"입력","textPreview":"입력","textChars":2,"textLines":1,"bbox":[72,625,56,20]}
+{"kind":"textbox","id":"sh/x07utofq","slide":1,"name":"footer-value-1","text":"회피 ×3","textPreview":"회피 ×3","textChars":5,"textLines":1,"bbox":[140,618,242,30]}
+{"kind":"textbox","id":"sh/czyd0je5","slide":1,"name":"footer-label-2","text":"지속","textPreview":"지속","textChars":2,"textLines":1,"bbox":[406,625,56,20]}
+{"kind":"textbox","id":"sh/bypcrexk","slide":1,"name":"footer-value-2","text":"시간 정지 5초","textPreview":"시간 정지 5초","textChars":8,"textLines":1,"bbox":[474,618,322,30]}
+{"kind":"textbox","id":"sh/axgvy9wz","slide":1,"name":"footer-label-3","text":"결과","textPreview":"결과","textChars":2,"textLines":1,"bbox":[824,625,56,20]}
+{"kind":"textbox","id":"sh/pwnup4fe","slide":1,"name":"footer-value-3","text":"받는 피해 +50%","textPreview":"받는 피해 +50%","textChars":10,"textLines":1,"bbox":[892,618,316,30]}
+{"kind":"shape","id":"sh/ovedwze9","slide":1,"name":"footer-separator-1","bbox":[382,620,0,36]}
+{"kind":"shape","id":"sh/upsja18v","slide":1,"name":"footer-separator-2","bbox":[800,620,0,36]}

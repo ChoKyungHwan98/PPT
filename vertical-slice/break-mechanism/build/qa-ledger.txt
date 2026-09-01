@@ -1,0 +1,34 @@
+VERTICAL SLICE QA
+
+RESULT
+한 장짜리 editable PPTX 생성 완료.
+동일 원문을 메커니즘 도판으로 번역했으며 외부 이미지나 래스터 배경을 사용하지 않음.
+
+CONTENT INTEGRITY
+PASS | 회피 ×3
+PASS | 시간 파편 획득
+PASS | 시간 정지 5초
+PASS | BREAK
+PASS | 받는 피해 +50%
+PASS | 창작 수치 0건
+DATA REQUIRED | 없음
+IMAGE SLOT | 없음
+
+VISUAL CRITIQUE
+PASS | reading path가 왼쪽 입력에서 오른쪽 결과까지 한 방향으로 읽힘
+PASS | 5초를 다섯 눈금으로 보여 주어 지속 시간이 실제 시각 정보가 됨
+PASS | BREAK가 시간 정지 영역을 절단하는 graphic event로 표현됨
+PASS | 입력·지속·결과가 하단에서 다시 확인되지만 본 도판보다 강하지 않음
+PASS | 카드 그리드, AI SaaS UI, 장식용 그래디언트 없음
+
+TECHNICAL QA
+PASS | PowerPoint COM에서 실제 파일 열기 성공
+PASS | PowerPoint native 1920×1080 PNG export 성공
+PASS | 1 slide / 50 editable shapes / 30 text runs
+PASS | ppt/media 파일 0개: 슬라이드 전체 래스터화 없음
+PASS | slides_test.py: overflow 없음
+PASS | unresolved placeholder 없음
+
+KNOWN LIMIT
+Pretendard가 현재 PC에 설치되어 있지 않아 이 proof는 Malgun Gothic live text를 사용함.
+폰트 임베딩은 아직 구현하지 않았으며 production compatibility gate에서 별도 처리 필요.

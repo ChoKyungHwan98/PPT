@@ -1,0 +1,12 @@
+{
+  "name": "@game-presentation/renderer",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@game-presentation/composition-engine": "workspace:*",
+    "@game-presentation/contracts": "workspace:*",
+    "@game-presentation/preference-learning": "workspace:*",
+    "@game-presentation/reference-engine": "workspace:*"
+  }
+}

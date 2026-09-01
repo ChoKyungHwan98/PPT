@@ -1,0 +1,31 @@
+{
+  "name": "game-presentation-designer-next",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.19.0",
+  "scripts": {
+    "check": "tsc --noEmit && pnpm --filter @game-presentation/workbench check",
+    "test": "vitest run",
+    "verify": "pnpm check && pnpm test",
+    "proof:mec01": "tsx packages/renderer/src/proof/mec-01.ts",
+    "proof:candidates": "tsx packages/renderer/src/proof/mec-01-candidates.ts",
+    "proof:review": "tsx packages/review-surface/src/proof/mec-01.ts",
+    "export:selected": "tsx packages/renderer/src/proof/export-selected-mec-01.ts",
+    "author:balance": "tsx packages/authoring-cli/src/main.ts",
+    "dev:workbench": "pnpm --filter @game-presentation/workbench dev",
+    "build:workbench": "pnpm proof:candidates && pnpm --filter @game-presentation/workbench build"
+  },
+  "dependencies": {
+    "pdfjs-dist": "6.2.108",
+    "playwright": "1.62.1",
+    "sharp": "0.35.4",
+    "zod": "4.4.3"
+  },
+  "devDependencies": {
+    "@types/node": "26.4.0",
+    "tsx": "4.23.12",
+    "typescript": "7.0.2",
+    "vitest": "4.1.11"
+  }
+}

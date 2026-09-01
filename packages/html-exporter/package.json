@@ -1,0 +1,13 @@
+{
+  "name": "@game-presentation/html-exporter",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@game-presentation/contracts": "workspace:*",
+    "playwright": "1.62.1"
+  }
+}

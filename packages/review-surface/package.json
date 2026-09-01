@@ -1,0 +1,14 @@
+{
+  "name": "@game-presentation/review-surface",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@game-presentation/composition-engine": "workspace:*",
+    "@game-presentation/contracts": "workspace:*",
+    "zod": "4.4.3"
+  }
+}

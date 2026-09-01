@@ -1,0 +1,16 @@
+{
+  "name": "@game-presentation/authoring-cli",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/main.ts"
+  },
+  "dependencies": {
+    "@game-presentation/contracts": "workspace:*",
+    "@game-presentation/html-exporter": "workspace:*",
+    "@game-presentation/pptx-exporter": "workspace:*",
+    "@game-presentation/source-ingestion": "workspace:*",
+    "@game-presentation/story-planner": "workspace:*"
+  }
+}

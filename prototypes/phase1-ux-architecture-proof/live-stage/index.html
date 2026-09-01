@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>UX Architecture Proof B — Live Stage</title>
+  <style>
+    *{box-sizing:border-box}
+    :root{
+      --stage-room:#e8e8e5;--stage-paper:#fafaf8;--stage-ink:#1e252c;--stage-muted:#6c747c;
+      --stage-line:#c9cbc9;--stage-blue:#365d9d;--stage-blue-soft:#e8eef8;--stage-coral:#e16451;
+      --stage-shadow:0 24px 64px rgba(25,31,36,.22),0 2px 6px rgba(25,31,36,.16)
+    }
+    html,body{width:100%;height:100%;margin:0;overflow:hidden}
+    body{background:var(--stage-room);color:var(--stage-ink);font-family:"SUIT Variable","Noto Sans KR","Malgun Gothic",sans-serif;text-rendering:geometricPrecision}
+    button,a{font:inherit;color:inherit}button{cursor:pointer}
+    .live-app{height:100vh;display:grid;grid-template-rows:60px minmax(0,1fr);background:var(--stage-room)}
+    .live-header{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:0 24px;border-bottom:1px solid var(--stage-line);background:rgba(250,250,248,.96);z-index:30}
+    .live-project{display:flex;align-items:baseline;gap:12px;min-width:0}.live-project strong{font-size:15px;letter-spacing:-.02em}.live-project span{color:var(--stage-muted);font-size:12px;white-space:nowrap}
+    .live-position{display:flex;align-items:center;gap:10px;color:var(--stage-muted);font-size:12px}.live-position b{color:var(--stage-ink);font-weight:650}.live-position i{width:34px;height:1px;background:var(--stage-line)}
+    .live-global{justify-self:end;display:flex;align-items:center;gap:8px}.live-global a{padding:8px 12px;text-decoration:none;font-size:12px}.live-global .live-present{border:1px solid #aeb3b6;background:#fff}.live-global .live-publish{background:var(--stage-ink);color:#fff;border:1px solid var(--stage-ink)}
+    .live-surface{position:relative;min-height:0;overflow:hidden;background:radial-gradient(circle at 50% 44%,#f1f1ef 0,#e7e7e4 58%,#ddddda 100%)}
+    .live-stage-view{position:absolute;inset:0;display:grid;grid-template-rows:44px minmax(0,1fr);transition:filter .18s ease,opacity .18s ease}
+    .live-stage-note{display:flex;align-items:center;justify-content:space-between;padding:0 26px;color:#626a71;font-size:11px}.live-stage-note b{color:var(--stage-ink);font-weight:650}.live-stage-note span:last-child{display:flex;gap:18px}
+    .live-page-ground{display:flex;align-items:center;justify-content:center;padding:8px 30px 78px}
+    .live-page{position:relative;width:min(1500px,calc((100vh - 184px)*16/9),calc(100vw - 110px));aspect-ratio:16/9;overflow:hidden;background:#0c1e2c;box-shadow:var(--stage-shadow);transition:width .22s ease,transform .22s ease}
+    .live-art{position:absolute;inset:0;overflow:hidden}.live-art img{position:absolute;width:128%;max-width:none;height:auto;left:-14%;top:-14.82%;user-select:none;pointer-events:none}
+    .live-selection{position:absolute;left:64.5%;top:29.5%;width:12.2%;height:43%;border:2px solid #fff;outline:2px solid var(--stage-blue);outline-offset:1px;background:rgba(54,93,157,.06);z-index:4}
+    .live-selection::before,.live-selection::after{content:"";position:absolute;width:8px;height:8px;background:#fff;border:2px solid var(--stage-blue);border-radius:50%;top:-7px}.live-selection::before{left:-7px}.live-selection::after{right:-7px}
+    .live-selection .live-handle-a,.live-selection .live-handle-b{position:absolute;width:8px;height:8px;background:#fff;border:2px solid var(--stage-blue);border-radius:50%;bottom:-7px}.live-selection .live-handle-a{left:-7px}.live-selection .live-handle-b{right:-7px}
+    .live-object-actions{position:absolute;left:63.4%;top:21.6%;z-index:8;display:flex;align-items:center;padding:5px;background:#fff;box-shadow:0 8px 24px rgba(18,24,30,.24)}
+    .live-object-actions b{padding:6px 10px;color:var(--stage-blue);font-size:11px}.live-object-actions a{padding:6px 9px;border-left:1px solid #e1e2df;text-decoration:none;color:#454d55;font-size:10px}.live-object-actions a:last-child{color:var(--stage-coral)}
+    .live-object-tag{position:absolute;left:64.5%;top:73.5%;z-index:6;padding:6px 9px;background:var(--stage-blue);color:#fff;font-size:10px;letter-spacing:.01em}
+    .live-dock{position:absolute;z-index:40;left:50%;bottom:20px;transform:translateX(-50%);display:flex;align-items:center;gap:2px;padding:5px;background:rgba(250,250,248,.97);border:1px solid #c6c8c6;box-shadow:0 12px 34px rgba(35,40,45,.17)}
+    .live-dock a{display:flex;align-items:center;gap:8px;min-height:38px;padding:0 13px;text-decoration:none;color:#4f575f;font-size:11px;border:1px solid transparent}.live-dock a:hover,.live-dock a:focus-visible{background:#f0f1ef}.live-dock a[aria-current="page"]{color:var(--stage-blue);border-color:#bfcbe0;background:var(--stage-blue-soft)}.live-dock kbd{font-family:inherit;font-size:9px;color:#899097;border:1px solid #d2d4d2;background:#fff;padding:2px 4px}.live-dock .live-close{margin-left:5px;border-left:1px solid var(--stage-line);color:var(--stage-muted)}
+    .live-sheet{position:absolute;z-index:24;left:50%;bottom:0;transform:translate(-50%,105%);width:min(1480px,calc(100vw - 100px));background:rgba(250,250,248,.99);border:1px solid #bec2c3;box-shadow:0 -18px 52px rgba(29,35,40,.18);transition:transform .22s ease}
+    .live-sheet-head{height:48px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;border-bottom:1px solid #dedfdd}.live-sheet-head strong{font-size:13px}.live-sheet-head span{font-size:10px;color:var(--stage-muted)}
+    .live-source-body{display:grid;grid-template-columns:1.25fr 1fr;gap:34px;padding:20px 22px 26px}.live-source-quote{font-size:21px;line-height:1.7;letter-spacing:-.025em}.live-source-quote mark{background:#e8eef8;color:var(--stage-blue);padding:2px 5px}.live-source-meta{display:grid;grid-template-columns:repeat(5,1fr);align-items:center}.live-source-step{position:relative;padding:0 13px;border-left:1px solid #d4d6d4}.live-source-step small{display:block;color:#81888e;font-size:9px;letter-spacing:.06em}.live-source-step b{display:block;margin-top:6px;font-size:12px}.live-source-step.selected{border-left:3px solid var(--stage-blue)}.live-source-step.selected b{color:var(--stage-blue)}
+    .live-review-body{display:grid;grid-template-columns:1fr auto;gap:30px;padding:18px 22px 24px}.live-finding-copy{display:grid;grid-template-columns:104px 1fr;gap:22px}.live-finding-code{color:var(--stage-coral);font-size:11px;font-weight:700}.live-finding-copy strong{font-size:16px}.live-finding-copy p{margin:6px 0 0;color:#626a71;font-size:12px;line-height:1.55}.live-review-actions{display:flex;align-items:center;gap:8px}.live-review-actions button{height:38px;padding:0 15px;border:1px solid #bfc3c4;background:#fff}.live-review-actions .live-apply{border-color:var(--stage-blue);background:var(--stage-blue);color:#fff}
+    .live-finding-anchor{display:none;position:absolute;z-index:10;right:6.4%;top:53%;width:16px;height:16px;border:4px solid #fff;border-radius:50%;background:var(--stage-coral);box-shadow:0 0 0 2px var(--stage-coral)}.live-finding-line{display:none;position:absolute;z-index:9;right:7.4%;top:55%;width:21%;height:1px;background:var(--stage-coral);transform-origin:right center;transform:rotate(9deg)}.live-finding-label{display:none;position:absolute;z-index:10;right:22.5%;top:43%;padding:9px 11px;background:#fff;border-left:3px solid var(--stage-coral);box-shadow:0 8px 22px rgba(22,28,33,.19);font-size:10px}.live-finding-label b{display:block;margin-bottom:3px;color:var(--stage-coral)}
+    .live-meaning{display:none;position:absolute;inset:0;z-index:7;pointer-events:none}.live-meaning::before{content:"";position:absolute;inset:0;background:rgba(5,20,30,.22)}.live-meaning svg{position:absolute;inset:0;width:100%;height:100%}.live-meaning path{fill:none;stroke:#f7f8f4;stroke-width:2;stroke-dasharray:8 7}.live-meaning circle{fill:#f7f8f4;stroke:var(--stage-blue);stroke-width:3}.live-meaning text{fill:#fff;font-family:"Noto Sans KR","Malgun Gothic",sans-serif;font-size:18px;font-weight:600;paint-order:stroke;stroke:#14212b;stroke-width:5px}.live-meaning .live-role{font-size:12px;letter-spacing:.09em;fill:#c8dbfa}
+    .live-compare,.live-overview{display:none;position:absolute;z-index:20;inset:0;background:#e7e7e4}
+    .live-mode-head{height:62px;display:flex;align-items:center;justify-content:space-between;padding:0 28px;border-bottom:1px solid var(--stage-line);background:#f8f8f6}.live-mode-head strong{font-size:16px}.live-mode-head p{margin:3px 0 0;color:var(--stage-muted);font-size:11px}.live-mode-head a{padding:9px 13px;border:1px solid #bfc2c2;background:#fff;text-decoration:none;font-size:11px}
+    .live-compare-grid{height:calc(100% - 62px);display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;padding:54px 28px 92px;align-items:start}.live-candidate{display:grid;grid-template-rows:auto auto auto;min-width:0}.live-candidate-head{display:flex;align-items:center;justify-content:space-between;padding:0 2px 12px}.live-candidate-head b{font-size:13px}.live-candidate-head span{color:var(--stage-muted);font-size:10px}.live-candidate-frame{position:relative;width:100%;aspect-ratio:16/9;overflow:hidden;background:#fff;box-shadow:0 16px 38px rgba(26,31,36,.18)}.live-candidate.active .live-candidate-frame{outline:3px solid var(--stage-blue);outline-offset:5px}.live-candidate-note{display:flex;justify-content:space-between;padding:14px 2px 0;color:#5f676e;font-size:11px}.live-candidate-note b{color:var(--stage-blue)}
+    .live-overview-grid{height:calc(100% - 62px);display:grid;grid-template-columns:repeat(3,1fr);gap:30px 26px;padding:28px 64px 86px}.live-overview-page{position:relative;display:grid;grid-template-rows:auto minmax(0,1fr);min-width:0}.live-overview-page header{display:flex;justify-content:space-between;padding:0 2px 8px;font-size:10px;color:var(--stage-muted)}.live-overview-page header b{color:var(--stage-ink)}.live-overview-thumb{position:relative;aspect-ratio:16/9;background:#fafaf8;box-shadow:0 9px 23px rgba(29,34,38,.14);overflow:hidden}.live-overview-page.current .live-overview-thumb{outline:3px solid var(--stage-blue);outline-offset:4px}.live-overview-thumb.simple{padding:26px 30px;background:#f7f7f4;color:#1e2a33}.live-overview-thumb.simple small{color:#6f777d;font-size:9px;letter-spacing:.08em}.live-overview-thumb.simple h2{margin:18px 0 0;font-size:22px;line-height:1.25;letter-spacing:-.04em}.live-overview-thumb.simple strong{color:var(--stage-blue)}
+    body[data-state="source"] .live-sheet-source{transform:translate(-50%,0)}body[data-state="source"] .live-page{width:min(1270px,calc(100vw - 260px));transform:translateY(-118px)}body[data-state="source"] .live-dock{bottom:148px}
+    body[data-state="meaning"] .live-meaning{display:block}
+    body[data-state="compare"] .live-stage-view,body[data-state="compare"] .live-sheet,body[data-state="compare"] .live-dock{display:none}body[data-state="compare"] .live-compare{display:block}
+    body[data-state="review"] .live-sheet-review{transform:translate(-50%,0)}body[data-state="review"] .live-page{width:min(1290px,calc(100vw - 240px));transform:translateY(-95px)}body[data-state="review"] .live-dock{bottom:158px}body[data-state="review"] .live-finding-anchor,body[data-state="review"] .live-finding-line,body[data-state="review"] .live-finding-label{display:block}
+    body[data-state="overview"] .live-stage-view,body[data-state="overview"] .live-sheet,body[data-state="overview"] .live-dock{display:none}body[data-state="overview"] .live-overview{display:block}
+    @media(prefers-reduced-motion:reduce){*{transition:none!important}}
+  </style>
+</head>
+<body data-state="stage">
+  <div class="live-app">
+    <header class="live-header">
+      <div class="live-project"><strong>Chrono Break</strong><span>Combat Mechanism</span></div>
+      <div class="live-position"><b>04</b><i></i><span>6 pages</span></div>
+      <nav class="live-global" aria-label="Presentation and output"><a class="live-present" href="?state=stage">Play from 04</a><a class="live-publish" href="?state=stage">Publish</a></nav>
+    </header>
+    <main class="live-surface">
+      <section class="live-stage-view" aria-label="Live Stage current rendered page">
+        <div class="live-stage-note"><span><b>BREAK window</b> · Actual render · 16:9</span><span><span>Content locked</span><span>Fit 92%</span></span></div>
+        <div class="live-page-ground">
+          <article class="live-page" aria-label="Selected BREAK mechanism slide">
+            <div class="live-art"><img src="../../phase1-round2/screenshots/b-mechanism/1920x1080.png" alt="회피 세 번에서 BREAK와 피해 50퍼센트 증가로 이어지는 메커니즘 슬라이드"></div>
+            <div class="live-selection" aria-hidden="true"><i class="live-handle-a"></i><i class="live-handle-b"></i></div>
+            <div class="live-object-actions"><b>BREAK</b><a href="?state=meaning">Meaning</a><a href="?state=compare">Emphasis variants</a><a href="?state=review">Review</a></div>
+            <div class="live-object-tag">Transition · object 04</div>
+            <div class="live-finding-anchor"></div><div class="live-finding-line"></div><div class="live-finding-label"><b>READING PATH</b>결과 수치가 BREAK보다 먼저 읽힙니다.</div>
+            <div class="live-meaning" aria-label="Semantic relation overlay">
+              <svg viewBox="0 0 1600 900" role="img" aria-label="회피 트리거에서 결과까지 이어지는 의미 관계">
+                <path d="M205 568 C350 500 455 520 585 565 S820 592 975 490 S1220 465 1405 560"/>
+                <circle cx="205" cy="568" r="13"/><circle cx="585" cy="565" r="13"/><circle cx="975" cy="490" r="13"/><circle cx="1405" cy="560" r="13"/>
+                <text x="150" y="530" class="live-role">TRIGGER</text><text x="150" y="555">회피 ×3</text>
+                <text x="500" y="625" class="live-role">RESOURCE</text><text x="500" y="650">시간 파편 획득</text>
+                <text x="850" y="410" class="live-role">TIMED STATE</text><text x="850" y="438">시간 정지 5초</text>
+                <text x="1135" y="430" class="live-role">TRANSITION → OUTCOME</text><text x="1135" y="458">BREAK → 피해 +50%</text>
+              </svg>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <nav class="live-dock" aria-label="Context surfaces">
+        <a href="?state=source"><span>Source</span><kbd>S</kbd></a>
+        <a href="?state=meaning"><span>Meaning</span><kbd>M</kbd></a>
+        <a href="?state=compare"><span>Compare</span><kbd>C</kbd></a>
+        <a href="?state=review"><span>Review</span><kbd>R</kbd></a>
+        <a href="?state=overview"><span>Overview</span><kbd>O</kbd></a>
+        <a class="live-close" href="?state=stage">Clear surface</a>
+      </nav>
+
+      <section class="live-sheet live-sheet-source" aria-label="Authored source surface">
+        <header class="live-sheet-head"><strong>Authored source</strong><span>Temporary surface · content remains locked</span></header>
+        <div class="live-source-body">
+          <div class="live-source-quote">회피 ×3 → 시간 파편 획득 → 시간 정지 5초 → <mark>BREAK</mark> → 받는 피해 +50%</div>
+          <div class="live-source-meta">
+            <div class="live-source-step"><small>TRIGGER</small><b>회피 ×3</b></div><div class="live-source-step"><small>RESOURCE</small><b>시간 파편</b></div><div class="live-source-step"><small>TIMED STATE</small><b>5초 정지</b></div><div class="live-source-step selected"><small>TRANSITION</small><b>BREAK</b></div><div class="live-source-step"><small>OUTCOME</small><b>피해 +50%</b></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="live-sheet live-sheet-review" aria-label="Temporary review surface">
+        <header class="live-sheet-head"><strong>Visual review · Finding 01 of 02</strong><span>Observed from actual 1600×900 render</span></header>
+        <div class="live-review-body"><div class="live-finding-copy"><div class="live-finding-code">HIERARCHY 02</div><div><strong>BREAK보다 +50%가 먼저 읽힙니다.</strong><p>Source 순서는 BREAK → 받는 피해 +50%입니다. BREAK label의 scale/contrast를 한 단계 높이는 visual-only revision을 검토하세요.</p></div></div><div class="live-review-actions"><button type="button">Ignore</button><button type="button">Show before</button><button class="live-apply" type="button">Apply bounded revision</button></div></div>
+      </section>
+
+      <section class="live-compare" aria-label="Temporary candidate compare stage">
+        <header class="live-mode-head"><div><strong>BREAK emphasis · three actual renders</strong><p>Same source and semantic relations; composition is the only variable.</p></div><a href="?state=stage">Return to page</a></header>
+        <div class="live-compare-grid">
+          <article class="live-candidate"><div class="live-candidate-head"><b>A · Editorial sequence</b><span>Reading path: vertical</span></div><div class="live-candidate-frame live-art"><img src="../../phase1-round2/screenshots/a-editorial/1920x1080.png" alt="Editorial candidate"></div><div class="live-candidate-note"><span>BREAK as editorial pivot</span><b>Choose A</b></div></article>
+          <article class="live-candidate active"><div class="live-candidate-head"><b>B · Mechanism trace</b><span>Reading path: causal flow</span></div><div class="live-candidate-frame live-art"><img src="../../phase1-round2/screenshots/b-mechanism/1920x1080.png" alt="Mechanism candidate"></div><div class="live-candidate-note"><span>BREAK as rupture in the system</span><b>Selected</b></div></article>
+          <article class="live-candidate"><div class="live-candidate-head"><b>C · Presentation narrative</b><span>Reading path: grouped phases</span></div><div class="live-candidate-frame live-art"><img src="../../phase1-round2/screenshots/c-professional/1920x1080.png" alt="Professional presentation candidate"></div><div class="live-candidate-note"><span>BREAK as conversion step</span><b>Choose C</b></div></article>
+        </div>
+      </section>
+
+      <section class="live-overview" aria-label="Full screen page overview">
+        <header class="live-mode-head"><div><strong>Chrono Break · Overview</strong><p>Presentation order · select a page to return to the stage.</p></div><a href="?state=stage">Return to page 04</a></header>
+        <div class="live-overview-grid">
+          <article class="live-overview-page"><header><b>01 · System message</b><span>Overview</span></header><div class="live-overview-thumb simple"><small>COMBAT MECHANISM</small><h2>회피 숙련이<br><strong>공격 기회</strong>로 전환된다</h2></div></article>
+          <article class="live-overview-page"><header><b>02 · Trigger</b><span>Input</span></header><div class="live-overview-thumb simple"><small>TRIGGER</small><h2>회피<br><strong>×3</strong></h2></div></article>
+          <article class="live-overview-page"><header><b>03 · Resource</b><span>Acquire</span></header><div class="live-overview-thumb simple"><small>RESOURCE</small><h2>시간 파편<br><strong>획득</strong></h2></div></article>
+          <article class="live-overview-page current"><header><b>04 · BREAK window</b><span>Current</span></header><div class="live-overview-thumb live-art"><img src="../../phase1-round2/screenshots/b-mechanism/1920x1080.png" alt="Current BREAK mechanism page"></div></article>
+          <article class="live-overview-page"><header><b>05 · Timed state</b><span>Hold</span></header><div class="live-overview-thumb simple"><small>TIMED STATE</small><h2>시간 정지<br><strong>5초</strong></h2></div></article>
+          <article class="live-overview-page"><header><b>06 · Outcome</b><span>Payoff</span></header><div class="live-overview-thumb simple"><small>OUTCOME</small><h2>받는 피해<br><strong>+50%</strong></h2></div></article>
+        </div>
+      </section>
+    </main>
+  </div>
+  <script>
+    (()=>{
+      const allowed=new Set(['stage','source','meaning','compare','review','overview']);
+      const params=new URLSearchParams(location.search);const state=allowed.has(params.get('state'))?params.get('state'):'stage';
+      document.body.dataset.state=state;
+      document.querySelectorAll('.live-dock a').forEach(link=>{const target=new URL(link.href).searchParams.get('state');if(target===state)link.setAttribute('aria-current','page')});
+      document.addEventListener('keydown',event=>{if(event.metaKey||event.ctrlKey||event.altKey)return;const keys={s:'source',m:'meaning',c:'compare',r:'review',o:'overview',Escape:'stage'};const next=keys[event.key]||keys[event.key.toLowerCase?.()];if(next)location.search=`state=${next}`});
+    })();
+  </script>
+</body>
+</html>
