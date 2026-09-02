@@ -87,6 +87,30 @@ describe('RenderTree contract', () => {
     expect(validateRenderTreeAgainstSlide(validTree(), MEC_01_SLIDE_IR)).toEqual([]);
   });
 
+  it('accepts the optional render-contract metadata while keeping legacy nodes valid', () => {
+    const tree = validTree();
+    const text = tree.nodes.find((node) => node.kind === 'text');
+    const relation = tree.nodes.find((node) => node.relationId !== undefined);
+    if (text?.kind !== 'text' || relation === undefined) throw new Error('fixture error');
+    text.compositionRegionId = 'phase-accumulation';
+    text.visualRole = 'ordered-step';
+    text.sourceUsage = 'content';
+    relation.compositionRegionId = 'phase-accumulation';
+    relation.visualRole = 'relation-carrier';
+    relation.relationVisualRole = 'accumulation-local';
+
+    const parsed = RenderTreeSchema.parse(tree);
+    expect(parsed.nodes.find((node) => node.nodeId === text.nodeId)).toMatchObject({
+      compositionRegionId: 'phase-accumulation',
+      visualRole: 'ordered-step',
+      sourceUsage: 'content',
+    });
+    expect(parsed.nodes.find((node) => node.nodeId === relation.nodeId)).toMatchObject({
+      visualRole: 'relation-carrier',
+      relationVisualRole: 'accumulation-local',
+    });
+  });
+
   it('fails closed when visible text is invented', () => {
     const tree = validTree();
     const target = tree.nodes.find((node) => node.nodeId === 'text-freeze');

@@ -5,6 +5,16 @@ import type { CompositionPlan, PatternFragment } from '@game-presentation/contra
  * Renderer는 reference나 fragment ID를 다시 해석하지 않고 이 계약만 소비한다.
  */
 export function styleIntentForPattern(fragment: PatternFragment): CompositionPlan['styleIntent'] {
+  if (fragment.topology.family === 'aligned-before-after-spec') {
+    return {
+      tone: 'editorial feature specification',
+      contrastModel: 'editorial-hierarchy',
+      hierarchy: { primaryTextSize: 72, supportTextSize: 36, evidenceTextSize: 42, primaryWeight: 700, supportWeight: 400 },
+      accent: { targetRole: 'evidence', color: '#254E44', softColor: '#E8EEE9' },
+      motif: { family: 'editorial-rule', color: '#B9C8BF', strokeWidth: 1.5 },
+      palette: { background: '#F8F7F3', ink: '#242E2A', mutedInk: '#626A64', connector: '#778D81' },
+    };
+  }
   if (fragment.topology.family === 'threshold-field') {
     return {
       tone: 'focused temporal mechanism stage',

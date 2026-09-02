@@ -1,0 +1,724 @@
+{
+  "schemaVersion": "0.1",
+  "renderTreeId": "render-composition-f923dc8e552fd07f",
+  "compositionPlanId": "composition-f923dc8e552fd07f",
+  "slideId": "mec-01-time-break",
+  "pageProfile": {
+    "id": "pdf-presentation-16:9",
+    "outputFamily": "pdf-presentation",
+    "width": 1920,
+    "height": 1080,
+    "unit": "css-px",
+    "pixelRatio": 1
+  },
+  "layoutFamily": "accumulation-threshold-consequence",
+  "messagePresentation": {
+    "presentationKind": "suppressed-duplicate",
+    "sourceSpanIds": [
+      "source-all"
+    ],
+    "sourceTransform": {
+      "kind": "exact"
+    },
+    "suppressionReason": "all-message-content-is-already-presented-by-blocks"
+  },
+  "background": "#F5F3EE",
+  "nodes": [
+    {
+      "nodeId": "region-message-context",
+      "zIndex": 0,
+      "box": {
+        "x": 105.6,
+        "y": 59.4,
+        "width": 1708.8,
+        "height": 97.2
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "group"
+    },
+    {
+      "nodeId": "region-phase-accumulation",
+      "compositionRegionId": "phase-accumulation",
+      "visualRole": "phase-container",
+      "zIndex": 0,
+      "box": {
+        "x": 76.8,
+        "y": 145.8,
+        "width": 915.456,
+        "height": 788.4
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "group"
+    },
+    {
+      "nodeId": "region-phase-threshold",
+      "compositionRegionId": "phase-threshold",
+      "visualRole": "phase-container",
+      "zIndex": 0,
+      "box": {
+        "x": 1017.216,
+        "y": 145.8,
+        "width": 343.29600000000005,
+        "height": 788.4
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "group"
+    },
+    {
+      "nodeId": "region-phase-consequence",
+      "compositionRegionId": "phase-consequence",
+      "visualRole": "phase-container",
+      "zIndex": 0,
+      "box": {
+        "x": 1385.472,
+        "y": 145.8,
+        "width": 457.72800000000007,
+        "height": 788.4
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "group"
+    },
+    {
+      "nodeId": "accumulation-shared-track-1",
+      "parentId": "region-phase-accumulation",
+      "compositionRegionId": "phase-accumulation",
+      "zIndex": 0,
+      "box": {
+        "x": 252.04266666666666,
+        "y": 529.194,
+        "width": 564.9706666666666,
+        "height": 39.62200000000007
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "shape",
+      "shape": "path",
+      "paint": {
+        "stroke": "#777A76",
+        "strokeWidth": 1.6,
+        "opacity": 0.28
+      },
+      "pathData": "M 252.04266666666666 568.816 L 817.0133333333333 529.194"
+    },
+    {
+      "nodeId": "accumulation-group-bracket",
+      "parentId": "region-phase-accumulation",
+      "compositionRegionId": "phase-accumulation",
+      "visualRole": "phase-container",
+      "zIndex": 0,
+      "box": {
+        "x": 252.04266666666666,
+        "y": 600.816,
+        "width": 564.9706666666666,
+        "height": 12
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "shape",
+      "shape": "path",
+      "paint": {
+        "stroke": "#777A76",
+        "strokeWidth": 1.6,
+        "opacity": 0.44
+      },
+      "pathData": "M 252.04266666666666 600.816 V 612.816 H 817.0133333333333 V 600.816"
+    },
+    {
+      "nodeId": "ordered-step-dodge-step",
+      "parentId": "region-phase-accumulation",
+      "semanticBlockId": "dodge-step",
+      "compositionRegionId": "phase-accumulation",
+      "visualRole": "ordered-step",
+      "zIndex": 1,
+      "box": {
+        "x": 110.8,
+        "y": 179.8,
+        "width": 282.48533333333336,
+        "height": 720.4
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "group"
+    },
+    {
+      "nodeId": "ordered-step-anchor-dodge-step",
+      "parentId": "ordered-step-dodge-step",
+      "semanticBlockId": "dodge-step",
+      "compositionRegionId": "phase-accumulation",
+      "visualRole": "ordered-step",
+      "zIndex": 2,
+      "box": {
+        "x": 245.54266666666666,
+        "y": 562.316,
+        "width": 13,
+        "height": 13
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "shape",
+      "shape": "ellipse",
+      "paint": {
+        "fill": "#F5F3EE",
+        "stroke": "#777A76",
+        "strokeWidth": 2
+      }
+    },
+    {
+      "nodeId": "text-dodge-step-0",
+      "parentId": "ordered-step-dodge-step",
+      "semanticBlockId": "dodge-step",
+      "compositionRegionId": "phase-accumulation",
+      "visualRole": "ordered-step",
+      "zIndex": 3,
+      "box": {
+        "x": 194.49725651041666,
+        "y": 508.31600000000003,
+        "width": 115.0908203125,
+        "height": 37
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "text",
+      "text": "회피 ×3",
+      "sourceSpanIds": [
+        "dodge"
+      ],
+      "sourceTransform": {
+        "kind": "exact"
+      },
+      "font": {
+        "family": "Pretendard",
+        "fileHash": "6d0af5258997aec7354a6e340fc2325ba321c410ca48b3af858c8c3d6e92a324",
+        "size": 30,
+        "weight": 500,
+        "lineHeight": 38,
+        "letterSpacing": -0.25
+      },
+      "color": "#222522",
+      "align": "center",
+      "lines": [
+        {
+          "text": "회피 ×3",
+          "x": 252.04266666666666,
+          "baselineY": 538.316,
+          "advanceWidth": 107.0908203125
+        }
+      ]
+    },
+    {
+      "nodeId": "ordered-step-fragment-resource",
+      "parentId": "region-phase-accumulation",
+      "semanticBlockId": "fragment-resource",
+      "compositionRegionId": "phase-accumulation",
+      "visualRole": "ordered-step",
+      "zIndex": 1,
+      "box": {
+        "x": 393.28533333333337,
+        "y": 179.8,
+        "width": 282.48533333333336,
+        "height": 720.4
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "group"
+    },
+    {
+      "nodeId": "ordered-step-anchor-fragment-resource",
+      "parentId": "ordered-step-fragment-resource",
+      "semanticBlockId": "fragment-resource",
+      "compositionRegionId": "phase-accumulation",
+      "visualRole": "ordered-step",
+      "zIndex": 2,
+      "box": {
+        "x": 528.028,
+        "y": 542.5050000000001,
+        "width": 13,
+        "height": 13
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "shape",
+      "shape": "ellipse",
+      "paint": {
+        "fill": "#F5F3EE",
+        "stroke": "#777A76",
+        "strokeWidth": 2
+      }
+    },
+    {
+      "nodeId": "text-fragment-resource-0",
+      "parentId": "ordered-step-fragment-resource",
+      "semanticBlockId": "fragment-resource",
+      "compositionRegionId": "phase-accumulation",
+      "visualRole": "ordered-step",
+      "zIndex": 3,
+      "box": {
+        "x": 430.856125,
+        "y": 488.5050000000001,
+        "width": 207.34375,
+        "height": 37
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "text",
+      "text": "시간 파편 획득",
+      "sourceSpanIds": [
+        "fragment"
+      ],
+      "sourceTransform": {
+        "kind": "exact"
+      },
+      "font": {
+        "family": "Pretendard",
+        "fileHash": "6d0af5258997aec7354a6e340fc2325ba321c410ca48b3af858c8c3d6e92a324",
+        "size": 30,
+        "weight": 500,
+        "lineHeight": 38,
+        "letterSpacing": -0.25
+      },
+      "color": "#222522",
+      "align": "center",
+      "lines": [
+        {
+          "text": "시간 파편 획득",
+          "x": 534.528,
+          "baselineY": 518.5050000000001,
+          "advanceWidth": 199.34375
+        }
+      ]
+    },
+    {
+      "nodeId": "ordered-step-freeze-step",
+      "parentId": "region-phase-accumulation",
+      "semanticBlockId": "freeze-step",
+      "compositionRegionId": "phase-accumulation",
+      "visualRole": "ordered-step",
+      "zIndex": 1,
+      "box": {
+        "x": 675.7706666666667,
+        "y": 179.8,
+        "width": 282.48533333333336,
+        "height": 720.4
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "group"
+    },
+    {
+      "nodeId": "ordered-step-anchor-freeze-step",
+      "parentId": "ordered-step-freeze-step",
+      "semanticBlockId": "freeze-step",
+      "compositionRegionId": "phase-accumulation",
+      "visualRole": "ordered-step",
+      "zIndex": 2,
+      "box": {
+        "x": 809.0133333333333,
+        "y": 521.194,
+        "width": 16,
+        "height": 16
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "shape",
+      "shape": "ellipse",
+      "paint": {
+        "fill": "#F5F3EE",
+        "stroke": "#777A76",
+        "strokeWidth": 2
+      }
+    },
+    {
+      "nodeId": "text-freeze-step-0",
+      "parentId": "ordered-step-freeze-step",
+      "semanticBlockId": "freeze-step",
+      "compositionRegionId": "phase-accumulation",
+      "visualRole": "ordered-step",
+      "zIndex": 3,
+      "box": {
+        "x": 713.3648958333333,
+        "y": 468.19399999999996,
+        "width": 207.296875,
+        "height": 38
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "text",
+      "text": "시간 정지 5초",
+      "sourceSpanIds": [
+        "freeze"
+      ],
+      "sourceTransform": {
+        "kind": "exact"
+      },
+      "font": {
+        "family": "Pretendard",
+        "fileHash": "eedbd2877218242323bdff816684f7f5c325e54ae820d5b78eec9a5e5c7edef6",
+        "size": 32,
+        "weight": 800,
+        "lineHeight": 40,
+        "letterSpacing": -0.25
+      },
+      "color": "#222522",
+      "align": "center",
+      "lines": [
+        {
+          "text": "시간 정지 5초",
+          "x": 817.0133333333333,
+          "baselineY": 500.19399999999996,
+          "advanceWidth": 199.296875
+        }
+      ]
+    },
+    {
+      "nodeId": "threshold-boundary-rule",
+      "parentId": "region-phase-threshold",
+      "compositionRegionId": "phase-threshold",
+      "visualRole": "threshold-boundary",
+      "zIndex": 0,
+      "box": {
+        "x": 1188.864,
+        "y": 371.51399999999995,
+        "width": 1,
+        "height": 315.36
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "shape",
+      "shape": "path",
+      "paint": {
+        "stroke": "#5B5C8D",
+        "strokeWidth": 2.4,
+        "opacity": 0.48
+      },
+      "pathData": "M 1188.864 371.51399999999995 V 504.19399999999996 M 1188.864 554.194 V 686.874"
+    },
+    {
+      "nodeId": "threshold-event-break-state",
+      "parentId": "region-phase-threshold",
+      "semanticBlockId": "break-state",
+      "compositionRegionId": "phase-threshold",
+      "visualRole": "threshold-event",
+      "zIndex": 1,
+      "box": {
+        "x": 1044.67968,
+        "y": 454.19399999999996,
+        "width": 288.36864,
+        "height": 150
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "group"
+    },
+    {
+      "nodeId": "threshold-event-marker-break-state",
+      "parentId": "threshold-event-break-state",
+      "semanticBlockId": "break-state",
+      "compositionRegionId": "phase-threshold",
+      "visualRole": "threshold-event",
+      "zIndex": 2,
+      "box": {
+        "x": 1171.864,
+        "y": 512.194,
+        "width": 34,
+        "height": 34
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "shape",
+      "shape": "ellipse",
+      "paint": {
+        "fill": "#E3E2F0",
+        "stroke": "#5B5C8D",
+        "strokeWidth": 2.75
+      }
+    },
+    {
+      "nodeId": "text-break-state-0",
+      "parentId": "threshold-event-break-state",
+      "semanticBlockId": "break-state",
+      "compositionRegionId": "phase-threshold",
+      "visualRole": "threshold-event",
+      "zIndex": 3,
+      "box": {
+        "x": 1077.922984375,
+        "y": 440.69399999999996,
+        "width": 221.88203125,
+        "height": 57
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "text",
+      "text": "BREAK",
+      "sourceSpanIds": [
+        "break"
+      ],
+      "sourceTransform": {
+        "kind": "exact"
+      },
+      "font": {
+        "family": "Pretendard",
+        "fileHash": "eedbd2877218242323bdff816684f7f5c325e54ae820d5b78eec9a5e5c7edef6",
+        "size": 68,
+        "weight": 800,
+        "lineHeight": 85,
+        "letterSpacing": -0.8
+      },
+      "color": "#5B5C8D",
+      "align": "center",
+      "lines": [
+        {
+          "text": "BREAK",
+          "x": 1188.864,
+          "baselineY": 493.69399999999996,
+          "advanceWidth": 213.88203125
+        }
+      ]
+    },
+    {
+      "nodeId": "consequence-alignment-axis",
+      "parentId": "region-phase-consequence",
+      "compositionRegionId": "phase-consequence",
+      "zIndex": 0,
+      "box": {
+        "x": 1481.43936,
+        "y": 447.19399999999996,
+        "width": 18,
+        "height": 188
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "shape",
+      "shape": "path",
+      "paint": {
+        "stroke": "#777A76",
+        "strokeWidth": 1.6,
+        "opacity": 0.38
+      },
+      "pathData": "M 1499.43936 447.19399999999996 H 1481.43936 V 635.194 H 1499.43936"
+    },
+    {
+      "nodeId": "consequence-result-damage-modifier",
+      "parentId": "region-phase-consequence",
+      "semanticBlockId": "damage-modifier",
+      "compositionRegionId": "phase-consequence",
+      "visualRole": "consequence-result",
+      "zIndex": 1,
+      "box": {
+        "x": 1481.43936,
+        "y": 450.19399999999996,
+        "width": 361.76063999999997,
+        "height": 170
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "group"
+    },
+    {
+      "nodeId": "consequence-result-anchor-damage-modifier",
+      "parentId": "consequence-result-damage-modifier",
+      "semanticBlockId": "damage-modifier",
+      "compositionRegionId": "phase-consequence",
+      "visualRole": "consequence-result",
+      "zIndex": 2,
+      "box": {
+        "x": 1480.43936,
+        "y": 535.194,
+        "width": 22,
+        "height": 1
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "shape",
+      "shape": "line",
+      "paint": {
+        "stroke": "#5B5C8D",
+        "strokeWidth": 2.6
+      }
+    },
+    {
+      "nodeId": "text-damage-modifier-0",
+      "parentId": "consequence-result-damage-modifier",
+      "semanticBlockId": "damage-modifier",
+      "compositionRegionId": "phase-consequence",
+      "visualRole": "consequence-result",
+      "zIndex": 3,
+      "box": {
+        "x": 1505.43936,
+        "y": 489.19399999999996,
+        "width": 188.765625,
+        "height": 48
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "text",
+      "text": "받는 피해",
+      "sourceSpanIds": [
+        "damage-label"
+      ],
+      "sourceTransform": {
+        "kind": "exact"
+      },
+      "font": {
+        "family": "Pretendard",
+        "fileHash": "eedbd2877218242323bdff816684f7f5c325e54ae820d5b78eec9a5e5c7edef6",
+        "size": 42,
+        "weight": 800,
+        "lineHeight": 53,
+        "letterSpacing": -0.5
+      },
+      "color": "#222522",
+      "align": "start",
+      "lines": [
+        {
+          "text": "받는 피해",
+          "x": 1509.43936,
+          "baselineY": 529.194,
+          "advanceWidth": 180.765625
+        }
+      ]
+    },
+    {
+      "nodeId": "text-damage-modifier-1",
+      "parentId": "consequence-result-damage-modifier",
+      "semanticBlockId": "damage-modifier",
+      "compositionRegionId": "phase-consequence",
+      "visualRole": "consequence-result",
+      "zIndex": 3,
+      "box": {
+        "x": 1505.43936,
+        "y": 534.194,
+        "width": 149.703125,
+        "height": 47
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "text",
+      "text": "+50%",
+      "sourceSpanIds": [
+        "damage-value"
+      ],
+      "sourceTransform": {
+        "kind": "exact"
+      },
+      "font": {
+        "family": "Pretendard",
+        "fileHash": "eedbd2877218242323bdff816684f7f5c325e54ae820d5b78eec9a5e5c7edef6",
+        "size": 52,
+        "weight": 800,
+        "lineHeight": 65,
+        "letterSpacing": -0.5
+      },
+      "color": "#5B5C8D",
+      "align": "start",
+      "lines": [
+        {
+          "text": "+50%",
+          "x": 1509.43936,
+          "baselineY": 576.194,
+          "advanceWidth": 141.703125
+        }
+      ]
+    },
+    {
+      "nodeId": "accumulation-relation-r-dodge-fragment",
+      "parentId": "region-phase-accumulation",
+      "relationId": "r-dodge-fragment",
+      "compositionRegionId": "phase-accumulation",
+      "visualRole": "relation-carrier",
+      "relationVisualRole": "accumulation-local",
+      "zIndex": 1,
+      "box": {
+        "x": 258.04266666666666,
+        "y": 549.0050000000001,
+        "width": 270.48533333333336,
+        "height": 19.810999999999922
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "shape",
+      "shape": "path",
+      "paint": {
+        "stroke": "#777A76",
+        "strokeWidth": 2.75
+      },
+      "pathData": "M 258.04266666666666 568.816 L 528.528 549.0050000000001"
+    },
+    {
+      "nodeId": "accumulation-relation-r-fragment-freeze",
+      "parentId": "region-phase-accumulation",
+      "relationId": "r-fragment-freeze",
+      "compositionRegionId": "phase-accumulation",
+      "visualRole": "relation-carrier",
+      "relationVisualRole": "accumulation-local",
+      "zIndex": 1,
+      "box": {
+        "x": 540.528,
+        "y": 529.194,
+        "width": 270.4853333333333,
+        "height": 19.81100000000015
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "shape",
+      "shape": "path",
+      "paint": {
+        "stroke": "#777A76",
+        "strokeWidth": 2.75
+      },
+      "pathData": "M 540.528 549.0050000000001 L 811.0133333333333 529.194"
+    },
+    {
+      "nodeId": "threshold-entry-r-freeze-break",
+      "parentId": "region-phase-threshold",
+      "relationId": "r-freeze-break",
+      "compositionRegionId": "phase-threshold",
+      "visualRole": "relation-carrier",
+      "relationVisualRole": "threshold-entry",
+      "zIndex": 1,
+      "box": {
+        "x": 823.0133333333333,
+        "y": 529.194,
+        "width": 348.8506666666667,
+        "height": 1
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "shape",
+      "shape": "line",
+      "paint": {
+        "stroke": "#5B5C8D",
+        "strokeWidth": 2.9
+      }
+    },
+    {
+      "nodeId": "consequence-activation-r-break-damage",
+      "parentId": "region-phase-consequence",
+      "relationId": "r-break-damage",
+      "compositionRegionId": "phase-consequence",
+      "visualRole": "relation-carrier",
+      "relationVisualRole": "consequence-activation",
+      "zIndex": 1,
+      "box": {
+        "x": 1205.864,
+        "y": 529.194,
+        "width": 275.57536000000005,
+        "height": 6
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "shape",
+      "shape": "path",
+      "paint": {
+        "stroke": "#5B5C8D",
+        "strokeWidth": 2.5,
+        "opacity": 0.78
+      },
+      "pathData": "M 1205.864 529.194 H 1343.65168 V 535.194 H 1481.43936"
+    }
+  ],
+  "deterministicFingerprint": "6b17bc2f5c2f8833b343bd53315c04d429a83ea93b2ceb8f82c897d11699f996"
+}

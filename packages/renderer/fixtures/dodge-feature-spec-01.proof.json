@@ -1,0 +1,153 @@
+{
+  "artifactId": "dodge-feature-spec-01",
+  "status": "candidate-awaiting-user-review",
+  "readyPositiveFixture": false,
+  "readyPromotionApproval": null,
+  "criticCalled": false,
+  "polishIterations": 0,
+  "pngRenderCount": 1,
+  "sourcePath": "packages/source-ingestion/fixtures/dodge-feature-spec.source.json",
+  "selectedPattern": [
+    "pattern-aligned-before-after-spec"
+  ],
+  "selectedReferences": [
+    "ext-2025-shadowverse-super-evolution"
+  ],
+  "semantic": {
+    "kind": "comparison",
+    "blocks": 11,
+    "authoredPairs": [
+      {
+        "id": "change-1",
+        "fromBlockId": "block-before-cancel",
+        "toBlockId": "block-after-cancel",
+        "type": "compares-with",
+        "sourceSpanIds": [
+          "before-cancel",
+          "after-cancel"
+        ]
+      },
+      {
+        "id": "change-2",
+        "fromBlockId": "block-before-direction",
+        "toBlockId": "block-after-direction",
+        "type": "compares-with",
+        "sourceSpanIds": [
+          "before-direction",
+          "after-direction"
+        ]
+      },
+      {
+        "id": "change-3",
+        "fromBlockId": "block-before-lock",
+        "toBlockId": "block-after-lock",
+        "type": "compares-with",
+        "sourceSpanIds": [
+          "before-lock",
+          "after-lock"
+        ]
+      }
+    ]
+  },
+  "renderTree": {
+    "fingerprint": "239d147709246d0fd27e19ba26ae5a31503ef4934c46404125de58614e53ac2e",
+    "nodes": 28,
+    "regions": [
+      {
+        "id": "page-heading",
+        "box": {
+          "x": 96,
+          "y": 75.60000000000001,
+          "width": 1728,
+          "height": 145.152
+        }
+      },
+      {
+        "id": "message-context",
+        "box": {
+          "x": 96,
+          "y": 220.752,
+          "width": 1728,
+          "height": 163.296
+        }
+      },
+      {
+        "id": "comparison-heading",
+        "box": {
+          "x": 96,
+          "y": 384.048,
+          "width": 1728,
+          "height": 127.008
+        }
+      },
+      {
+        "id": "comparison-field",
+        "box": {
+          "x": 96,
+          "y": 511.056,
+          "width": 1728,
+          "height": 471.74399999999997
+        }
+      },
+      {
+        "id": "comparison-pair-0",
+        "box": {
+          "x": 96,
+          "y": 511.056,
+          "width": 1728,
+          "height": 157.248
+        }
+      },
+      {
+        "id": "comparison-pair-1",
+        "box": {
+          "x": 96,
+          "y": 668.304,
+          "width": 1728,
+          "height": 157.248
+        }
+      },
+      {
+        "id": "comparison-pair-2",
+        "box": {
+          "x": 96,
+          "y": 825.5519999999999,
+          "width": 1728,
+          "height": 157.248
+        }
+      }
+    ]
+  },
+  "hardGate": {
+    "passed": true,
+    "programFindings": [],
+    "sourceFidelityFindings": [],
+    "findings": []
+  },
+  "deterministic": true,
+  "png": {
+    "path": "packages/renderer/fixtures/dodge-feature-spec-01.png",
+    "width": 1920,
+    "height": 1080,
+    "bytes": 81950,
+    "sha256": "6d1c21aabb634cc48bb25d5c10c3191db96255ca90412d21c477389185329588"
+  },
+  "fontHashes": [
+    {
+      "family": "Pretendard",
+      "weight": 400,
+      "sha256": "6d0af5258997aec7354a6e340fc2325ba321c410ca48b3af858c8c3d6e92a324"
+    },
+    {
+      "family": "Pretendard",
+      "weight": 700,
+      "sha256": "c16b88c670d23e83fa1170c954cbc4822d3b8dad3c3cde15d798a94b43d97985"
+    },
+    {
+      "family": "Pretendard",
+      "weight": 800,
+      "sha256": "eedbd2877218242323bdff816684f7f5c325e54ae820d5b78eec9a5e5c7edef6"
+    }
+  ],
+  "renderer": "RenderTree → renderTreeToHtml / SVG → Chromium screenshot"
+}

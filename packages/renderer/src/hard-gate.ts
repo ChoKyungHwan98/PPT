@@ -8,6 +8,8 @@ import {
   type SlideIR,
 } from '@game-presentation/contracts';
 import { validateLayout } from './layout-validation.js';
+import { messagePresentationRecord, resolveMessagePresentation } from './render-contract.js';
+import { validateAlignedFeatureFidelity } from './aligned-feature-validation.js';
 
 export type HardGateResult = {
   passed: boolean;
@@ -69,6 +71,97 @@ function informationPlanFindings(tree: RenderTree, plan: InformationPlan, slide:
   });
 }
 
+function sameJson(left: unknown, right: unknown): boolean {
+  return JSON.stringify(left) === JSON.stringify(right);
+}
+
+/** 새 layout family의 message가 표시 또는 억제 중 정확히 한 방식으로 처리됐는지 검사한다. */
+export function validateMessagePresentationHardGate(input: {
+  slide: SlideIR;
+  informationPlan: InformationPlan;
+  tree: RenderTree;
+}): Finding[] {
+  if (input.tree.layoutFamily !== 'accumulation-threshold-consequence') return [];
+  const findings: Finding[] = [];
+  const add = (suffix: string, message: string, nodeIds: string[], evidence: Record<string, unknown>): void => {
+    findings.push(FindingSchema.parse({
+      schemaVersion: '0.1',
+      findingId: `message-presentation-${suffix}`,
+      artifactId: input.tree.renderTreeId,
+      stage: 'contract',
+      severity: 'fatal',
+      code: 'untraceable-content',
+      nodeIds,
+      message,
+      evidence,
+    }));
+  };
+  const expected = resolveMessagePresentation({
+    message: input.informationPlan.message,
+    slide: input.slide,
+  });
+  const expectedRecord = messagePresentationRecord(expected);
+  if (!sameJson(input.tree.messagePresentation, expectedRecord)) {
+    add('record', 'RenderTree의 message presentation 기록이 deterministic resolver 결과와 다릅니다.', [], {
+      expected: expectedRecord,
+      actual: input.tree.messagePresentation,
+    });
+  }
+  const messageNodes = input.tree.nodes.filter(
+    (node): node is Extract<RenderTree['nodes'][number], { kind: 'text' }> =>
+      node.kind === 'text' && node.visualRole === 'message-context',
+  );
+  if (expected.presentationKind === 'suppressed-duplicate') {
+    if (messageNodes.length > 0) {
+      add(
+        'suppressed-text-present',
+        '완전 중복 message는 text node로 표시할 수 없습니다.',
+        messageNodes.map((node) => node.nodeId),
+        { presentationKind: expected.presentationKind },
+      );
+    }
+    return findings;
+  }
+
+  if (messageNodes.length !== 1) {
+    add(
+      'node-count',
+      'headline/context message는 정확히 하나의 text node로 표시해야 합니다.',
+      messageNodes.map((node) => node.nodeId),
+      { expectedCount: 1, actualCount: messageNodes.length },
+    );
+    return findings;
+  }
+  const node = messageNodes[0]!;
+  if (
+    node.text !== input.informationPlan.message.text ||
+    !sameJson(node.sourceSpanIds, input.informationPlan.message.sourceSpanIds) ||
+    !sameJson(node.sourceTransform, input.informationPlan.message.transform)
+  ) {
+    add('source', 'message text와 source trace가 InformationPlan.message와 다릅니다.', [node.nodeId], {
+      expectedText: input.informationPlan.message.text,
+      actualText: node.text,
+      expectedSourceSpanIds: input.informationPlan.message.sourceSpanIds,
+      actualSourceSpanIds: node.sourceSpanIds,
+    });
+  }
+  if (
+    node.compositionRegionId !== 'message-context' ||
+    node.visualRole !== 'message-context' ||
+    node.sourceUsage !== expected.sourceUsage ||
+    !node.visible
+  ) {
+    add('metadata', 'message text node의 region, visual role, source usage 또는 visibility가 계약과 다릅니다.', [node.nodeId], {
+      compositionRegionId: node.compositionRegionId,
+      visualRole: node.visualRole,
+      expectedSourceUsage: expected.sourceUsage,
+      actualSourceUsage: node.sourceUsage,
+      visible: node.visible,
+    });
+  }
+  return findings;
+}
+
 /** 프로그램이 확정적으로 판단할 수 있는 배치 오류 검사. */
 export function validateProgramHardGate(tree: RenderTree, slide: SlideIR): Finding[] {
   const contractFindings = validateRenderTreeAgainstSlide(tree, slide)
@@ -88,6 +181,8 @@ export function validateSourceFidelityHardGate(input: {
     .filter((finding) => finding.code !== 'out-of-bounds');
   return [
     ...informationPlanFindings(input.tree, input.informationPlan, input.slide),
+    ...validateMessagePresentationHardGate(input),
+    ...validateAlignedFeatureFidelity(input),
     ...treeFindings,
     ...numberAndUnitFindings(input.tree, input.slide),
   ];

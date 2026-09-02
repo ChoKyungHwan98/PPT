@@ -1,0 +1,27 @@
+{
+  "fixtureId": "dodge-feature-spec-01",
+  "rawText": "회피 시스템 개선\n\n기존 방식\n- 공격 중 회피 입력 불가\n- 구르기 중심 회피\n- 락온 중에도 동일한 회피 모션\n\n개선 방식\n- 공격 중 회피 입력 시 더킹으로 캔슬\n- 입력 방향에 따라 회피 방향 결정\n- 락온 상태를 유지한 채 근거리 회피\n\n핵심 의도\n공격 흐름을 끊지 않으면서,\n보스와의 근거리 공방을 지속할 수 있는 회피 시스템",
+  "segments": [
+    { "id": "title", "text": "회피 시스템 개선" },
+    { "id": "before-label", "text": "기존 방식" },
+    { "id": "before-cancel", "text": "공격 중 회피 입력 불가" },
+    { "id": "before-direction", "text": "구르기 중심 회피" },
+    { "id": "before-lock", "text": "락온 중에도 동일한 회피 모션" },
+    { "id": "after-label", "text": "개선 방식" },
+    { "id": "after-cancel", "text": "공격 중 회피 입력 시 더킹으로 캔슬" },
+    { "id": "after-direction", "text": "입력 방향에 따라 회피 방향 결정" },
+    { "id": "after-lock", "text": "락온 상태를 유지한 채 근거리 회피" },
+    { "id": "intent-label", "text": "핵심 의도" },
+    { "id": "intent", "text": "공격 흐름을 끊지 않으면서,\n보스와의 근거리 공방을 지속할 수 있는 회피 시스템" }
+  ],
+  "titleSegmentId": "title",
+  "messageSegmentId": "intent",
+  "messageLabelSegmentId": "intent-label",
+  "before": { "labelSegmentId": "before-label", "itemSegmentIds": ["before-cancel", "before-direction", "before-lock"] },
+  "after": { "labelSegmentId": "after-label", "itemSegmentIds": ["after-cancel", "after-direction", "after-lock"] },
+  "pairs": [
+    { "beforeSegmentId": "before-cancel", "afterSegmentId": "after-cancel" },
+    { "beforeSegmentId": "before-direction", "afterSegmentId": "after-direction" },
+    { "beforeSegmentId": "before-lock", "afterSegmentId": "after-lock" }
+  ]
+}

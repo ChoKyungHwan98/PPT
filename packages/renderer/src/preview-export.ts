@@ -31,6 +31,20 @@ export async function exportRenderPreview(input: {
     await page.evaluate(async () => {
       await document.fonts.ready;
     });
+    const missingFonts = await page.evaluate((items) => items.filter((item) =>
+      !document.fonts.check(
+        `${String(item.weight)} ${String(item.size)}px ${JSON.stringify(item.family)}`,
+        item.text,
+      ),
+    ), input.tree.nodes.flatMap((node) => node.kind === 'text' ? [{
+      family: node.font.family,
+      weight: node.font.weight,
+      size: node.font.size,
+      text: node.text,
+    }] : []));
+    if (missingFonts.length > 0) {
+      throw new Error(`렌더링에 필요한 font가 로드되지 않았습니다: ${JSON.stringify(missingFonts)}`);
+    }
     await page.screenshot({ path: pngPath, type: 'png', animations: 'disabled' });
   } finally {
     await page.close();

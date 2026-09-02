@@ -1,0 +1,67 @@
+{
+  "brief": {
+    "schemaVersion": "0.1",
+    "briefId": "brief-9c3da1409580cd21",
+    "slideId": "dodge-feature-spec-01",
+    "sourceContentHash": "a69d0a461335ffff0bca8109d8828130b302b4217f8fe7d4ec67d08ba3350e42",
+    "corpusSnapshotHash": "c40e49f2aa6275b5e4d543c639b7a012586df53294caeba74c0ba34677b83088",
+    "intent": "comparison",
+    "semanticShape": "comparison",
+    "relationshipShape": [
+      "compares-with"
+    ],
+    "primaryArtifact": "comparison-field",
+    "densityBand": "dense",
+    "readingPathCandidates": [
+      "before-after",
+      "left-to-right"
+    ],
+    "audience": "game-design-reviewer",
+    "outputProfile": "pdf-presentation",
+    "avoidSignatures": []
+  },
+  "results": [
+    {
+      "referenceId": "ext-2025-shadowverse-super-evolution",
+      "score": 0.8143,
+      "semanticScore": 0.7143,
+      "exactRuleScore": 1,
+      "matched": [
+        "intent",
+        "semantic-shape",
+        "relationship-shape",
+        "primary-artifact",
+        "reading-path"
+      ]
+    },
+    {
+      "referenceId": "ref-ppt-agent-functional",
+      "score": 0.2022,
+      "semanticScore": 0.1091,
+      "exactRuleScore": 0.375,
+      "matched": [
+        "intent",
+        "density"
+      ]
+    },
+    {
+      "referenceId": "ref-oh-my-ppt-layout",
+      "score": 0.1969,
+      "semanticScore": 0.101,
+      "exactRuleScore": 0.375,
+      "matched": [
+        "intent",
+        "reading-path"
+      ]
+    },
+    {
+      "referenceId": "ref-marp-reproducible",
+      "score": 0.0219,
+      "semanticScore": 0,
+      "exactRuleScore": 0.0625,
+      "matched": [
+        "reading-path"
+      ]
+    }
+  ]
+}

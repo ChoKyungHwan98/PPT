@@ -1,0 +1,75 @@
+{
+  "schemaVersion": "0.1",
+  "purpose": "External Master Reference for GAME PPT DESIGNER V1",
+  "status": "reference-only",
+  "rules": [
+    "이 자료는 External Master Reference다. ready Golden Case가 아니다.",
+    "사용자 승인 없이 positive/ready fixture로 등록하지 않는다.",
+    "행사 프레임/로고/브랜드 스타일을 복제하지 않는다.",
+    "레이아웃 좌표를 그대로 템플릿화하지 않는다.",
+    "배워야 하는 것은 정보 구조, 위계, 비교 방식, 관계 표현, annotation 방식이다.",
+    "각 reference는 적용 맥락과 선정 이유를 함께 보존한다."
+  ],
+  "references": [
+    {
+      "file": "01_pokemon_problem_task-leak.png",
+      "origin": "Pokemon TCG Pocket / CEDEC 2025",
+      "year": 2025,
+      "grammar": "Problem / Diagnosis",
+      "whySelected": "문제 설명 → 기존 프로세스 → 누락된 문제 강조. 실패 원인을 흐름 안에서 시각적으로 드러내는 참고.",
+      "userStatus": "selected-as-external-master-reference",
+      "readyGolden": false,
+      "sha256": "ab4d90b80aeeeb6cee1c747f15971715109ce307730c68501e1b58824d0409a0"
+    },
+    {
+      "file": "02_pokemon_card-format-concept.png",
+      "origin": "Pokemon TCG Pocket / 2025",
+      "year": 2025,
+      "grammar": "Feature Concept / UI Annotation",
+      "whySelected": "하나의 기능/오브젝트를 실제 구성 요소로 분해하고, 각 요소의 역할을 annotation으로 연결하는 참고.",
+      "userStatus": "selected-as-external-master-reference",
+      "readyGolden": false,
+      "sha256": "452794f8bd540715f836dcc05219dbae3214d982378b11536b533664cbafad3a"
+    },
+    {
+      "file": "03_pokemon_initiative-team-structure.png",
+      "origin": "Pokemon TCG Pocket / CEDEC 2025",
+      "year": 2025,
+      "grammar": "Organization / Structure",
+      "whySelected": "텍스트 설명 + 조직 구조 도식의 병치. 좌측 설명과 우측 구조를 서로 보완하게 만드는 참고.",
+      "userStatus": "selected-as-external-master-reference",
+      "readyGolden": false,
+      "sha256": "00d9d360009c08361054ba9c1d618818d543704c4e427a97235fe17c30f74345"
+    },
+    {
+      "file": "04_shadowverse_accessibility-vs-competitiveness.png",
+      "origin": "Shadowverse: Worlds Beyond / CEDEC 2025",
+      "year": 2025,
+      "grammar": "Trade-off / Problem Framing",
+      "whySelected": "서로 충돌하는 설계 목표를 대립 구조로 설명하는 참고. 캐릭터/말풍선은 장식이 아니라 관점 구분 역할.",
+      "userStatus": "selected-as-external-master-reference",
+      "readyGolden": false,
+      "sha256": "362d30d02a379bc71300488a63a438cb147186c5f0a219589f46fb645f8f9bd2"
+    },
+    {
+      "file": "05_shadowverse_super-evolution.png",
+      "origin": "Shadowverse: Worlds Beyond / CEDEC 2025",
+      "year": 2025,
+      "grammar": "Before-After / Feature Spec",
+      "whySelected": "기존 사양과 신규 사양을 좌우 비교하고 차이를 시각적으로 즉시 식별하게 하는 참고.",
+      "userStatus": "selected-as-external-master-reference",
+      "readyGolden": false,
+      "sha256": "1cb60b26bcef9a1da3dbfc09112752a535a364773f208b63e19d8a7469619ede"
+    },
+    {
+      "file": "06_shadowverse_rules-vs-card-ability.png",
+      "origin": "Shadowverse: Worlds Beyond / CEDEC 2025",
+      "year": 2025,
+      "grammar": "System Comparison / Countermeasure",
+      "whySelected": "규칙 레벨 대응과 카드 능력 레벨 대응을 병렬 비교. 원인/대응 관계를 두 컬럼으로 나눠 설명하는 참고.",
+      "userStatus": "selected-as-external-master-reference",
+      "readyGolden": false,
+      "sha256": "c6972da8ac4e61abd4ba32f96eea583781ddbb8642cfeca5a0dea6d88b0d0726"
+    }
+  ]
+}

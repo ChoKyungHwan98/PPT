@@ -212,7 +212,10 @@ export function validateCompositionPlan(
     }
     if (
       selectedFragments.length > 0 &&
-      !selectedFragments.some((fragment) => fragment.sourceReferenceIds.includes(referenceId))
+      !selectedFragments.some((fragment) =>
+        fragment.sourceReferenceIds.includes(referenceId) ||
+        fragment.retrievalSupportReferenceIds?.includes(referenceId),
+      )
     ) {
       issues.push({
         path: 'referenceIds',

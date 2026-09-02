@@ -17,11 +17,65 @@ const PaintSchema = z.strictObject({
   opacity: z.number().min(0).max(1).optional(),
 });
 
+const RenderSourceTransformSchema = z.discriminatedUnion('kind', [
+  z.strictObject({ kind: z.literal('exact') }),
+  z.strictObject({ kind: z.literal('join'), separator: z.string() }),
+]);
+
+export const MessagePresentationRecordSchema = z.discriminatedUnion('presentationKind', [
+  z.strictObject({
+    presentationKind: z.enum(['headline', 'context']),
+    sourceSpanIds: z.array(z.string().min(1)).min(1),
+    sourceTransform: RenderSourceTransformSchema,
+  }),
+  z.strictObject({
+    presentationKind: z.literal('suppressed-duplicate'),
+    sourceSpanIds: z.array(z.string().min(1)).min(1),
+    sourceTransform: RenderSourceTransformSchema,
+    suppressionReason: z.literal('all-message-content-is-already-presented-by-blocks'),
+  }),
+]);
+
+export type MessagePresentationRecord = z.infer<typeof MessagePresentationRecordSchema>;
+
+export const RenderVisualRoleSchema = z.enum([
+  'page-title',
+  'comparison-field',
+  'comparison-header',
+  'comparison-pair',
+  'comparison-before',
+  'comparison-after',
+  'message-context',
+  'phase-container',
+  'ordered-step',
+  'threshold-boundary',
+  'threshold-event',
+  'consequence-result',
+  'relation-carrier',
+]);
+
+export const RelationVisualRoleSchema = z.enum([
+  'comparison-change',
+  'accumulation-local',
+  'threshold-entry',
+  'consequence-activation',
+  'consequence-local',
+]);
+
+export const SourceUsageSchema = z.enum(['content', 'context-repeat']);
+
+export type RenderVisualRole = z.infer<typeof RenderVisualRoleSchema>;
+export type RelationVisualRole = z.infer<typeof RelationVisualRoleSchema>;
+export type SourceUsage = z.infer<typeof SourceUsageSchema>;
+
 const NodeBaseShape = {
   nodeId: z.string().min(1),
   parentId: z.string().min(1).optional(),
   semanticBlockId: z.string().min(1).optional(),
   relationId: z.string().min(1).optional(),
+  compositionRegionId: z.string().min(1).optional(),
+  visualRole: RenderVisualRoleSchema.optional(),
+  relationVisualRole: RelationVisualRoleSchema.optional(),
   zIndex: z.number().int(),
   box: BoxSchema,
   clip: z.boolean(),
@@ -53,10 +107,7 @@ const TextNodeSchema = z.strictObject({
   kind: z.literal('text'),
   text: z.string().min(1),
   sourceSpanIds: z.array(z.string().min(1)).min(1),
-  sourceTransform: z.discriminatedUnion('kind', [
-    z.strictObject({ kind: z.literal('exact') }),
-    z.strictObject({ kind: z.literal('join'), separator: z.string() }),
-  ]),
+  sourceTransform: RenderSourceTransformSchema,
   font: z.strictObject({
     family: z.string().min(1),
     fileHash: z.string().regex(/^[a-f0-9]{64}$/),
@@ -67,6 +118,7 @@ const TextNodeSchema = z.strictObject({
   }),
   color: z.string().regex(/^#[A-Fa-f0-9]{6}$/),
   align: z.enum(['start', 'center', 'end']),
+  sourceUsage: SourceUsageSchema.optional(),
   lines: z.array(TextLineSchema).min(1),
 });
 
@@ -95,6 +147,8 @@ export const RenderTreeSchema = z
     compositionPlanId: z.string().min(1),
     slideId: z.string().min(1),
     pageProfile: PageProfileSchema,
+    layoutFamily: z.string().min(1).optional(),
+    messagePresentation: MessagePresentationRecordSchema.optional(),
     background: z.string().regex(/^#[A-Fa-f0-9]{6}$/),
     nodes: z.array(RenderNodeSchema).min(1),
     deterministicFingerprint: z.string().regex(/^[a-f0-9]{64}$/),
@@ -111,6 +165,23 @@ export const RenderTreeSchema = z
       if (node.parentId !== undefined && !ids.has(node.parentId)) {
         context.addIssue({ code: 'custom', path: ['nodes', index, 'parentId'], message: '부모 render node가 존재하지 않습니다.' });
       }
+      if (node.relationVisualRole !== undefined && node.relationId === undefined) {
+        context.addIssue({
+          code: 'custom',
+          path: ['nodes', index, 'relationVisualRole'],
+          message: 'relation visual role에는 source relationId가 필요합니다.',
+        });
+      }
+    }
+    if (
+      tree.messagePresentation !== undefined &&
+      tree.layoutFamily !== 'accumulation-threshold-consequence'
+    ) {
+      context.addIssue({
+        code: 'custom',
+        path: ['messagePresentation'],
+        message: 'V1 message presentation 기록은 accumulation-threshold-consequence layout에만 사용합니다.',
+      });
     }
   });
 
@@ -198,7 +269,7 @@ export function validateRenderTreeAgainstSlide(tree: RenderTree, slide: SlideIR)
           message: '표시 텍스트를 사용자 원문으로 역추적할 수 없습니다.',
           evidence: { text: node.text, sourceSpanIds: node.sourceSpanIds },
         });
-      } else {
+      } else if (node.sourceUsage !== 'context-repeat') {
         const coveredByNode = new Set<number>();
         for (const span of spans) {
           if (span === undefined) continue;

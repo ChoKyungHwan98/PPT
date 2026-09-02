@@ -11,11 +11,156 @@ import {
 import type { FontAsset } from './font.js';
 import type { TextMeasureRequest, TextMeasurement } from './measure.js';
 import { measuredTextNode, vectorNode } from './node-builders.js';
+import { alignedFeatureMeasureRequests, buildAlignedFeatureRenderTree } from './aligned-feature-layout.js';
+import {
+  classifyRelationVisualRole,
+  messagePresentationRecord,
+  resolveMessagePresentation,
+} from './render-contract.js';
 
 type Region = CompositionPlan['regions'][number];
 type Binding = CompositionPlan['bindings'][number];
 type Box = RenderNode['box'];
 type RegionPlacement = { region: Region; box: Box };
+
+export type AccumulationLayoutPolishProfile =
+  | 'balanced-runway'
+  | 'balanced-runway-expanded'
+  | 'balanced-runway-gentle-buildup'
+  | 'balanced-runway-final'
+  | 'balanced-runway-revision-1';
+
+type AccumulationLayoutPolishSpec = {
+  contentTop: number;
+  contentHeight: number;
+  contentSide: number;
+  regionGap: number;
+  accumulationTrackRatio: number;
+  accumulationRiseRatio: number;
+  accumulationBracketOffset: number;
+  accumulationBracketOpacity: number;
+  accumulationMarkerDiameter: number;
+  accumulationFinalMarkerDiameter: number;
+  thresholdYOffset: number;
+  thresholdTextOffset: number;
+  thresholdBoundaryRatio: number;
+  thresholdMarkerDiameter: number;
+  consequenceYOffset: number;
+  consequenceAxisAbove: number;
+  consequenceAxisBelow: number;
+  consequenceTextInset: number;
+  consequenceLineGap: number;
+};
+
+const ACCUMULATION_LAYOUT_POLISH: Record<AccumulationLayoutPolishProfile, AccumulationLayoutPolishSpec> = {
+  'balanced-runway': {
+    contentTop: 0.16,
+    contentHeight: 0.66,
+    contentSide: 0.07,
+    regionGap: 0.018,
+    accumulationTrackRatio: 0.5,
+    accumulationRiseRatio: 0,
+    accumulationBracketOffset: 54,
+    accumulationBracketOpacity: 0.26,
+    accumulationMarkerDiameter: 12,
+    accumulationFinalMarkerDiameter: 12,
+    thresholdYOffset: 0,
+    thresholdTextOffset: 58,
+    thresholdBoundaryRatio: 0.42,
+    thresholdMarkerDiameter: 32,
+    consequenceYOffset: 0,
+    consequenceAxisAbove: 76,
+    consequenceAxisBelow: 88,
+    consequenceTextInset: 34,
+    consequenceLineGap: 14,
+  },
+  'balanced-runway-expanded': {
+    contentTop: 0.14,
+    contentHeight: 0.72,
+    contentSide: 0.045,
+    regionGap: 0.014,
+    accumulationTrackRatio: 0.5,
+    accumulationRiseRatio: 0,
+    accumulationBracketOffset: 48,
+    accumulationBracketOpacity: 0.38,
+    accumulationMarkerDiameter: 13,
+    accumulationFinalMarkerDiameter: 16,
+    thresholdYOffset: 0,
+    thresholdTextOffset: 60,
+    thresholdBoundaryRatio: 0.4,
+    thresholdMarkerDiameter: 34,
+    consequenceYOffset: 0,
+    consequenceAxisAbove: 84,
+    consequenceAxisBelow: 96,
+    consequenceTextInset: 30,
+    consequenceLineGap: 7,
+  },
+  'balanced-runway-gentle-buildup': {
+    contentTop: 0.14,
+    contentHeight: 0.72,
+    contentSide: 0.045,
+    regionGap: 0.014,
+    accumulationTrackRatio: 0.54,
+    accumulationRiseRatio: -0.065,
+    accumulationBracketOffset: 48,
+    accumulationBracketOpacity: 0.38,
+    accumulationMarkerDiameter: 13,
+    accumulationFinalMarkerDiameter: 16,
+    thresholdYOffset: 0,
+    thresholdTextOffset: 60,
+    thresholdBoundaryRatio: 0.4,
+    thresholdMarkerDiameter: 34,
+    consequenceYOffset: 8,
+    consequenceAxisAbove: 84,
+    consequenceAxisBelow: 96,
+    consequenceTextInset: 30,
+    consequenceLineGap: 7,
+  },
+  'balanced-runway-final': {
+    contentTop: 0.135,
+    contentHeight: 0.73,
+    contentSide: 0.04,
+    regionGap: 0.013,
+    accumulationTrackRatio: 0.54,
+    accumulationRiseRatio: -0.055,
+    accumulationBracketOffset: 44,
+    accumulationBracketOpacity: 0.44,
+    accumulationMarkerDiameter: 13,
+    accumulationFinalMarkerDiameter: 16,
+    thresholdYOffset: 0,
+    thresholdTextOffset: 60,
+    thresholdBoundaryRatio: 0.4,
+    thresholdMarkerDiameter: 34,
+    consequenceYOffset: 6,
+    consequenceAxisAbove: 88,
+    consequenceAxisBelow: 100,
+    consequenceTextInset: 28,
+    consequenceLineGap: 5,
+  },
+  'balanced-runway-revision-1': {
+    contentTop: 0.11,
+    contentHeight: 0.78,
+    contentSide: 0.032,
+    regionGap: 0.012,
+    accumulationTrackRatio: 0.54,
+    accumulationRiseRatio: -0.055,
+    accumulationBracketOffset: 52,
+    accumulationBracketOpacity: 0.44,
+    accumulationMarkerDiameter: 13,
+    accumulationFinalMarkerDiameter: 16,
+    thresholdYOffset: 0,
+    thresholdTextOffset: 60,
+    thresholdBoundaryRatio: 0.46,
+    thresholdMarkerDiameter: 34,
+    consequenceYOffset: 0,
+    consequenceAxisAbove: 104,
+    consequenceAxisBelow: 116,
+    consequenceTextInset: 28,
+    consequenceLineGap: 5,
+  },
+};
+
+const DEFAULT_ACCUMULATION_LAYOUT_POLISH: AccumulationLayoutPolishProfile = 'balanced-runway-final';
 type BlockPlacement = {
   binding: Binding;
   region: Region;
@@ -49,6 +194,8 @@ function measureKey(blockId: string, index: number): string {
   return `information:${blockId}:${index}`;
 }
 
+const MESSAGE_MEASURE_KEY = 'information:message-context';
+
 function requirePlanForInformation(plan: CompositionPlan, informationPlan: InformationPlan): void {
   if (plan.informationPlanId !== informationPlan.informationPlanId) {
     throw new Error('다른 InformationPlan의 CompositionPlan을 렌더링할 수 없습니다.');
@@ -65,14 +212,19 @@ function styleForBinding(input: {
   const hierarchy = input.plan.styleIntent.hierarchy;
   const isPrimary = input.region.role === 'primary-artifact';
   const isEvidence = input.region.role === 'evidence';
+  const isConsequenceMetric =
+    input.region.regionId === 'phase-consequence' && input.block.kind === 'metric';
   let size = isPrimary
     ? hierarchy.primaryTextSize
     : isEvidence
       ? hierarchy.evidenceTextSize
       : hierarchy.supportTextSize;
-  if (input.binding.fragmentRole === 'modifier' && input.refIndex === 1) size += 12;
+  if (isConsequenceMetric && input.refIndex === 1) {
+    size = Math.min(hierarchy.primaryTextSize - 8, hierarchy.evidenceTextSize + 12);
+  }
+  else if (input.binding.fragmentRole === 'modifier' && input.refIndex === 1) size += 12;
   else if (!isPrimary) size += Math.max(-2, input.binding.prominence - 3) * 2;
-  const weight = isPrimary || input.binding.prominence >= 4
+  const weight = isPrimary || (isConsequenceMetric && input.refIndex === 1) || input.binding.prominence >= 4
     ? hierarchy.primaryWeight
     : hierarchy.supportWeight;
   return { weight, size, letterSpacing: size >= 60 ? -0.8 : size >= 40 ? -0.5 : -0.25 };
@@ -85,8 +237,9 @@ export function informationMeasureRequests(input: {
   plan: CompositionPlan;
 }): TextMeasureRequest[] {
   requirePlanForInformation(input.plan, input.informationPlan);
+  if (input.plan.layout.layoutFamily === 'aligned-before-after-spec') return alignedFeatureMeasureRequests(input);
   const regions = new Map(input.plan.regions.map((region) => [region.regionId, region]));
-  return [...input.plan.bindings]
+  const blockRequests = [...input.plan.bindings]
     .sort((left, right) => left.readingOrder - right.readingOrder)
     .flatMap((binding) => {
       const block = input.slide.blocks.find((candidate) => candidate.id === binding.blockId);
@@ -100,6 +253,28 @@ export function informationMeasureRequests(input: {
         ...styleForBinding({ plan: input.plan, binding, region, refIndex: index, block }),
       }));
     });
+  if (input.plan.layout.layoutFamily !== 'accumulation-threshold-consequence') {
+    return blockRequests;
+  }
+  const presentation = resolveMessagePresentation({
+    message: input.informationPlan.message,
+    slide: input.slide,
+  });
+  if (presentation.presentationKind === 'suppressed-duplicate') return blockRequests;
+  const hierarchy = input.plan.styleIntent.hierarchy;
+  const size = presentation.presentationKind === 'headline'
+    ? Math.min(hierarchy.primaryTextSize, hierarchy.supportTextSize + 12)
+    : Math.max(16, hierarchy.supportTextSize - 4);
+  return [{
+    key: MESSAGE_MEASURE_KEY,
+    text: presentation.text,
+    family: 'Pretendard',
+    weight: presentation.presentationKind === 'headline'
+      ? hierarchy.primaryWeight
+      : hierarchy.supportWeight,
+    size,
+    letterSpacing: size >= 40 ? -0.5 : -0.25,
+  }, ...blockRequests];
 }
 
 function requiredMeasurement(measures: Map<string, TextMeasurement>, blockId: string, index: number): TextMeasurement {
@@ -210,8 +385,30 @@ function causalSpineRegions(plan: CompositionPlan, contentRegions: Region[]): Re
   );
 }
 
+function accumulationThresholdConsequenceRegions(
+  plan: CompositionPlan,
+  contentRegions: Region[],
+  polish: AccumulationLayoutPolishSpec,
+): RegionPlacement[] {
+  const width = plan.pageProfile.width;
+  const height = plan.pageProfile.height;
+  return allocateHorizontal(
+    contentRegions,
+    {
+      x: width * polish.contentSide,
+      y: height * polish.contentTop,
+      width: width * (1 - polish.contentSide * 2),
+      height: height * polish.contentHeight,
+    },
+    width * polish.regionGap,
+  );
+}
+
 /** layoutFamily chooses topology; region order, weight, and role determine actual boxes. */
-function placeRegions(plan: CompositionPlan): RegionPlacement[] {
+function placeRegions(
+  plan: CompositionPlan,
+  polishProfile: AccumulationLayoutPolishProfile,
+): RegionPlacement[] {
   const contentRegions = [...plan.regions]
     .filter((region) => !['message', 'navigation', 'annotation'].includes(region.role))
     .sort((left, right) => left.order - right.order);
@@ -221,6 +418,16 @@ function placeRegions(plan: CompositionPlan): RegionPlacement[] {
   }
   if (plan.layout.layoutFamily === 'editorial-causal-spine') {
     return [...auxiliary, ...causalSpineRegions(plan, contentRegions)];
+  }
+  if (plan.layout.layoutFamily === 'accumulation-threshold-consequence') {
+    return [
+      ...auxiliary,
+      ...accumulationThresholdConsequenceRegions(
+        plan,
+        contentRegions,
+        ACCUMULATION_LAYOUT_POLISH[polishProfile],
+      ),
+    ];
   }
   const width = plan.pageProfile.width;
   const height = plan.pageProfile.height;
@@ -539,6 +746,696 @@ function connectorMarkers(plan: CompositionPlan, blocks: BlockPlacement[]): Rend
     });
 }
 
+type AccumulationPlacement = BlockPlacement & {
+  laneIndex: number;
+  positionInLane: number;
+  laneSize: number;
+  slotBox: Box;
+};
+
+function maximumMeasuredWidth(
+  slide: SlideIR,
+  measures: Map<string, TextMeasurement>,
+  binding: Binding,
+): number {
+  const block = slide.blocks.find((candidate) => candidate.id === binding.blockId);
+  if (block === undefined) throw new Error(`SlideIR block을 찾을 수 없습니다: ${binding.blockId}`);
+  return Math.max(
+    1,
+    ...contentRefsForBlock(block).map((_, index) => requiredMeasurement(measures, block.id, index).width),
+  );
+}
+
+/**
+ * Accumulation is a bounded ordered sequence. Up to four measured steps share one lane;
+ * longer or wider content deterministically wraps in reading order without shrinking text.
+ */
+function placeAccumulationSequence(input: {
+  slide: SlideIR;
+  plan: CompositionPlan;
+  regionPlacement: RegionPlacement;
+  bindings: Binding[];
+  measures: Map<string, TextMeasurement>;
+  polish: AccumulationLayoutPolishSpec;
+}): AccumulationPlacement[] {
+  const bindings = [...input.bindings].sort((left, right) => left.readingOrder - right.readingOrder);
+  if (bindings.length === 0) return [];
+  const scale = input.plan.pageProfile.width / 1920;
+  const padding = paddingFor(input.regionPlacement.region.paddingToken, scale);
+  const inner: Box = {
+    x: input.regionPlacement.box.x + padding,
+    y: input.regionPlacement.box.y + padding,
+    width: Math.max(1, input.regionPlacement.box.width - padding * 2),
+    height: Math.max(1, input.regionPlacement.box.height - padding * 2),
+  };
+  const minimumGap = 34 * scale;
+  const widestText = Math.max(...bindings.map((binding) =>
+    maximumMeasuredWidth(input.slide, input.measures, binding),
+  ));
+  const minimumSlotWidth = widestText + minimumGap;
+  const measuredCapacity = Math.max(1, Math.floor(inner.width / minimumSlotWidth));
+  const itemsPerLane = Math.max(1, Math.min(4, bindings.length, measuredCapacity));
+  const laneCount = Math.ceil(bindings.length / itemsPerLane);
+  const laneHeight = inner.height / laneCount;
+  const parentId = `region-${input.regionPlacement.region.regionId}`;
+
+  return bindings.map((binding, index) => {
+    const laneIndex = Math.floor(index / itemsPerLane);
+    const laneStart = laneIndex * itemsPerLane;
+    const laneSize = Math.min(itemsPerLane, bindings.length - laneStart);
+    const positionInLane = index - laneStart;
+    const slotWidth = inner.width / laneSize;
+    const readingProgress = bindings.length === 1 ? 0 : index / (bindings.length - 1);
+    const trackRatio = clamp(
+      input.polish.accumulationTrackRatio + input.polish.accumulationRiseRatio * readingProgress,
+      0.24,
+      0.76,
+    );
+    const trackY = inner.y + laneHeight * laneIndex + laneHeight * trackRatio;
+    return {
+      binding,
+      region: input.regionPlacement.region,
+      parentId,
+      x: inner.x + slotWidth * (positionInLane + 0.5),
+      baselineY: trackY - 42 * scale,
+      connectorY: trackY,
+      laneIndex,
+      positionInLane,
+      laneSize,
+      slotBox: {
+        x: inner.x + slotWidth * positionInLane,
+        y: inner.y + laneHeight * laneIndex,
+        width: slotWidth,
+        height: laneHeight,
+      },
+    };
+  });
+}
+
+function placeThresholdEvents(input: {
+  plan: CompositionPlan;
+  regionPlacement: RegionPlacement;
+  bindings: Binding[];
+  entryY: number;
+  polish: AccumulationLayoutPolishSpec;
+}): BlockPlacement[] {
+  const bindings = [...input.bindings].sort((left, right) => left.readingOrder - right.readingOrder);
+  if (bindings.length === 0) return [];
+  const scale = input.plan.pageProfile.width / 1920;
+  const padding = paddingFor(input.regionPlacement.region.paddingToken, scale);
+  const inner: Box = {
+    x: input.regionPlacement.box.x + padding,
+    y: input.regionPlacement.box.y + padding,
+    width: Math.max(1, input.regionPlacement.box.width - padding * 2),
+    height: Math.max(1, input.regionPlacement.box.height - padding * 2),
+  };
+  const centerY = clamp(
+    input.entryY + input.polish.thresholdYOffset * scale,
+    inner.y + inner.height * 0.26,
+    inner.y + inner.height * 0.74,
+  );
+  const eventGap = Math.min(110 * scale, inner.height / Math.max(1, bindings.length));
+  const centerIndex = (bindings.length - 1) / 2;
+  return bindings.map((binding, index) => {
+    const connectorY = centerY + (index - centerIndex) * eventGap;
+    return {
+      binding,
+      region: input.regionPlacement.region,
+      parentId: `region-${input.regionPlacement.region.regionId}`,
+      x: inner.x + inner.width / 2,
+      baselineY: connectorY - input.polish.thresholdTextOffset * scale,
+      connectorY,
+    };
+  });
+}
+
+function placeConsequenceResults(input: {
+  plan: CompositionPlan;
+  regionPlacement: RegionPlacement;
+  bindings: Binding[];
+  activationY: number;
+  polish: AccumulationLayoutPolishSpec;
+}): BlockPlacement[] {
+  const bindings = [...input.bindings].sort((left, right) => left.readingOrder - right.readingOrder);
+  if (bindings.length === 0) return [];
+  const scale = input.plan.pageProfile.width / 1920;
+  const padding = paddingFor(input.regionPlacement.region.paddingToken, scale);
+  const inner: Box = {
+    x: input.regionPlacement.box.x + padding,
+    y: input.regionPlacement.box.y + padding,
+    width: Math.max(1, input.regionPlacement.box.width - padding * 2),
+    height: Math.max(1, input.regionPlacement.box.height - padding * 2),
+  };
+  const axisX = inner.x + inner.width * 0.12;
+  const firstY = clamp(
+    input.activationY + input.polish.consequenceYOffset * scale,
+    inner.y + inner.height * 0.2,
+    inner.y + inner.height * 0.68,
+  );
+  const availableAfterFirst = inner.y + inner.height * 0.82 - firstY;
+  const gap = bindings.length === 1
+    ? 0
+    : Math.min(170 * scale, availableAfterFirst / (bindings.length - 1));
+  return bindings.map((binding, index) => {
+    const connectorY = firstY + gap * index;
+    return {
+      binding,
+      region: input.regionPlacement.region,
+      parentId: `region-${input.regionPlacement.region.regionId}`,
+      x: axisX + input.polish.consequenceTextInset * scale,
+      baselineY: connectorY,
+      connectorY,
+    };
+  });
+}
+
+function blockTextNodes(input: {
+  slide: SlideIR;
+  plan: CompositionPlan;
+  placement: BlockPlacement;
+  measures: Map<string, TextMeasurement>;
+  fonts: FontAsset[];
+  parentId?: string;
+  compositionRegionId?: string;
+  visualRole?: 'ordered-step' | 'threshold-event' | 'consequence-result';
+  align?: 'start' | 'center' | 'end';
+  lineGap?: number;
+}): RenderNode[] {
+  const block = input.slide.blocks.find((candidate) => candidate.id === input.placement.binding.blockId);
+  if (block === undefined) throw new Error(`SlideIR block을 찾을 수 없습니다: ${input.placement.binding.blockId}`);
+  const refs = contentRefsForBlock(block);
+  const scale = input.plan.pageProfile.width / 1920;
+  const lineGap = (input.lineGap ?? 14) * scale;
+  const measured = refs.map((_, index) => requiredMeasurement(input.measures, block.id, index));
+  const totalHeight = measured.reduce(
+    (sum, measurement) => sum + measurement.actualBoundingBoxAscent + measurement.actualBoundingBoxDescent,
+    0,
+  ) + lineGap * Math.max(0, measured.length - 1);
+  let baseline = input.placement.baselineY - totalHeight / 2 + (measured[0]?.actualBoundingBoxAscent ?? 0);
+  const accented = input.placement.region.role === input.plan.styleIntent.accent.targetRole;
+  return refs.map((ref, refIndex) => {
+    const measurement = measured[refIndex]!;
+    const isResultValue =
+      input.compositionRegionId === 'phase-consequence' && block.kind === 'metric' && refIndex === 1;
+    const node = measuredTextNode({
+      nodeId: `text-${block.id}-${refIndex}`,
+      parentId: input.parentId ?? input.placement.parentId,
+      semanticBlockId: block.id,
+      ...(input.compositionRegionId === undefined ? {} : { compositionRegionId: input.compositionRegionId }),
+      ...(input.visualRole === undefined ? {} : { visualRole: input.visualRole }),
+      text: ref.text,
+      sourceSpanIds: ref.sourceSpanIds,
+      x: input.placement.x,
+      baselineY: baseline,
+      align: input.align ?? 'center',
+      color: accented || isResultValue
+        ? input.plan.styleIntent.accent.color
+        : input.placement.binding.prominence <= 2
+          ? input.plan.styleIntent.palette.mutedInk
+          : input.plan.styleIntent.palette.ink,
+      measurement,
+      fonts: input.fonts,
+      zIndex: 3,
+    });
+    baseline += measurement.actualBoundingBoxDescent + lineGap + (measured[refIndex + 1]?.actualBoundingBoxAscent ?? 0);
+    return node;
+  });
+}
+
+function accumulationThresholdNodes(input: {
+  slide: SlideIR;
+  plan: CompositionPlan;
+  placements: RegionPlacement[];
+  bindingsByRegion: Map<string, Binding[]>;
+  measures: Map<string, TextMeasurement>;
+  fonts: FontAsset[];
+  polish: AccumulationLayoutPolishSpec;
+}): RenderNode[] {
+  const accumulationRegion = input.placements.find(
+    (placement) => placement.region.regionId === 'phase-accumulation',
+  );
+  if (accumulationRegion === undefined) throw new Error('phase-accumulation Composition region을 찾을 수 없습니다.');
+  const accumulationPlacements = placeAccumulationSequence({
+    slide: input.slide,
+    plan: input.plan,
+    regionPlacement: accumulationRegion,
+    bindings: input.bindingsByRegion.get('phase-accumulation') ?? [],
+    measures: input.measures,
+    polish: input.polish,
+  });
+  const thresholdRegion = input.placements.find(
+    (placement) => placement.region.regionId === 'phase-threshold',
+  );
+  if (thresholdRegion === undefined) throw new Error('phase-threshold Composition region을 찾을 수 없습니다.');
+  const lastAccumulation = [...accumulationPlacements]
+    .sort((left, right) => left.binding.readingOrder - right.binding.readingOrder)
+    .at(-1);
+  if (lastAccumulation === undefined) throw new Error('threshold 앞에 accumulation binding이 필요합니다.');
+  const thresholdPlacements = placeThresholdEvents({
+    plan: input.plan,
+    regionPlacement: thresholdRegion,
+    bindings: input.bindingsByRegion.get('phase-threshold') ?? [],
+    entryY: lastAccumulation.connectorY,
+    polish: input.polish,
+  });
+  const consequenceRegion = input.placements.find(
+    (placement) => placement.region.regionId === 'phase-consequence',
+  );
+  if (consequenceRegion === undefined) throw new Error('phase-consequence Composition region을 찾을 수 없습니다.');
+  const lastThreshold = [...thresholdPlacements]
+    .sort((left, right) => left.binding.readingOrder - right.binding.readingOrder)
+    .at(-1);
+  if (lastThreshold === undefined) throw new Error('consequence 앞에 threshold binding이 필요합니다.');
+  const consequencePlacements = placeConsequenceResults({
+    plan: input.plan,
+    regionPlacement: consequenceRegion,
+    bindings: input.bindingsByRegion.get('phase-consequence') ?? [],
+    activationY: lastThreshold.connectorY,
+    polish: input.polish,
+  });
+  const otherPlacements = input.placements
+    .filter((placement) =>
+      placement.region.regionId !== 'phase-accumulation' &&
+      placement.region.regionId !== 'phase-threshold' &&
+      placement.region.regionId !== 'phase-consequence',
+    )
+    .flatMap((placement) => placementsInRegion({
+      plan: input.plan,
+      placement,
+      bindings: input.bindingsByRegion.get(placement.region.regionId) ?? [],
+    }));
+  const allPlacements: BlockPlacement[] = [
+    ...accumulationPlacements,
+    ...thresholdPlacements,
+    ...consequencePlacements,
+    ...otherPlacements,
+  ];
+  const placementsByBlockId = new Map(allPlacements.map((placement) => [placement.binding.blockId, placement]));
+  const nodes: RenderNode[] = [];
+
+  const lanes = new Map<number, AccumulationPlacement[]>();
+  for (const placement of accumulationPlacements) {
+    const lane = lanes.get(placement.laneIndex) ?? [];
+    lane.push(placement);
+    lanes.set(placement.laneIndex, lane);
+  }
+  for (const [laneIndex, lane] of lanes) {
+    const ordered = [...lane].sort((left, right) => left.positionInLane - right.positionInLane);
+    const first = ordered[0]!;
+    const last = ordered.at(-1)!;
+    const isLevel = Math.abs(last.connectorY - first.connectorY) < 0.5;
+    nodes.push(vectorNode({
+      nodeId: `accumulation-shared-track-${laneIndex + 1}`,
+      parentId: first.parentId,
+      compositionRegionId: 'phase-accumulation',
+      shape: isLevel ? 'line' : 'path',
+      box: {
+        x: first.x,
+        y: Math.min(first.connectorY, last.connectorY),
+        width: Math.max(1, last.x - first.x),
+        height: Math.max(1, Math.abs(last.connectorY - first.connectorY)),
+      },
+      ...(isLevel ? {} : { pathData: `M ${first.x} ${first.connectorY} L ${last.x} ${last.connectorY}` }),
+      stroke: input.plan.styleIntent.palette.connector,
+      strokeWidth: Math.max(1, input.plan.styleIntent.motif.strokeWidth * 0.32),
+      opacity: 0.28,
+      zIndex: 0,
+    }));
+  }
+
+  const firstAccumulation = accumulationPlacements[0];
+  const lastAccumulationForBracket = accumulationPlacements.at(-1);
+  if (firstAccumulation !== undefined && lastAccumulationForBracket !== undefined) {
+    const bracketY = Math.max(...accumulationPlacements.map((placement) => placement.connectorY))
+      + input.polish.accumulationBracketOffset;
+    nodes.push(vectorNode({
+      nodeId: 'accumulation-group-bracket',
+      parentId: firstAccumulation.parentId,
+      compositionRegionId: 'phase-accumulation',
+      visualRole: 'phase-container',
+      shape: 'path',
+      box: {
+        x: firstAccumulation.x,
+        y: bracketY - 12,
+        width: Math.max(1, lastAccumulationForBracket.x - firstAccumulation.x),
+        height: 12,
+      },
+      pathData: `M ${firstAccumulation.x} ${bracketY - 12} V ${bracketY} H ${lastAccumulationForBracket.x} V ${bracketY - 12}`,
+      stroke: input.plan.styleIntent.palette.connector,
+      strokeWidth: 1.6,
+      opacity: input.polish.accumulationBracketOpacity,
+      zIndex: 0,
+    }));
+  }
+
+  for (const placement of accumulationPlacements) {
+    const stepGroupId = `ordered-step-${placement.binding.blockId}`;
+    const markerDiameter = placement.binding.prominence >= 4
+      ? input.polish.accumulationFinalMarkerDiameter
+      : input.polish.accumulationMarkerDiameter;
+    nodes.push({
+      nodeId: stepGroupId,
+      kind: 'group',
+      parentId: placement.parentId,
+      semanticBlockId: placement.binding.blockId,
+      compositionRegionId: 'phase-accumulation',
+      visualRole: 'ordered-step',
+      zIndex: 1,
+      box: placement.slotBox,
+      clip: false,
+      visible: true,
+    });
+    nodes.push(vectorNode({
+      nodeId: `ordered-step-anchor-${placement.binding.blockId}`,
+      parentId: stepGroupId,
+      semanticBlockId: placement.binding.blockId,
+      compositionRegionId: 'phase-accumulation',
+      visualRole: 'ordered-step',
+      shape: 'ellipse',
+      box: {
+        x: placement.x - markerDiameter / 2,
+        y: placement.connectorY - markerDiameter / 2,
+        width: markerDiameter,
+        height: markerDiameter,
+      },
+      fill: input.plan.styleIntent.palette.background,
+      stroke: input.plan.styleIntent.palette.connector,
+      strokeWidth: 2,
+      zIndex: 2,
+    }));
+    nodes.push(...blockTextNodes({
+      slide: input.slide,
+      plan: input.plan,
+      placement,
+      measures: input.measures,
+      fonts: input.fonts,
+      parentId: stepGroupId,
+      compositionRegionId: 'phase-accumulation',
+      visualRole: 'ordered-step',
+    }));
+  }
+
+  const thresholdCenterX = thresholdRegion.box.x + thresholdRegion.box.width / 2;
+  const thresholdMarkerRadius = input.polish.thresholdMarkerDiameter / 2;
+  const thresholdBoundaryHeight = thresholdRegion.box.height * input.polish.thresholdBoundaryRatio;
+  const thresholdConnectorY = thresholdPlacements[0]?.connectorY
+    ?? thresholdRegion.box.y + thresholdRegion.box.height / 2;
+  const thresholdBoundaryTop = thresholdConnectorY - thresholdBoundaryHeight / 2;
+  nodes.push(vectorNode({
+    nodeId: 'threshold-boundary-rule',
+    parentId: `region-${thresholdRegion.region.regionId}`,
+    compositionRegionId: 'phase-threshold',
+    visualRole: 'threshold-boundary',
+    shape: 'path',
+    box: {
+      x: thresholdCenterX,
+      y: thresholdBoundaryTop,
+      width: 1,
+      height: thresholdBoundaryHeight,
+    },
+    pathData: `M ${thresholdCenterX} ${thresholdBoundaryTop} V ${thresholdConnectorY - thresholdMarkerRadius - 8} M ${thresholdCenterX} ${thresholdConnectorY + thresholdMarkerRadius + 8} V ${thresholdBoundaryTop + thresholdBoundaryHeight}`,
+    stroke: input.plan.styleIntent.accent.color,
+    strokeWidth: Math.max(2, input.plan.styleIntent.motif.strokeWidth * 0.48),
+    opacity: 0.48,
+    zIndex: 0,
+  }));
+  for (const placement of thresholdPlacements) {
+    const eventGroupId = `threshold-event-${placement.binding.blockId}`;
+    const eventHeight = Math.min(thresholdRegion.box.height * 0.24, 150 * (input.plan.pageProfile.width / 1920));
+    nodes.push({
+      nodeId: eventGroupId,
+      kind: 'group',
+      parentId: placement.parentId,
+      semanticBlockId: placement.binding.blockId,
+      compositionRegionId: 'phase-threshold',
+      visualRole: 'threshold-event',
+      zIndex: 1,
+      box: {
+        x: thresholdRegion.box.x + thresholdRegion.box.width * 0.08,
+        y: placement.connectorY - eventHeight / 2,
+        width: thresholdRegion.box.width * 0.84,
+        height: eventHeight,
+      },
+      clip: false,
+      visible: true,
+    });
+    nodes.push(vectorNode({
+      nodeId: `threshold-event-marker-${placement.binding.blockId}`,
+      parentId: eventGroupId,
+      semanticBlockId: placement.binding.blockId,
+      compositionRegionId: 'phase-threshold',
+      visualRole: 'threshold-event',
+      shape: 'ellipse',
+      box: {
+        x: placement.x - thresholdMarkerRadius,
+        y: placement.connectorY - thresholdMarkerRadius,
+        width: input.polish.thresholdMarkerDiameter,
+        height: input.polish.thresholdMarkerDiameter,
+      },
+      fill: input.plan.styleIntent.accent.softColor,
+      stroke: input.plan.styleIntent.accent.color,
+      strokeWidth: Math.max(2, input.plan.styleIntent.motif.strokeWidth * 0.55),
+      zIndex: 2,
+    }));
+    nodes.push(...blockTextNodes({
+      slide: input.slide,
+      plan: input.plan,
+      placement,
+      measures: input.measures,
+      fonts: input.fonts,
+      parentId: eventGroupId,
+      compositionRegionId: 'phase-threshold',
+      visualRole: 'threshold-event',
+    }));
+  }
+
+  const consequenceAxisX = consequencePlacements[0]?.x === undefined
+    ? consequenceRegion.box.x + consequenceRegion.box.width * 0.16
+    : consequencePlacements[0].x
+      - input.polish.consequenceTextInset * (input.plan.pageProfile.width / 1920);
+  const firstConsequenceY = consequencePlacements[0]?.connectorY ?? consequenceRegion.box.y + consequenceRegion.box.height * 0.4;
+  const lastConsequenceY = consequencePlacements.at(-1)?.connectorY ?? firstConsequenceY;
+  const consequenceTop = Math.min(firstConsequenceY, lastConsequenceY) - input.polish.consequenceAxisAbove;
+  const consequenceBottom = Math.max(firstConsequenceY, lastConsequenceY) + input.polish.consequenceAxisBelow;
+  nodes.push(vectorNode({
+    nodeId: 'consequence-alignment-axis',
+    parentId: `region-${consequenceRegion.region.regionId}`,
+    compositionRegionId: 'phase-consequence',
+    shape: 'path',
+    box: {
+      x: consequenceAxisX,
+      y: consequenceTop,
+      width: 18,
+      height: Math.max(1, consequenceBottom - consequenceTop),
+    },
+    pathData: `M ${consequenceAxisX + 18} ${consequenceTop} H ${consequenceAxisX} V ${consequenceBottom} H ${consequenceAxisX + 18}`,
+    stroke: input.plan.styleIntent.palette.connector,
+    strokeWidth: Math.max(1, input.plan.styleIntent.motif.strokeWidth * 0.32),
+    opacity: 0.38,
+    zIndex: 0,
+  }));
+  for (const placement of consequencePlacements) {
+    const resultGroupId = `consequence-result-${placement.binding.blockId}`;
+    const resultHeight = Math.min(
+      consequenceRegion.box.height * 0.28,
+      170 * (input.plan.pageProfile.width / 1920),
+    );
+    nodes.push({
+      nodeId: resultGroupId,
+      kind: 'group',
+      parentId: placement.parentId,
+      semanticBlockId: placement.binding.blockId,
+      compositionRegionId: 'phase-consequence',
+      visualRole: 'consequence-result',
+      zIndex: 1,
+      box: {
+        x: consequenceAxisX,
+        y: placement.connectorY - resultHeight / 2,
+        width: consequenceRegion.box.x + consequenceRegion.box.width - consequenceAxisX,
+        height: resultHeight,
+      },
+      clip: false,
+      visible: true,
+    });
+    nodes.push(vectorNode({
+      nodeId: `consequence-result-anchor-${placement.binding.blockId}`,
+      parentId: resultGroupId,
+      semanticBlockId: placement.binding.blockId,
+      compositionRegionId: 'phase-consequence',
+      visualRole: 'consequence-result',
+      shape: 'path',
+      box: {
+        x: consequenceAxisX,
+        y: placement.connectorY,
+        width: 22,
+        height: 1,
+      },
+      pathData: `M ${consequenceAxisX} ${placement.connectorY} H ${consequenceAxisX + 22}`,
+      stroke: input.plan.styleIntent.accent.color,
+      strokeWidth: Math.max(2, input.plan.styleIntent.motif.strokeWidth * 0.52),
+      zIndex: 2,
+    }));
+    nodes.push(...blockTextNodes({
+      slide: input.slide,
+      plan: input.plan,
+      placement,
+      measures: input.measures,
+      fonts: input.fonts,
+      parentId: resultGroupId,
+      compositionRegionId: 'phase-consequence',
+      visualRole: 'consequence-result',
+      align: 'start',
+      lineGap: input.polish.consequenceLineGap,
+    }));
+  }
+
+  for (const relation of input.slide.relations) {
+    const classified = classifyRelationVisualRole({ relation, plan: input.plan });
+    const from = placementsByBlockId.get(relation.fromBlockId);
+    const to = placementsByBlockId.get(relation.toBlockId);
+    if (classified === undefined || from === undefined || to === undefined) continue;
+    if (classified.visualRole === 'accumulation-local') {
+      const fromAccumulation = accumulationPlacements.find((placement) => placement.binding.blockId === relation.fromBlockId);
+      const toAccumulation = accumulationPlacements.find((placement) => placement.binding.blockId === relation.toBlockId);
+      if (fromAccumulation === undefined || toAccumulation === undefined) continue;
+      const sameLane = fromAccumulation.laneIndex === toAccumulation.laneIndex;
+      const sameY = Math.abs(fromAccumulation.connectorY - toAccumulation.connectorY) < 0.5;
+      const markerInset = 6;
+      const direction = toAccumulation.x >= fromAccumulation.x ? 1 : -1;
+      const startX = fromAccumulation.x + direction * markerInset;
+      const endX = sameLane
+        ? toAccumulation.x - direction * markerInset
+        : toAccumulation.x + markerInset;
+      const bendX = accumulationRegion.box.x + accumulationRegion.box.width - 8;
+      const carrierXs = sameLane ? [startX, endX] : [startX, bendX, endX];
+      nodes.push(vectorNode({
+        nodeId: `accumulation-relation-${relation.id}`,
+        parentId: fromAccumulation.parentId,
+        compositionRegionId: 'phase-accumulation',
+        visualRole: 'relation-carrier',
+        relationVisualRole: 'accumulation-local',
+        relationId: relation.id,
+        shape: sameLane && sameY ? 'line' : 'path',
+        box: {
+          x: Math.min(...carrierXs),
+          y: Math.min(fromAccumulation.connectorY, toAccumulation.connectorY),
+          width: Math.max(1, Math.max(...carrierXs) - Math.min(...carrierXs)),
+          height: Math.max(1, Math.abs(toAccumulation.connectorY - fromAccumulation.connectorY)),
+        },
+        ...(sameLane && sameY ? {} : {
+          pathData: sameLane
+            ? `M ${startX} ${fromAccumulation.connectorY} L ${endX} ${toAccumulation.connectorY}`
+            : `M ${startX} ${fromAccumulation.connectorY} H ${bendX} V ${toAccumulation.connectorY} H ${endX}`,
+        }),
+        stroke: input.plan.styleIntent.palette.connector,
+        strokeWidth: Math.max(2, input.plan.styleIntent.motif.strokeWidth * 0.55),
+        zIndex: 1,
+      }));
+      continue;
+    }
+
+    if (classified.visualRole === 'threshold-entry') {
+      const startX = from.x + 6;
+      const endX = to.x - thresholdMarkerRadius;
+      const sameY = Math.abs(from.connectorY - to.connectorY) < 0.5;
+      const carrierXs = [startX, endX];
+      nodes.push(vectorNode({
+        nodeId: `threshold-entry-${relation.id}`,
+        parentId: `region-${thresholdRegion.region.regionId}`,
+        relationId: relation.id,
+        compositionRegionId: 'phase-threshold',
+        visualRole: 'relation-carrier',
+        relationVisualRole: 'threshold-entry',
+        shape: sameY ? 'line' : 'path',
+        box: {
+          x: Math.min(...carrierXs),
+          y: Math.min(from.connectorY, to.connectorY),
+          width: Math.max(1, Math.max(...carrierXs) - Math.min(...carrierXs)),
+          height: Math.max(1, Math.abs(to.connectorY - from.connectorY)),
+        },
+        ...(sameY ? {} : {
+          pathData: `M ${startX} ${from.connectorY} H ${(startX + endX) / 2} V ${to.connectorY} H ${endX}`,
+        }),
+        stroke: input.plan.styleIntent.accent.color,
+        strokeWidth: Math.max(2, input.plan.styleIntent.motif.strokeWidth * 0.58),
+        zIndex: 1,
+      }));
+      continue;
+    }
+
+    if (classified.visualRole === 'consequence-activation') {
+      const startX = from.x + thresholdMarkerRadius;
+      const endX = to.x
+        - input.polish.consequenceTextInset * (input.plan.pageProfile.width / 1920);
+      const sameY = Math.abs(from.connectorY - to.connectorY) < 0.5;
+      nodes.push(vectorNode({
+        nodeId: `consequence-activation-${relation.id}`,
+        parentId: `region-${consequenceRegion.region.regionId}`,
+        relationId: relation.id,
+        compositionRegionId: 'phase-consequence',
+        visualRole: 'relation-carrier',
+        relationVisualRole: 'consequence-activation',
+        shape: 'path',
+        box: {
+          x: Math.min(startX, endX),
+          y: Math.min(from.connectorY, to.connectorY),
+          width: Math.max(1, Math.abs(endX - startX)),
+          height: Math.max(1, Math.abs(to.connectorY - from.connectorY)),
+        },
+        pathData: sameY
+          ? `M ${startX} ${from.connectorY} H ${endX}`
+          : `M ${startX} ${from.connectorY} H ${(startX + endX) / 2} V ${to.connectorY} H ${endX}`,
+        stroke: input.plan.styleIntent.accent.color,
+        strokeWidth: Math.max(2, input.plan.styleIntent.motif.strokeWidth * 0.5),
+        opacity: 0.78,
+        zIndex: 1,
+      }));
+      continue;
+    }
+
+    if (classified.visualRole === 'consequence-local') {
+      const axisX = from.x
+        - input.polish.consequenceTextInset * (input.plan.pageProfile.width / 1920);
+      const startY = Math.min(from.connectorY, to.connectorY) + 2;
+      const endY = Math.max(from.connectorY, to.connectorY) - 2;
+      nodes.push(vectorNode({
+        nodeId: `consequence-local-${relation.id}`,
+        parentId: `region-${consequenceRegion.region.regionId}`,
+        relationId: relation.id,
+        compositionRegionId: 'phase-consequence',
+        visualRole: 'relation-carrier',
+        relationVisualRole: 'consequence-local',
+        shape: 'line',
+        box: {
+          x: axisX,
+          y: startY,
+          width: 1,
+          height: Math.max(1, endY - startY),
+        },
+        stroke: input.plan.styleIntent.palette.connector,
+        strokeWidth: Math.max(2, input.plan.styleIntent.motif.strokeWidth * 0.45),
+        zIndex: 1,
+      }));
+      continue;
+    }
+
+    throw new Error(`새 layout에서 지원하지 않는 relation visual role입니다: ${classified.visualRole}`);
+  }
+
+  for (const placement of otherPlacements) {
+    nodes.push(...blockTextNodes({
+      slide: input.slide,
+      plan: input.plan,
+      placement,
+      measures: input.measures,
+      fonts: input.fonts,
+      compositionRegionId: placement.binding.regionId,
+    }));
+  }
+
+  return nodes;
+}
+
 /**
  * CompositionPlan is authoritative. InformationPlan only verifies the contract link;
  * coordinates, order, grouping, hierarchy, and styling come from CompositionPlan.
@@ -549,9 +1446,12 @@ export function buildInformationRenderTree(input: {
   plan: CompositionPlan;
   measures: Map<string, TextMeasurement>;
   fonts: FontAsset[];
+  accumulationLayoutPolish?: AccumulationLayoutPolishProfile;
 }) {
   requirePlanForInformation(input.plan, input.informationPlan);
-  const placements = placeRegions(input.plan);
+  if (input.plan.layout.layoutFamily === 'aligned-before-after-spec') return buildAlignedFeatureRenderTree(input);
+  const accumulationLayoutPolish = input.accumulationLayoutPolish ?? DEFAULT_ACCUMULATION_LAYOUT_POLISH;
+  const placements = placeRegions(input.plan, accumulationLayoutPolish);
   const placementByRegion = new Map(placements.map((placement) => [placement.region.regionId, placement]));
   const bindingsByRegion = new Map<string, Binding[]>();
   for (const binding of input.plan.bindings) {
@@ -559,78 +1459,108 @@ export function buildInformationRenderTree(input: {
     bucket.push(binding);
     bindingsByRegion.set(binding.regionId, bucket);
   }
-  const rawBlockPlacements = placements.flatMap((placement) => placementsInRegion({
-    plan: input.plan,
-    placement,
-    bindings: bindingsByRegion.get(placement.region.regionId) ?? [],
-  }));
-  const sharedConnectorY = input.plan.layout.layoutFamily === 'threshold-field'
-    ? input.plan.pageProfile.height * 0.61
-    : input.plan.layout.layoutFamily === 'editorial-causal-spine'
-      ? input.plan.pageProfile.height * 0.62
-      : undefined;
-  const blockPlacements = sharedConnectorY === undefined
-    ? rawBlockPlacements
-    : rawBlockPlacements.map((placement) => {
-        if (input.plan.layout.layoutFamily !== 'editorial-causal-spine') {
-          return { ...placement, connectorY: sharedConnectorY };
-        }
-        const spineBaseline = placement.region.role === 'primary-artifact'
-          ? input.plan.pageProfile.height * 0.56
-          : placement.region.role === 'support' && placement.binding.readingOrder % 2 === 1
-            ? input.plan.pageProfile.height * 0.74
-            : input.plan.pageProfile.height * 0.46;
-        return { ...placement, baselineY: spineBaseline, connectorY: sharedConnectorY };
-      });
-  const placementByBlockId = new Map(blockPlacements.map((placement) => [placement.binding.blockId, placement]));
+  const isAccumulationLayout = input.plan.layout.layoutFamily === 'accumulation-threshold-consequence';
+  const messagePresentation = isAccumulationLayout
+    ? resolveMessagePresentation({ message: input.informationPlan.message, slide: input.slide })
+    : undefined;
 
-  const nodes: RenderNode[] = placements.map(regionGroupNode);
-  nodes.push(...motifNodes({ plan: input.plan, regions: placements, blocks: blockPlacements }));
-  for (const relation of input.slide.relations) {
-    const from = placementByBlockId.get(relation.fromBlockId);
-    const to = placementByBlockId.get(relation.toBlockId);
-    if (from === undefined || to === undefined) continue;
-    nodes.push(...relationNodes({ relationId: relation.id, nodeId: `relation-${relation.id}`, from, to, plan: input.plan }));
+  const nodes: RenderNode[] = placements.map((placement) => {
+    const group = regionGroupNode(placement);
+    if (
+      isAccumulationLayout &&
+      (
+        placement.region.regionId === 'phase-accumulation' ||
+        placement.region.regionId === 'phase-threshold' ||
+        placement.region.regionId === 'phase-consequence'
+      )
+    ) {
+      return {
+        ...group,
+        compositionRegionId: placement.region.regionId,
+        visualRole: 'phase-container' as const,
+      };
+    }
+    return group;
+  });
+  if (messagePresentation !== undefined && messagePresentation.presentationKind !== 'suppressed-duplicate') {
+    const messageRegion = placements.find((placement) => placement.region.regionId === 'message-context');
+    if (messageRegion === undefined) throw new Error('message-context Composition region을 찾을 수 없습니다.');
+    const measurement = input.measures.get(MESSAGE_MEASURE_KEY);
+    if (measurement === undefined) throw new Error('message-context 텍스트 측정값을 찾을 수 없습니다.');
+    const scale = input.plan.pageProfile.width / 1920;
+    const padding = paddingFor(messageRegion.region.paddingToken, scale);
+    nodes.push(measuredTextNode({
+      nodeId: 'message-context-text',
+      parentId: `region-${messageRegion.region.regionId}`,
+      compositionRegionId: messageRegion.region.regionId,
+      visualRole: 'message-context',
+      sourceUsage: messagePresentation.sourceUsage,
+      text: messagePresentation.text,
+      sourceSpanIds: messagePresentation.sourceSpanIds,
+      sourceTransform: messagePresentation.sourceTransform,
+      x: messageRegion.box.x + padding,
+      baselineY: messageRegion.box.y + messageRegion.box.height * 0.62,
+      align: 'start',
+      color: input.plan.styleIntent.palette.ink,
+      measurement,
+      fonts: input.fonts,
+      zIndex: 3,
+    }));
   }
-  nodes.push(...connectorMarkers(input.plan, blockPlacements));
-
-  for (const blockPlacement of blockPlacements) {
-    const block = input.slide.blocks.find((candidate) => candidate.id === blockPlacement.binding.blockId);
-    const regionPlacement = placementByRegion.get(blockPlacement.binding.regionId);
-    if (block === undefined) throw new Error(`SlideIR block을 찾을 수 없습니다: ${blockPlacement.binding.blockId}`);
-    if (regionPlacement === undefined) throw new Error(`Composition region을 찾을 수 없습니다: ${blockPlacement.binding.regionId}`);
-    const refs = contentRefsForBlock(block);
-    const lineGap = 14 * (input.plan.pageProfile.width / 1920);
-    const measured = refs.map((_, index) => requiredMeasurement(input.measures, block.id, index));
-    const totalHeight = measured.reduce(
-      (sum, measurement) => sum + measurement.actualBoundingBoxAscent + measurement.actualBoundingBoxDescent,
-      0,
-    ) + lineGap * Math.max(0, measured.length - 1);
-    let baseline = blockPlacement.baselineY - totalHeight / 2 + (measured[0]?.actualBoundingBoxAscent ?? 0);
-    const accented = blockPlacement.region.role === input.plan.styleIntent.accent.targetRole;
-    refs.forEach((ref, refIndex) => {
-      const measurement = measured[refIndex]!;
-      const isResultValue = blockPlacement.binding.fragmentRole === 'modifier' && refIndex === 1;
-      nodes.push(measuredTextNode({
-        nodeId: `text-${block.id}-${refIndex}`,
-        parentId: blockPlacement.parentId,
-        semanticBlockId: block.id,
-        text: ref.text,
-        sourceSpanIds: ref.sourceSpanIds,
-        x: blockPlacement.x,
-        baselineY: baseline,
-        align: 'center',
-        color: accented || isResultValue
-          ? input.plan.styleIntent.accent.color
-          : blockPlacement.binding.prominence <= 2
-            ? input.plan.styleIntent.palette.mutedInk
-            : input.plan.styleIntent.palette.ink,
-        measurement,
+  if (isAccumulationLayout) {
+    nodes.push(...accumulationThresholdNodes({
+      slide: input.slide,
+      plan: input.plan,
+      placements,
+      bindingsByRegion,
+      measures: input.measures,
+      fonts: input.fonts,
+      polish: ACCUMULATION_LAYOUT_POLISH[accumulationLayoutPolish],
+    }));
+  } else {
+    const rawBlockPlacements = placements.flatMap((placement) => placementsInRegion({
+      plan: input.plan,
+      placement,
+      bindings: bindingsByRegion.get(placement.region.regionId) ?? [],
+    }));
+    const sharedConnectorY = input.plan.layout.layoutFamily === 'threshold-field'
+      ? input.plan.pageProfile.height * 0.61
+      : input.plan.layout.layoutFamily === 'editorial-causal-spine'
+        ? input.plan.pageProfile.height * 0.62
+        : undefined;
+    const blockPlacements = sharedConnectorY === undefined
+      ? rawBlockPlacements
+      : rawBlockPlacements.map((placement) => {
+          if (input.plan.layout.layoutFamily !== 'editorial-causal-spine') {
+            return { ...placement, connectorY: sharedConnectorY };
+          }
+          const spineBaseline = placement.region.role === 'primary-artifact'
+            ? input.plan.pageProfile.height * 0.56
+            : placement.region.role === 'support' && placement.binding.readingOrder % 2 === 1
+              ? input.plan.pageProfile.height * 0.74
+              : input.plan.pageProfile.height * 0.46;
+          return { ...placement, baselineY: spineBaseline, connectorY: sharedConnectorY };
+        });
+    const placementByBlockId = new Map(blockPlacements.map((placement) => [placement.binding.blockId, placement]));
+    nodes.push(...motifNodes({ plan: input.plan, regions: placements, blocks: blockPlacements }));
+    for (const relation of input.slide.relations) {
+      const from = placementByBlockId.get(relation.fromBlockId);
+      const to = placementByBlockId.get(relation.toBlockId);
+      if (from === undefined || to === undefined) continue;
+      nodes.push(...relationNodes({ relationId: relation.id, nodeId: `relation-${relation.id}`, from, to, plan: input.plan }));
+    }
+    nodes.push(...connectorMarkers(input.plan, blockPlacements));
+    for (const blockPlacement of blockPlacements) {
+      const regionPlacement = placementByRegion.get(blockPlacement.binding.regionId);
+      if (regionPlacement === undefined) throw new Error(`Composition region을 찾을 수 없습니다: ${blockPlacement.binding.regionId}`);
+      nodes.push(...blockTextNodes({
+        slide: input.slide,
+        plan: input.plan,
+        placement: blockPlacement,
+        measures: input.measures,
         fonts: input.fonts,
-        zIndex: 3,
       }));
-      baseline += measurement.actualBoundingBoxDescent + lineGap + (measured[refIndex + 1]?.actualBoundingBoxAscent ?? 0);
-    });
+    }
   }
 
   return RenderTreeSchema.parse({
@@ -639,6 +1569,10 @@ export function buildInformationRenderTree(input: {
     compositionPlanId: input.plan.planId,
     slideId: input.slide.slideId,
     pageProfile: input.plan.pageProfile,
+    layoutFamily: input.plan.layout.layoutFamily,
+    ...(messagePresentation === undefined
+      ? {}
+      : { messagePresentation: messagePresentationRecord(messagePresentation) }),
     background: input.plan.styleIntent.palette.background,
     nodes,
     deterministicFingerprint: contentHash({
@@ -646,7 +1580,12 @@ export function buildInformationRenderTree(input: {
       informationPlanId: input.informationPlan.informationPlanId,
       compositionPlan: input.plan,
       fonts: input.fonts.map((font) => font.fileHash),
-      layoutVersion: 'composition-authoritative-v2',
+      layoutVersion: isAccumulationLayout
+        ? `accumulation-sequence-v1:${accumulationLayoutPolish}`
+        : 'composition-authoritative-v2',
+      ...(isAccumulationLayout
+        ? { accumulationLayoutPolish: ACCUMULATION_LAYOUT_POLISH[accumulationLayoutPolish] }
+        : {}),
     }),
   });
 }

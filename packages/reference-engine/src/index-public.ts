@@ -1,5 +1,7 @@
 export * from './curated-adapter.js';
 export * from './deduplicate.js';
+export * from './external-master.js';
+export * from './external-comparison-records.js';
 export * from './image-analysis.js';
 export * from './index.js';
 export * from './ocr.js';

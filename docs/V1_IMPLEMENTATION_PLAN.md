@@ -305,6 +305,8 @@ MEC-01 전용 Retrieval, Composition, Renderer 경로는 만들지 않는다.
 
 ### 단계 7 — 최대 한 번의 부분 수정
 
+현재 상태: **MEC-01 artifact 사이클 완료**. `f-relation-clarity-2`는 해결됐고 `f-space-use-1`은 미해결로 남았다. Hard Gate와 Source Fidelity는 PASS를 유지했으며 새 error는 없다. 결과는 `intermediate-golden-case / revised-needs-review`로 보존하고 추가 자동 수정 또는 `ready` 강제 승격을 금지한다. 이 완료는 ready Positive Fixture 확보를 뜻하지 않는다.
+
 - 검토 결과 중 안전하게 적용할 수 있는 수정만 반영한다.
 - 다시 렌더링하고 Hard Gate를 다시 실행한다.
 - 두 번째 전체 재생성은 하지 않는다.

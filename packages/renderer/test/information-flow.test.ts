@@ -48,9 +48,11 @@ function validArtifacts(fragmentId?: string) {
     slide,
     informationPlan,
     retrieval,
-    fragments: fragmentId === undefined
-      ? SEED_PATTERN_FRAGMENTS
-      : SEED_PATTERN_FRAGMENTS.filter((fragment) => fragment.fragmentId === fragmentId),
+    // 새 phase Pattern의 Renderer primitive는 다음 승인 단계에서 정한다.
+    // 이 기존 Renderer baseline은 승인된 threshold-field만 계속 검증한다.
+    fragments: SEED_PATTERN_FRAGMENTS.filter(
+      (fragment) => fragment.fragmentId === (fragmentId ?? 'pattern-break-threshold-field'),
+    ),
   });
   const tree = buildInformationRenderTree({
     slide,

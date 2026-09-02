@@ -1,0 +1,75 @@
+{
+  "schemaVersion": "0.1",
+  "informationPlanId": "information-dodge-feature-spec-01",
+  "slideId": "dodge-feature-spec-01",
+  "semanticShape": "comparison",
+  "grammarId": "before-after-feature-spec",
+  "message": {
+    "text": "공격 흐름을 끊지 않으면서,\n보스와의 근거리 공방을 지속할 수 있는 회피 시스템",
+    "sourceSpanIds": [
+      "intent"
+    ],
+    "locked": true,
+    "transform": {
+      "kind": "exact"
+    }
+  },
+  "primaryArtifactBlockId": "block-title",
+  "readingOrder": [
+    "block-title",
+    "block-intent-label",
+    "block-intent",
+    "block-before-label",
+    "block-after-label",
+    "block-before-cancel",
+    "block-after-cancel",
+    "block-before-direction",
+    "block-after-direction",
+    "block-before-lock",
+    "block-after-lock"
+  ],
+  "groups": [
+    {
+      "groupId": "authored-context",
+      "role": "context",
+      "order": 0,
+      "blockIds": [
+        "block-title",
+        "block-intent-label",
+        "block-intent"
+      ]
+    },
+    {
+      "groupId": "authored-before",
+      "role": "before",
+      "order": 1,
+      "blockIds": [
+        "block-before-label",
+        "block-before-cancel",
+        "block-before-direction",
+        "block-before-lock"
+      ]
+    },
+    {
+      "groupId": "authored-after",
+      "role": "after",
+      "order": 2,
+      "blockIds": [
+        "block-after-label",
+        "block-after-cancel",
+        "block-after-direction",
+        "block-after-lock"
+      ]
+    }
+  ],
+  "relationIds": [
+    "change-1",
+    "change-2",
+    "change-3"
+  ],
+  "interpretation": {
+    "author": "user",
+    "confidence": 1,
+    "ambiguityIds": []
+  }
+}

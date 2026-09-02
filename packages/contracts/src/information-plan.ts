@@ -17,7 +17,7 @@ export const InformationShapeSchema = z.enum([
 
 export const InformationGroupSchema = z.strictObject({
   groupId: z.string().min(1),
-  role: z.enum(['trigger', 'setup', 'transition', 'consequence', 'evidence', 'context']),
+  role: z.enum(['trigger', 'setup', 'transition', 'consequence', 'evidence', 'context', 'before', 'after']),
   order: z.number().int().nonnegative(),
   blockIds: z.array(z.string().min(1)).min(1),
 });

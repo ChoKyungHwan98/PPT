@@ -105,10 +105,17 @@ export const ReferenceRetrievalBriefSchema = z.strictObject({
 
 export type ReferenceRetrievalBrief = z.infer<typeof ReferenceRetrievalBriefSchema>;
 
+const PatternPhaseNameSchema = z.enum(['accumulation', 'threshold', 'consequence']);
+const PatternGroupRoleSchema = z.enum(['trigger', 'setup', 'transition', 'consequence', 'evidence', 'context']);
+const PatternRegionRoleSchema = z.enum(['message', 'primary-artifact', 'support', 'evidence', 'navigation', 'annotation']);
+const PatternRegionFlowSchema = z.enum(['row', 'column', 'overlay', 'radial', 'free-composition']);
+const PatternSpacingTokenSchema = z.enum(['none', 'tight', 'normal', 'open']);
+
 export const PatternFragmentSchema = z.strictObject({
   schemaVersion: z.literal('0.1'),
   fragmentId: z.string().min(1),
   sourceReferenceIds: z.array(z.string().min(1)).min(1),
+  retrievalSupportReferenceIds: z.array(z.string().min(1)).optional(),
   abstractionLevel: z.literal('structural'),
   compatibleIntents: z.array(z.string().min(1)).min(1),
   semanticShape: z.string().min(1),
@@ -122,8 +129,88 @@ export const PatternFragmentSchema = z.strictObject({
     emphasisRule: z.string().min(1),
     groupingRule: z.string().min(1),
   }),
+  comparisonContract: z.strictObject({
+    pairing: z.literal('authored-compares-with'),
+    cardinality: z.literal('one-to-one'),
+    beforeGroupRole: z.literal('before'),
+    afterGroupRole: z.literal('after'),
+    applicability: z.array(z.string().min(1)).min(1),
+    boundary: z.array(z.string().min(1)).min(1),
+    derivedPrinciples: z.array(z.string().min(1)).min(1),
+  }).optional(),
+  phaseContract: z.strictObject({
+    semanticFamily: z.string().min(1),
+    requiredSemanticShape: z.string().min(1),
+    regions: z.array(z.strictObject({
+      phase: PatternPhaseNameSchema,
+      sourceGroupRoles: z.array(PatternGroupRoleSchema).min(1),
+      regionRole: PatternRegionRoleSchema,
+      flow: PatternRegionFlowSchema,
+      order: z.number().int().nonnegative(),
+      weight: z.number().positive(),
+      gapToken: PatternSpacingTokenSchema,
+      paddingToken: PatternSpacingTokenSchema,
+      emphasisPriority: z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4), z.literal(5)]),
+      localSequenceRequired: z.boolean(),
+    })).length(3),
+    regionReadingOrder: z.tuple([
+      z.literal('accumulation'),
+      z.literal('threshold'),
+      z.literal('consequence'),
+    ]),
+    interPhaseRelations: z.array(z.strictObject({
+      from: PatternPhaseNameSchema,
+      to: PatternPhaseNameSchema,
+      rule: z.literal('source-relation-required'),
+    })).min(2),
+    applicability: z.strictObject({
+      useWhen: z.array(z.string().min(1)).min(1),
+      requiredSignals: z.array(z.string().min(1)).min(1),
+    }),
+    boundary: z.strictObject({
+      doNotUseWhen: z.array(z.string().min(1)).min(1),
+      forbiddenInferences: z.array(z.string().min(1)).min(1),
+    }),
+    provenance: z.strictObject({
+      derivedPrinciples: z.array(z.strictObject({
+        referenceId: z.string().min(1),
+        principle: z.string().min(1),
+      })).min(1),
+      excludedMeanings: z.array(z.string().min(1)).min(1),
+    }),
+  }).optional(),
   constraints: z.array(z.string().min(1)),
   prohibitedCopy: z.array(z.string().min(1)).min(1),
+}).superRefine((fragment, context) => {
+  const contract = fragment.phaseContract;
+  if (contract === undefined) return;
+  const phases = contract.regions.map((region) => region.phase);
+  if (new Set(phases).size !== 3) {
+    context.addIssue({
+      code: 'custom',
+      path: ['phaseContract', 'regions'],
+      message: 'phase Pattern은 accumulation, threshold, consequence region을 각각 한 번씩 가져야 합니다.',
+    });
+  }
+  const threshold = contract.regions.find((region) => region.phase === 'threshold');
+  if (threshold !== undefined && contract.regions.some(
+    (region) => region.phase !== 'threshold' && region.emphasisPriority >= threshold.emphasisPriority,
+  )) {
+    context.addIssue({
+      code: 'custom',
+      path: ['phaseContract', 'regions'],
+      message: 'threshold는 phase Pattern에서 가장 높은 강조 우선순위를 가져야 합니다.',
+    });
+  }
+  for (const principle of contract.provenance.derivedPrinciples) {
+    if (!fragment.sourceReferenceIds.includes(principle.referenceId)) {
+      context.addIssue({
+        code: 'custom',
+        path: ['phaseContract', 'provenance', 'derivedPrinciples'],
+        message: '유도 원칙의 reference는 Pattern sourceReferenceIds에 포함되어야 합니다.',
+      });
+    }
+  }
 });
 
 export type PatternFragment = z.infer<typeof PatternFragmentSchema>;

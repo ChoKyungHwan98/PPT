@@ -1,0 +1,207 @@
+{
+  "schemaVersion": "0.1",
+  "planId": "composition-955a80fcca33b532",
+  "slideId": "dodge-feature-spec-01",
+  "informationPlanId": "information-dodge-feature-spec-01",
+  "seed": 2505736444,
+  "pageProfile": {
+    "id": "pdf-presentation-16:9",
+    "outputFamily": "pdf-presentation",
+    "width": 1920,
+    "height": 1080,
+    "unit": "css-px",
+    "pixelRatio": 1
+  },
+  "retrievalBriefId": "brief-9c3da1409580cd21",
+  "referenceIds": [
+    "ext-2025-shadowverse-super-evolution"
+  ],
+  "patternFragmentIds": [
+    "pattern-aligned-before-after-spec"
+  ],
+  "layout": {
+    "layoutFamily": "aligned-before-after-spec",
+    "readingPath": "before-after",
+    "rationale": "Keep the authored intent above the comparison; emphasize the revised feature without hiding the baseline."
+  },
+  "regions": [
+    {
+      "regionId": "page-heading",
+      "role": "message",
+      "flow": "row",
+      "order": 0,
+      "weight": 0.16,
+      "gapToken": "normal",
+      "paddingToken": "open"
+    },
+    {
+      "regionId": "message-context",
+      "role": "annotation",
+      "flow": "row",
+      "order": 1,
+      "weight": 0.18,
+      "gapToken": "normal",
+      "paddingToken": "open"
+    },
+    {
+      "regionId": "comparison-heading",
+      "role": "navigation",
+      "flow": "row",
+      "order": 2,
+      "weight": 0.14,
+      "gapToken": "normal",
+      "paddingToken": "open"
+    },
+    {
+      "regionId": "comparison-field",
+      "role": "primary-artifact",
+      "flow": "row",
+      "order": 3,
+      "weight": 0.52,
+      "gapToken": "normal",
+      "paddingToken": "open"
+    },
+    {
+      "regionId": "comparison-pair-0",
+      "parentRegionId": "comparison-field",
+      "role": "evidence",
+      "flow": "row",
+      "order": 0,
+      "weight": 1,
+      "gapToken": "normal",
+      "paddingToken": "open"
+    },
+    {
+      "regionId": "comparison-pair-1",
+      "parentRegionId": "comparison-field",
+      "role": "evidence",
+      "flow": "row",
+      "order": 1,
+      "weight": 1,
+      "gapToken": "normal",
+      "paddingToken": "open"
+    },
+    {
+      "regionId": "comparison-pair-2",
+      "parentRegionId": "comparison-field",
+      "role": "evidence",
+      "flow": "row",
+      "order": 2,
+      "weight": 1,
+      "gapToken": "normal",
+      "paddingToken": "open"
+    }
+  ],
+  "bindings": [
+    {
+      "blockId": "block-title",
+      "regionId": "page-heading",
+      "fragmentRole": "comparison.title",
+      "prominence": 5,
+      "readingOrder": 0
+    },
+    {
+      "blockId": "block-intent-label",
+      "regionId": "message-context",
+      "fragmentRole": "comparison.message-label",
+      "prominence": 2,
+      "readingOrder": 1
+    },
+    {
+      "blockId": "block-intent",
+      "regionId": "message-context",
+      "fragmentRole": "comparison.message",
+      "prominence": 4,
+      "readingOrder": 2
+    },
+    {
+      "blockId": "block-before-label",
+      "regionId": "comparison-heading",
+      "fragmentRole": "comparison.before-label",
+      "prominence": 3,
+      "readingOrder": 3
+    },
+    {
+      "blockId": "block-after-label",
+      "regionId": "comparison-heading",
+      "fragmentRole": "comparison.after-label",
+      "prominence": 4,
+      "readingOrder": 4
+    },
+    {
+      "blockId": "block-before-cancel",
+      "regionId": "comparison-pair-0",
+      "fragmentRole": "comparison.before",
+      "prominence": 3,
+      "readingOrder": 5
+    },
+    {
+      "blockId": "block-after-cancel",
+      "regionId": "comparison-pair-0",
+      "fragmentRole": "comparison.after",
+      "prominence": 4,
+      "readingOrder": 6
+    },
+    {
+      "blockId": "block-before-direction",
+      "regionId": "comparison-pair-1",
+      "fragmentRole": "comparison.before",
+      "prominence": 3,
+      "readingOrder": 7
+    },
+    {
+      "blockId": "block-after-direction",
+      "regionId": "comparison-pair-1",
+      "fragmentRole": "comparison.after",
+      "prominence": 4,
+      "readingOrder": 8
+    },
+    {
+      "blockId": "block-before-lock",
+      "regionId": "comparison-pair-2",
+      "fragmentRole": "comparison.before",
+      "prominence": 3,
+      "readingOrder": 9
+    },
+    {
+      "blockId": "block-after-lock",
+      "regionId": "comparison-pair-2",
+      "fragmentRole": "comparison.after",
+      "prominence": 4,
+      "readingOrder": 10
+    }
+  ],
+  "styleIntent": {
+    "tone": "editorial feature specification",
+    "contrastModel": "editorial-hierarchy",
+    "hierarchy": {
+      "primaryTextSize": 72,
+      "supportTextSize": 36,
+      "evidenceTextSize": 42,
+      "primaryWeight": 700,
+      "supportWeight": 400
+    },
+    "accent": {
+      "targetRole": "evidence",
+      "color": "#254E44",
+      "softColor": "#E8EEE9"
+    },
+    "motif": {
+      "family": "editorial-rule",
+      "color": "#B9C8BF",
+      "strokeWidth": 1.5
+    },
+    "palette": {
+      "background": "#F8F7F3",
+      "ink": "#242E2A",
+      "mutedInk": "#626A64",
+      "connector": "#778D81"
+    }
+  },
+  "qualityFloor": {
+    "requireAllBlocks": true,
+    "requireAllRelations": true,
+    "maximumSevereFindings": 0,
+    "allowCandidateOmission": true
+  }
+}

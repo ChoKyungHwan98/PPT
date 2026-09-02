@@ -1,4 +1,10 @@
-import type { RenderNode } from '@game-presentation/contracts';
+import type {
+  ContentRef,
+  RelationVisualRole,
+  RenderNode,
+  RenderVisualRole,
+  SourceUsage,
+} from '@game-presentation/contracts';
 import type { FontAsset } from './font.js';
 import type { TextMeasurement } from './measure.js';
 
@@ -16,8 +22,12 @@ export function measuredTextNode(input: {
   nodeId: string;
   parentId?: string;
   semanticBlockId?: string;
+  compositionRegionId?: string;
+  visualRole?: RenderVisualRole;
+  sourceUsage?: SourceUsage;
   text: string;
   sourceSpanIds: string[];
+  sourceTransform?: ContentRef['transform'];
   x: number;
   baselineY: number;
   align: 'start' | 'center' | 'end';
@@ -39,6 +49,8 @@ export function measuredTextNode(input: {
     kind: 'text',
     ...(input.parentId === undefined ? {} : { parentId: input.parentId }),
     ...(input.semanticBlockId === undefined ? {} : { semanticBlockId: input.semanticBlockId }),
+    ...(input.compositionRegionId === undefined ? {} : { compositionRegionId: input.compositionRegionId }),
+    ...(input.visualRole === undefined ? {} : { visualRole: input.visualRole }),
     zIndex: input.zIndex ?? 5,
     box: {
       x: Math.max(0, left - 4),
@@ -50,7 +62,7 @@ export function measuredTextNode(input: {
     visible: true,
     text: input.text,
     sourceSpanIds: input.sourceSpanIds,
-    sourceTransform: { kind: 'exact' },
+    sourceTransform: input.sourceTransform ?? { kind: 'exact' },
     font: {
       family: input.measurement.family,
       fileHash: fontHashForWeight(input.fonts, input.measurement.weight),
@@ -61,6 +73,7 @@ export function measuredTextNode(input: {
     },
     color: input.color,
     align: input.align,
+    ...(input.sourceUsage === undefined ? {} : { sourceUsage: input.sourceUsage }),
     lines: [
       {
         text: input.text,
@@ -84,6 +97,9 @@ export function vectorNode(input: {
   pathData?: string;
   semanticBlockId?: string;
   relationId?: string;
+  compositionRegionId?: string;
+  visualRole?: RenderVisualRole;
+  relationVisualRole?: RelationVisualRole;
   zIndex?: number;
 }): RenderNode {
   return {
@@ -92,6 +108,9 @@ export function vectorNode(input: {
     ...(input.parentId === undefined ? {} : { parentId: input.parentId }),
     ...(input.semanticBlockId === undefined ? {} : { semanticBlockId: input.semanticBlockId }),
     ...(input.relationId === undefined ? {} : { relationId: input.relationId }),
+    ...(input.compositionRegionId === undefined ? {} : { compositionRegionId: input.compositionRegionId }),
+    ...(input.visualRole === undefined ? {} : { visualRole: input.visualRole }),
+    ...(input.relationVisualRole === undefined ? {} : { relationVisualRole: input.relationVisualRole }),
     zIndex: input.zIndex ?? 2,
     box: input.box,
     clip: false,

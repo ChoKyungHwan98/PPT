@@ -3,6 +3,7 @@ import {
   PAGE_PROFILES,
   contentHash,
   validateInformationPlan,
+  resolveAlignedFeatureSpec,
   type CompositionPlan,
   type InformationPlan,
   type PatternFragment,
@@ -11,6 +12,10 @@ import {
 } from '@game-presentation/contracts';
 import type { ReferenceSearchResult } from '@game-presentation/reference-engine';
 import { styleIntentForPattern } from './design-intent.js';
+import { alignedFeatureComposition } from './aligned-feature-composition.js';
+
+type PhaseName = 'accumulation' | 'threshold' | 'consequence';
+type PhaseContract = NonNullable<PatternFragment['phaseContract']>;
 
 function pageProfileFor(outputProfile: ReferenceRetrievalBrief['outputProfile']) {
   switch (outputProfile) {
@@ -56,6 +61,90 @@ function regionDesignForGroup(input: {
   };
 }
 
+function relationExists(input: {
+  slide: SlideIR;
+  fromBlockIds: string[];
+  toBlockIds: string[];
+}): boolean {
+  const from = new Set(input.fromBlockIds);
+  const to = new Set(input.toBlockIds);
+  return input.slide.relations.some(
+    (relation) => from.has(relation.fromBlockId) && to.has(relation.toBlockId),
+  );
+}
+
+function phaseGroups(input: {
+  informationPlan: InformationPlan;
+  contract: PhaseContract;
+}): Map<PhaseName, InformationPlan['groups']> | undefined {
+  const result = new Map<PhaseName, InformationPlan['groups']>();
+  const assignedGroupIds = new Set<string>();
+  for (const region of input.contract.regions) {
+    const groups = input.informationPlan.groups
+      .filter((group) => region.sourceGroupRoles.some((role) => role === group.role))
+      .sort((left, right) => left.order - right.order);
+    if (groups.length === 0) return undefined;
+    for (const group of groups) {
+      if (assignedGroupIds.has(group.groupId)) return undefined;
+      assignedGroupIds.add(group.groupId);
+    }
+    result.set(region.phase, groups);
+  }
+  if (assignedGroupIds.size !== input.informationPlan.groups.length) return undefined;
+  return result;
+}
+
+function phaseBlockIds(input: {
+  informationPlan: InformationPlan;
+  groups: InformationPlan['groups'];
+}): string[] {
+  const accepted = new Set(input.groups.flatMap((group) => group.blockIds));
+  return input.informationPlan.readingOrder.filter((blockId) => accepted.has(blockId));
+}
+
+function matchesPhaseContract(input: {
+  slide: SlideIR;
+  informationPlan: InformationPlan;
+  contract: PhaseContract;
+}): boolean {
+  if (input.informationPlan.semanticShape !== input.contract.requiredSemanticShape) return false;
+  const groups = phaseGroups(input);
+  if (groups === undefined) return false;
+  const accumulation = phaseBlockIds({ informationPlan: input.informationPlan, groups: groups.get('accumulation') ?? [] });
+  const threshold = phaseBlockIds({ informationPlan: input.informationPlan, groups: groups.get('threshold') ?? [] });
+  const consequence = phaseBlockIds({ informationPlan: input.informationPlan, groups: groups.get('consequence') ?? [] });
+  if (accumulation.length === 0 || threshold.length === 0 || consequence.length === 0) return false;
+  if (!threshold.includes(input.informationPlan.primaryArtifactBlockId)) return false;
+
+  const readingPosition = new Map(input.informationPlan.readingOrder.map((blockId, index) => [blockId, index]));
+  const lastAccumulation = Math.max(...accumulation.map((blockId) => readingPosition.get(blockId) ?? -1));
+  const firstThreshold = Math.min(...threshold.map((blockId) => readingPosition.get(blockId) ?? Number.MAX_SAFE_INTEGER));
+  const lastThreshold = Math.max(...threshold.map((blockId) => readingPosition.get(blockId) ?? -1));
+  const firstConsequence = Math.min(...consequence.map((blockId) => readingPosition.get(blockId) ?? Number.MAX_SAFE_INTEGER));
+  if (!(lastAccumulation < firstThreshold && lastThreshold < firstConsequence)) return false;
+
+  const accumulationRegion = input.contract.regions.find((region) => region.phase === 'accumulation');
+  if (accumulationRegion?.localSequenceRequired) {
+    for (let index = 0; index < accumulation.length - 1; index += 1) {
+      if (!relationExists({
+        slide: input.slide,
+        fromBlockIds: [accumulation[index]!],
+        toBlockIds: [accumulation[index + 1]!],
+      })) return false;
+    }
+  }
+  const blocksByPhase = { accumulation, threshold, consequence };
+  return input.contract.interPhaseRelations.every((relation) => relationExists({
+    slide: input.slide,
+    fromBlockIds: blocksByPhase[relation.from],
+    toBlockIds: blocksByPhase[relation.to],
+  }));
+}
+
+function selectionReferenceIds(fragment: PatternFragment): string[] {
+  return [...fragment.sourceReferenceIds, ...(fragment.retrievalSupportReferenceIds ?? [])];
+}
+
 function matchingFragment(input: {
   slide: SlideIR;
   informationPlan: InformationPlan;
@@ -67,11 +156,18 @@ function matchingFragment(input: {
     .filter((fragment) =>
       fragment.compatibleIntents.includes(input.slide.intent.kind) &&
       fragment.semanticShape === input.informationPlan.semanticShape &&
-      fragment.sourceReferenceIds.some((id) => resultScores.has(id)),
+      (fragment.comparisonContract === undefined || resolveAlignedFeatureSpec(input.slide, input.informationPlan) !== undefined) &&
+      selectionReferenceIds(fragment).some((id) => resultScores.has(id)) &&
+      (fragment.phaseContract === undefined || matchesPhaseContract({
+        slide: input.slide,
+        informationPlan: input.informationPlan,
+        contract: fragment.phaseContract,
+      })),
     )
     .map((fragment) => {
-      const referenceIds = fragment.sourceReferenceIds.filter((id) => resultScores.has(id));
-      const score = referenceIds.reduce((sum, id) => sum + (resultScores.get(id) ?? 0), 0);
+      const referenceIds = selectionReferenceIds(fragment).filter((id) => resultScores.has(id));
+      const structuralPriority = fragment.phaseContract === undefined && fragment.comparisonContract === undefined ? 0 : 100;
+      const score = structuralPriority + referenceIds.reduce((sum, id) => sum + (resultScores.get(id) ?? 0), 0);
       return { fragment, referenceIds, score };
     })
     .sort((left, right) => right.score - left.score || left.fragment.fragmentId.localeCompare(right.fragment.fragmentId));
@@ -80,6 +176,62 @@ function matchingFragment(input: {
     throw new Error('현재 SlideIR과 InformationPlan에 맞는 허용된 pattern fragment를 찾지 못했습니다.');
   }
   return selected;
+}
+
+function phaseComposition(input: {
+  slide: SlideIR;
+  informationPlan: InformationPlan;
+  fragment: PatternFragment;
+}): Pick<CompositionPlan, 'regions' | 'bindings'> | undefined {
+  const contract = input.fragment.phaseContract;
+  if (contract === undefined) return undefined;
+  const groups = phaseGroups({ informationPlan: input.informationPlan, contract });
+  if (groups === undefined) throw new Error('선택된 phase Pattern과 InformationPlan group 구조가 다릅니다.');
+  const phaseByBlockId = new Map<string, PhaseName>();
+  for (const phase of contract.regionReadingOrder) {
+    for (const group of groups.get(phase) ?? []) {
+      for (const blockId of group.blockIds) phaseByBlockId.set(blockId, phase);
+    }
+  }
+  return {
+    regions: [
+      {
+        regionId: 'message-context',
+        role: 'message',
+        flow: 'column',
+        order: 0,
+        weight: 0.12,
+        gapToken: 'tight',
+        paddingToken: 'open',
+      },
+      ...contract.regions
+        .slice()
+        .sort((left, right) => left.order - right.order)
+        .map((region) => ({
+          regionId: `phase-${region.phase}`,
+          role: region.regionRole,
+          flow: region.flow,
+          order: region.order,
+          weight: region.weight,
+          gapToken: region.gapToken,
+          paddingToken: region.paddingToken,
+        })),
+    ],
+    bindings: input.informationPlan.readingOrder.map((blockId, readingOrder) => {
+      const block = input.slide.blocks.find((candidate) => candidate.id === blockId);
+      const phase = phaseByBlockId.get(blockId);
+      if (block === undefined || phase === undefined) {
+        throw new Error(`phase Pattern에 배치할 InformationPlan block을 찾을 수 없습니다: ${blockId}`);
+      }
+      return {
+        blockId,
+        regionId: `phase-${phase}`,
+        fragmentRole: `${phase}.${block.role}`,
+        prominence: block.importance,
+        readingOrder,
+      };
+    }),
+  };
 }
 
 /**
@@ -114,6 +266,13 @@ export function createCompositionPlanFromInformationPlan(input: {
   const groupByBlockId = new Map(
     input.informationPlan.groups.flatMap((group) => group.blockIds.map((blockId) => [blockId, group] as const)),
   );
+  const phasePlan = selected.fragment.comparisonContract !== undefined
+    ? alignedFeatureComposition(input.slide, input.informationPlan)
+    : phaseComposition({
+    slide: input.slide,
+    informationPlan: input.informationPlan,
+    fragment: selected.fragment,
+  });
 
   return CompositionPlanSchema.parse({
     schemaVersion: '0.1',
@@ -130,7 +289,7 @@ export function createCompositionPlanFromInformationPlan(input: {
       readingPath: selected.fragment.readingPath,
       rationale: selected.fragment.topology.emphasisRule,
     },
-    regions: [
+    regions: phasePlan?.regions ?? [
       {
         regionId: 'message-context',
         role: 'message',
@@ -150,7 +309,7 @@ export function createCompositionPlanFromInformationPlan(input: {
           ...regionDesignForGroup({ group, informationPlan: input.informationPlan, fragment: selected.fragment }),
         })),
     ],
-    bindings: input.informationPlan.readingOrder.map((blockId, readingOrder) => {
+    bindings: phasePlan?.bindings ?? input.informationPlan.readingOrder.map((blockId, readingOrder) => {
       const block = input.slide.blocks.find((candidate) => candidate.id === blockId);
       const group = groupByBlockId.get(blockId);
       if (block === undefined || group === undefined) throw new Error(`InformationPlan의 block을 찾을 수 없습니다: ${blockId}`);

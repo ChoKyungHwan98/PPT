@@ -6,7 +6,7 @@
 - 단계 0과 단계 6은 **미완료**다.
 - 기존 `positive-golden-case`는 사용자가 최종 제출 품질로 승인하지 않았으므로 `intermediate-golden-case / needs-review`로 재분류했다.
 - 현재 `ready` Positive Fixture는 **없다**. 따라서 단계 완료 판정도 존재하지 않는다.
-- 단계 7 Partial Revision은 시작하지 않는다.
+- MEC-01 Stage 7 Partial Revision은 정확히 1회 실행 후 종료했다. 결과는 `intermediate-golden-case / revised-needs-review`이며 `ready` Positive Fixture가 아니다.
 
 ## 입력 경계
 
@@ -88,6 +88,6 @@ Medium은 Recall과 Readiness Accuracy를 개선하지 않았고, 비용과 toke
 
 1. 사용자가 명시적으로 승인한 실제 `ready` 이미지가 아직 없다.
 2. Positive가 없으므로 Critic의 제출 품질 calibration을 다시 실행할 수 없다.
-3. 기준 이미지가 확보되기 전에는 모델 호출과 단계 7을 진행하지 않는다.
+3. MEC-01의 완료된 revision cycle을 다시 실행하지 않는다. 새 후보를 실제 이미지로 확보한 뒤 사용자 승인 여부를 별도로 기록한다.
 
 세부 human label, Low/Medium 구조화 결과, 입력 trace와 비용은 `output/v1-visual-critic/benchmark-report.json`에 저장한다.

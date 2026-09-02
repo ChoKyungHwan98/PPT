@@ -20,6 +20,7 @@ export async function measureTextBatch(
   browser: Browser,
   fonts: FontAsset[],
   requests: TextMeasureRequest[],
+  options: { requireLoadedFonts?: boolean } = {},
 ): Promise<Map<string, TextMeasurement>> {
   const page = await browser.newPage({ viewport: { width: 320, height: 240 } });
   try {
@@ -32,6 +33,21 @@ export async function measureTextBatch(
     await page.evaluate(async () => {
       await document.fonts.ready;
     });
+    // Opt-in for new paths: canvas-only measurement otherwise need not trigger a font download.
+    // Legacy callers retain their current behavior/fingerprint.
+    if (options.requireLoadedFonts) {
+      await page.evaluate(async (items) => {
+        const faces = new Map(items.map((item) => [
+          `${item.weight} ${item.size}px ${JSON.stringify(item.family)}`, item.text,
+        ]));
+        for (const [face, text] of faces) {
+          const loaded = await document.fonts.load(face, text);
+          if (loaded.length === 0 || !document.fonts.check(face, text)) {
+            throw new Error(`Production measurement font failed to load: ${face}`);
+          }
+        }
+      }, requests);
+    }
     const values = await page.evaluate((items) => {
       const canvas = document.createElement('canvas');
       const context = canvas.getContext('2d');

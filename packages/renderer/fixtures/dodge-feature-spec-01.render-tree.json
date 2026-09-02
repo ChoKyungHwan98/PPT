@@ -1,0 +1,812 @@
+{
+  "schemaVersion": "0.1",
+  "renderTreeId": "render-composition-955a80fcca33b532",
+  "compositionPlanId": "composition-955a80fcca33b532",
+  "slideId": "dodge-feature-spec-01",
+  "pageProfile": {
+    "id": "pdf-presentation-16:9",
+    "outputFamily": "pdf-presentation",
+    "width": 1920,
+    "height": 1080,
+    "unit": "css-px",
+    "pixelRatio": 1
+  },
+  "layoutFamily": "aligned-before-after-spec",
+  "background": "#F8F7F3",
+  "nodes": [
+    {
+      "nodeId": "region-page-heading",
+      "compositionRegionId": "page-heading",
+      "visualRole": "comparison-field",
+      "zIndex": 0,
+      "box": {
+        "x": 96,
+        "y": 75.60000000000001,
+        "width": 1728,
+        "height": 145.152
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "group"
+    },
+    {
+      "nodeId": "region-message-context",
+      "compositionRegionId": "message-context",
+      "visualRole": "comparison-field",
+      "zIndex": 0,
+      "box": {
+        "x": 96,
+        "y": 220.752,
+        "width": 1728,
+        "height": 163.296
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "group"
+    },
+    {
+      "nodeId": "region-comparison-heading",
+      "compositionRegionId": "comparison-heading",
+      "visualRole": "comparison-field",
+      "zIndex": 0,
+      "box": {
+        "x": 96,
+        "y": 384.048,
+        "width": 1728,
+        "height": 127.008
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "group"
+    },
+    {
+      "nodeId": "region-comparison-field",
+      "compositionRegionId": "comparison-field",
+      "visualRole": "comparison-field",
+      "zIndex": 0,
+      "box": {
+        "x": 96,
+        "y": 511.056,
+        "width": 1728,
+        "height": 471.74399999999997
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "group"
+    },
+    {
+      "nodeId": "region-comparison-pair-0",
+      "parentId": "region-comparison-field",
+      "compositionRegionId": "comparison-pair-0",
+      "visualRole": "comparison-pair",
+      "zIndex": 0,
+      "box": {
+        "x": 96,
+        "y": 511.056,
+        "width": 1728,
+        "height": 157.248
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "group"
+    },
+    {
+      "nodeId": "region-comparison-pair-1",
+      "parentId": "region-comparison-field",
+      "compositionRegionId": "comparison-pair-1",
+      "visualRole": "comparison-pair",
+      "zIndex": 0,
+      "box": {
+        "x": 96,
+        "y": 668.304,
+        "width": 1728,
+        "height": 157.248
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "group"
+    },
+    {
+      "nodeId": "region-comparison-pair-2",
+      "parentId": "region-comparison-field",
+      "compositionRegionId": "comparison-pair-2",
+      "visualRole": "comparison-pair",
+      "zIndex": 0,
+      "box": {
+        "x": 96,
+        "y": 825.5519999999999,
+        "width": 1728,
+        "height": 157.248
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "group"
+    },
+    {
+      "nodeId": "comparison-after-field",
+      "parentId": "region-comparison-field",
+      "compositionRegionId": "comparison-field",
+      "visualRole": "comparison-field",
+      "zIndex": 1,
+      "box": {
+        "x": 996,
+        "y": 384.048,
+        "width": 848,
+        "height": 598.752
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "shape",
+      "shape": "rect",
+      "paint": {
+        "fill": "#E8EEE9"
+      }
+    },
+    {
+      "nodeId": "comparison-after-rule",
+      "zIndex": 2,
+      "box": {
+        "x": 996,
+        "y": 384.048,
+        "width": 848,
+        "height": 4
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "shape",
+      "shape": "path",
+      "paint": {
+        "stroke": "#254E44",
+        "strokeWidth": 4
+      },
+      "pathData": "M 996 384.048 H 1844"
+    },
+    {
+      "nodeId": "comparison-before-rule",
+      "zIndex": 2,
+      "box": {
+        "x": 96,
+        "y": 384.048,
+        "width": 808,
+        "height": 1.5
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "shape",
+      "shape": "path",
+      "paint": {
+        "stroke": "#B9C8BF",
+        "strokeWidth": 1.5
+      },
+      "pathData": "M 96 384.048 H 904"
+    },
+    {
+      "nodeId": "comparison-row-left-0",
+      "zIndex": 2,
+      "box": {
+        "x": 128,
+        "y": 668.304,
+        "width": 744,
+        "height": 1
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "shape",
+      "shape": "path",
+      "paint": {
+        "stroke": "#B9C8BF",
+        "strokeWidth": 1
+      },
+      "pathData": "M 128 668.304 H 872"
+    },
+    {
+      "nodeId": "comparison-row-right-0",
+      "zIndex": 2,
+      "box": {
+        "x": 1048,
+        "y": 668.304,
+        "width": 744,
+        "height": 1
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "shape",
+      "shape": "path",
+      "paint": {
+        "stroke": "#B9C8BF",
+        "strokeWidth": 1
+      },
+      "pathData": "M 1048 668.304 H 1792"
+    },
+    {
+      "nodeId": "comparison-row-left-1",
+      "zIndex": 2,
+      "box": {
+        "x": 128,
+        "y": 825.5519999999999,
+        "width": 744,
+        "height": 1
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "shape",
+      "shape": "path",
+      "paint": {
+        "stroke": "#B9C8BF",
+        "strokeWidth": 1
+      },
+      "pathData": "M 128 825.5519999999999 H 872"
+    },
+    {
+      "nodeId": "comparison-row-right-1",
+      "zIndex": 2,
+      "box": {
+        "x": 1048,
+        "y": 825.5519999999999,
+        "width": 744,
+        "height": 1
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "shape",
+      "shape": "path",
+      "paint": {
+        "stroke": "#B9C8BF",
+        "strokeWidth": 1
+      },
+      "pathData": "M 1048 825.5519999999999 H 1792"
+    },
+    {
+      "nodeId": "comparison-text-block-title",
+      "parentId": "region-page-heading",
+      "semanticBlockId": "block-title",
+      "compositionRegionId": "page-heading",
+      "visualRole": "page-title",
+      "zIndex": 5,
+      "box": {
+        "x": 92,
+        "y": 79.60000000000001,
+        "width": 473.5734375,
+        "height": 73
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "text",
+      "text": "회피 시스템 개선",
+      "sourceSpanIds": [
+        "title"
+      ],
+      "sourceTransform": {
+        "kind": "exact"
+      },
+      "font": {
+        "family": "Pretendard",
+        "fileHash": "c16b88c670d23e83fa1170c954cbc4822d3b8dad3c3cde15d798a94b43d97985",
+        "size": 72,
+        "weight": 700,
+        "lineHeight": 100.8,
+        "letterSpacing": -0.4
+      },
+      "color": "#242E2A",
+      "align": "start",
+      "sourceUsage": "content",
+      "lines": [
+        {
+          "text": "회피 시스템 개선",
+          "x": 96,
+          "baselineY": 141.60000000000002,
+          "advanceWidth": 465.5734375
+        }
+      ]
+    },
+    {
+      "nodeId": "comparison-text-block-intent-label",
+      "parentId": "region-message-context",
+      "semanticBlockId": "block-intent-label",
+      "compositionRegionId": "message-context",
+      "visualRole": "comparison-header",
+      "zIndex": 5,
+      "box": {
+        "x": 92,
+        "y": 226.752,
+        "width": 94.9,
+        "height": 31
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "text",
+      "text": "핵심 의도",
+      "sourceSpanIds": [
+        "intent-label"
+      ],
+      "sourceTransform": {
+        "kind": "exact"
+      },
+      "font": {
+        "family": "Pretendard",
+        "fileHash": "c16b88c670d23e83fa1170c954cbc4822d3b8dad3c3cde15d798a94b43d97985",
+        "size": 24,
+        "weight": 700,
+        "lineHeight": 33.599999999999994,
+        "letterSpacing": -0.4
+      },
+      "color": "#626A64",
+      "align": "start",
+      "sourceUsage": "content",
+      "lines": [
+        {
+          "text": "핵심 의도",
+          "x": 96,
+          "baselineY": 250.752,
+          "advanceWidth": 86.9
+        }
+      ]
+    },
+    {
+      "nodeId": "comparison-text-block-intent",
+      "parentId": "region-message-context",
+      "semanticBlockId": "block-intent",
+      "compositionRegionId": "message-context",
+      "visualRole": "message-context",
+      "zIndex": 5,
+      "box": {
+        "x": 356,
+        "y": 226.752,
+        "width": 833.2625,
+        "height": 104.8
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "text",
+      "text": "공격 흐름을 끊지 않으면서,\n보스와의 근거리 공방을 지속할 수 있는 회피 시스템",
+      "sourceSpanIds": [
+        "intent"
+      ],
+      "sourceTransform": {
+        "kind": "exact"
+      },
+      "font": {
+        "family": "Pretendard",
+        "fileHash": "6d0af5258997aec7354a6e340fc2325ba321c410ca48b3af858c8c3d6e92a324",
+        "size": 42,
+        "weight": 400,
+        "lineHeight": 58.8,
+        "letterSpacing": -0.4
+      },
+      "color": "#242E2A",
+      "align": "start",
+      "sourceUsage": "content",
+      "lines": [
+        {
+          "text": "공격 흐름을 끊지 않으면서,",
+          "x": 360,
+          "baselineY": 264.752,
+          "advanceWidth": 436.13828125
+        },
+        {
+          "text": "보스와의 근거리 공방을 지속할 수 있는 회피 시스템",
+          "x": 360,
+          "baselineY": 323.552,
+          "advanceWidth": 825.2625
+        }
+      ]
+    },
+    {
+      "nodeId": "comparison-text-block-before-label",
+      "parentId": "region-comparison-heading",
+      "semanticBlockId": "block-before-label",
+      "compositionRegionId": "comparison-heading",
+      "visualRole": "comparison-header",
+      "zIndex": 5,
+      "box": {
+        "x": 124,
+        "y": 427.552,
+        "width": 139.88828125,
+        "height": 40
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "text",
+      "text": "기존 방식",
+      "sourceSpanIds": [
+        "before-label"
+      ],
+      "sourceTransform": {
+        "kind": "exact"
+      },
+      "font": {
+        "family": "Pretendard",
+        "fileHash": "6d0af5258997aec7354a6e340fc2325ba321c410ca48b3af858c8c3d6e92a324",
+        "size": 36,
+        "weight": 400,
+        "lineHeight": 50.4,
+        "letterSpacing": -0.4
+      },
+      "color": "#626A64",
+      "align": "start",
+      "sourceUsage": "content",
+      "lines": [
+        {
+          "text": "기존 방식",
+          "x": 128,
+          "baselineY": 460.552,
+          "advanceWidth": 131.88828125
+        }
+      ]
+    },
+    {
+      "nodeId": "comparison-text-block-after-label",
+      "parentId": "region-comparison-heading",
+      "semanticBlockId": "block-after-label",
+      "compositionRegionId": "comparison-heading",
+      "visualRole": "comparison-header",
+      "zIndex": 5,
+      "box": {
+        "x": 1044,
+        "y": 427.052,
+        "width": 139.15,
+        "height": 41
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "text",
+      "text": "개선 방식",
+      "sourceSpanIds": [
+        "after-label"
+      ],
+      "sourceTransform": {
+        "kind": "exact"
+      },
+      "font": {
+        "family": "Pretendard",
+        "fileHash": "c16b88c670d23e83fa1170c954cbc4822d3b8dad3c3cde15d798a94b43d97985",
+        "size": 36,
+        "weight": 700,
+        "lineHeight": 50.4,
+        "letterSpacing": -0.4
+      },
+      "color": "#254E44",
+      "align": "start",
+      "sourceUsage": "content",
+      "lines": [
+        {
+          "text": "개선 방식",
+          "x": 1048,
+          "baselineY": 460.052,
+          "advanceWidth": 131.15
+        }
+      ]
+    },
+    {
+      "nodeId": "comparison-text-block-before-cancel",
+      "parentId": "region-comparison-pair-0",
+      "semanticBlockId": "block-before-cancel",
+      "compositionRegionId": "comparison-pair-0",
+      "visualRole": "comparison-before",
+      "zIndex": 5,
+      "box": {
+        "x": 124,
+        "y": 569.68,
+        "width": 319.36015625,
+        "height": 40
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "text",
+      "text": "공격 중 회피 입력 불가",
+      "sourceSpanIds": [
+        "before-cancel"
+      ],
+      "sourceTransform": {
+        "kind": "exact"
+      },
+      "font": {
+        "family": "Pretendard",
+        "fileHash": "6d0af5258997aec7354a6e340fc2325ba321c410ca48b3af858c8c3d6e92a324",
+        "size": 36,
+        "weight": 400,
+        "lineHeight": 50.4,
+        "letterSpacing": -0.4
+      },
+      "color": "#626A64",
+      "align": "start",
+      "sourceUsage": "content",
+      "lines": [
+        {
+          "text": "공격 중 회피 입력 불가",
+          "x": 128,
+          "baselineY": 602.68,
+          "advanceWidth": 311.36015625
+        }
+      ]
+    },
+    {
+      "nodeId": "comparison-text-block-after-cancel",
+      "parentId": "region-comparison-pair-0",
+      "semanticBlockId": "block-after-cancel",
+      "compositionRegionId": "comparison-pair-0",
+      "visualRole": "comparison-after",
+      "zIndex": 5,
+      "box": {
+        "x": 1044,
+        "y": 566.68,
+        "width": 566.66171875,
+        "height": 46
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "text",
+      "text": "공격 중 회피 입력 시 더킹으로 캔슬",
+      "sourceSpanIds": [
+        "after-cancel"
+      ],
+      "sourceTransform": {
+        "kind": "exact"
+      },
+      "font": {
+        "family": "Pretendard",
+        "fileHash": "c16b88c670d23e83fa1170c954cbc4822d3b8dad3c3cde15d798a94b43d97985",
+        "size": 42,
+        "weight": 700,
+        "lineHeight": 58.8,
+        "letterSpacing": -0.4
+      },
+      "color": "#254E44",
+      "align": "start",
+      "sourceUsage": "content",
+      "lines": [
+        {
+          "text": "공격 중 회피 입력 시 더킹으로 캔슬",
+          "x": 1048,
+          "baselineY": 604.68,
+          "advanceWidth": 558.66171875
+        }
+      ]
+    },
+    {
+      "nodeId": "comparison-text-block-before-direction",
+      "parentId": "region-comparison-pair-1",
+      "semanticBlockId": "block-before-direction",
+      "compositionRegionId": "comparison-pair-1",
+      "visualRole": "comparison-before",
+      "zIndex": 5,
+      "box": {
+        "x": 124,
+        "y": 726.928,
+        "width": 240.66328125,
+        "height": 40
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "text",
+      "text": "구르기 중심 회피",
+      "sourceSpanIds": [
+        "before-direction"
+      ],
+      "sourceTransform": {
+        "kind": "exact"
+      },
+      "font": {
+        "family": "Pretendard",
+        "fileHash": "6d0af5258997aec7354a6e340fc2325ba321c410ca48b3af858c8c3d6e92a324",
+        "size": 36,
+        "weight": 400,
+        "lineHeight": 50.4,
+        "letterSpacing": -0.4
+      },
+      "color": "#626A64",
+      "align": "start",
+      "sourceUsage": "content",
+      "lines": [
+        {
+          "text": "구르기 중심 회피",
+          "x": 128,
+          "baselineY": 759.928,
+          "advanceWidth": 232.66328125
+        }
+      ]
+    },
+    {
+      "nodeId": "comparison-text-block-after-direction",
+      "parentId": "region-comparison-pair-1",
+      "semanticBlockId": "block-after-direction",
+      "compositionRegionId": "comparison-pair-1",
+      "visualRole": "comparison-after",
+      "zIndex": 5,
+      "box": {
+        "x": 1044,
+        "y": 723.928,
+        "width": 521.483203125,
+        "height": 46
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "text",
+      "text": "입력 방향에 따라 회피 방향 결정",
+      "sourceSpanIds": [
+        "after-direction"
+      ],
+      "sourceTransform": {
+        "kind": "exact"
+      },
+      "font": {
+        "family": "Pretendard",
+        "fileHash": "c16b88c670d23e83fa1170c954cbc4822d3b8dad3c3cde15d798a94b43d97985",
+        "size": 42,
+        "weight": 700,
+        "lineHeight": 58.8,
+        "letterSpacing": -0.4
+      },
+      "color": "#254E44",
+      "align": "start",
+      "sourceUsage": "content",
+      "lines": [
+        {
+          "text": "입력 방향에 따라 회피 방향 결정",
+          "x": 1048,
+          "baselineY": 761.928,
+          "advanceWidth": 513.483203125
+        }
+      ]
+    },
+    {
+      "nodeId": "comparison-text-block-before-lock",
+      "parentId": "region-comparison-pair-2",
+      "semanticBlockId": "block-before-lock",
+      "compositionRegionId": "comparison-pair-2",
+      "visualRole": "comparison-before",
+      "zIndex": 5,
+      "box": {
+        "x": 124,
+        "y": 884.1759999999999,
+        "width": 411.5,
+        "height": 40
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "text",
+      "text": "락온 중에도 동일한 회피 모션",
+      "sourceSpanIds": [
+        "before-lock"
+      ],
+      "sourceTransform": {
+        "kind": "exact"
+      },
+      "font": {
+        "family": "Pretendard",
+        "fileHash": "6d0af5258997aec7354a6e340fc2325ba321c410ca48b3af858c8c3d6e92a324",
+        "size": 36,
+        "weight": 400,
+        "lineHeight": 50.4,
+        "letterSpacing": -0.4
+      },
+      "color": "#626A64",
+      "align": "start",
+      "sourceUsage": "content",
+      "lines": [
+        {
+          "text": "락온 중에도 동일한 회피 모션",
+          "x": 128,
+          "baselineY": 917.1759999999999,
+          "advanceWidth": 403.5
+        }
+      ]
+    },
+    {
+      "nodeId": "comparison-text-block-after-lock",
+      "parentId": "region-comparison-pair-2",
+      "semanticBlockId": "block-after-lock",
+      "compositionRegionId": "comparison-pair-2",
+      "visualRole": "comparison-after",
+      "zIndex": 5,
+      "box": {
+        "x": 1044,
+        "y": 881.1759999999999,
+        "width": 557.38203125,
+        "height": 46
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "text",
+      "text": "락온 상태를 유지한 채 근거리 회피",
+      "sourceSpanIds": [
+        "after-lock"
+      ],
+      "sourceTransform": {
+        "kind": "exact"
+      },
+      "font": {
+        "family": "Pretendard",
+        "fileHash": "c16b88c670d23e83fa1170c954cbc4822d3b8dad3c3cde15d798a94b43d97985",
+        "size": 42,
+        "weight": 700,
+        "lineHeight": 58.8,
+        "letterSpacing": -0.4
+      },
+      "color": "#254E44",
+      "align": "start",
+      "sourceUsage": "content",
+      "lines": [
+        {
+          "text": "락온 상태를 유지한 채 근거리 회피",
+          "x": 1048,
+          "baselineY": 919.1759999999999,
+          "advanceWidth": 549.38203125
+        }
+      ]
+    },
+    {
+      "nodeId": "comparison-change-change-1",
+      "parentId": "region-comparison-pair-0",
+      "relationId": "change-1",
+      "compositionRegionId": "comparison-pair-0",
+      "visualRole": "relation-carrier",
+      "relationVisualRole": "comparison-change",
+      "zIndex": 2,
+      "box": {
+        "x": 940,
+        "y": 582.68,
+        "width": 40,
+        "height": 14
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "shape",
+      "shape": "path",
+      "paint": {
+        "stroke": "#778D81",
+        "strokeWidth": 1.6
+      },
+      "pathData": "M 940 589.68 H 980 M 973 582.68 L 980 589.68 L 973 596.68"
+    },
+    {
+      "nodeId": "comparison-change-change-2",
+      "parentId": "region-comparison-pair-1",
+      "relationId": "change-2",
+      "compositionRegionId": "comparison-pair-1",
+      "visualRole": "relation-carrier",
+      "relationVisualRole": "comparison-change",
+      "zIndex": 2,
+      "box": {
+        "x": 940,
+        "y": 739.928,
+        "width": 40,
+        "height": 14
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "shape",
+      "shape": "path",
+      "paint": {
+        "stroke": "#778D81",
+        "strokeWidth": 1.6
+      },
+      "pathData": "M 940 746.928 H 980 M 973 739.928 L 980 746.928 L 973 753.928"
+    },
+    {
+      "nodeId": "comparison-change-change-3",
+      "parentId": "region-comparison-pair-2",
+      "relationId": "change-3",
+      "compositionRegionId": "comparison-pair-2",
+      "visualRole": "relation-carrier",
+      "relationVisualRole": "comparison-change",
+      "zIndex": 2,
+      "box": {
+        "x": 940,
+        "y": 897.1759999999999,
+        "width": 40,
+        "height": 14
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "shape",
+      "shape": "path",
+      "paint": {
+        "stroke": "#778D81",
+        "strokeWidth": 1.6
+      },
+      "pathData": "M 940 904.1759999999999 H 980 M 973 897.1759999999999 L 980 904.1759999999999 L 973 911.1759999999999"
+    }
+  ],
+  "deterministicFingerprint": "239d147709246d0fd27e19ba26ae5a31503ef4934c46404125de58614e53ac2e"
+}

@@ -1,0 +1,419 @@
+{
+  "schemaVersion": "0.1",
+  "slideId": "dodge-feature-spec-01",
+  "locale": "ko-KR",
+  "pagePreference": {
+    "mode": "auto"
+  },
+  "source": {
+    "schemaVersion": "0.1",
+    "ledgerId": "ledger-dodge-feature-spec-01",
+    "locale": "ko-KR",
+    "kind": "user-authored",
+    "rawText": "회피 시스템 개선\n\n기존 방식\n- 공격 중 회피 입력 불가\n- 구르기 중심 회피\n- 락온 중에도 동일한 회피 모션\n\n개선 방식\n- 공격 중 회피 입력 시 더킹으로 캔슬\n- 입력 방향에 따라 회피 방향 결정\n- 락온 상태를 유지한 채 근거리 회피\n\n핵심 의도\n공격 흐름을 끊지 않으면서,\n보스와의 근거리 공방을 지속할 수 있는 회피 시스템",
+    "contentHash": "a69d0a461335ffff0bca8109d8828130b302b4217f8fe7d4ec67d08ba3350e42",
+    "spans": [
+      {
+        "id": "title",
+        "start": 0,
+        "end": 9,
+        "text": "회피 시스템 개선",
+        "checksum": "1dfe14c88dbeae455851a67851bac168ea6fc4cbf81d004286ce5c74207db5fe"
+      },
+      {
+        "id": "before-label",
+        "start": 11,
+        "end": 16,
+        "text": "기존 방식",
+        "checksum": "cd10ce165e4740b5fefe5ba553856af10079d6c040c33f1f9b4a440a868f58d7"
+      },
+      {
+        "id": "before-cancel",
+        "start": 19,
+        "end": 32,
+        "text": "공격 중 회피 입력 불가",
+        "checksum": "8ec487b68b7e4fed22fb24ea935fc69f01ad5f10195590fe41c7f11981b9c16c"
+      },
+      {
+        "id": "before-direction",
+        "start": 35,
+        "end": 44,
+        "text": "구르기 중심 회피",
+        "checksum": "0f7eecd617f7f1f68f6841023e174ad6217572153b4c095c3bdcb6c9fc1b9c1c"
+      },
+      {
+        "id": "before-lock",
+        "start": 47,
+        "end": 63,
+        "text": "락온 중에도 동일한 회피 모션",
+        "checksum": "469f17478147d8a2d32533a6d97d28e8395133b79daafa05354715691180e7fa"
+      },
+      {
+        "id": "after-label",
+        "start": 65,
+        "end": 70,
+        "text": "개선 방식",
+        "checksum": "e0c5692bf0bc9fdb9cdbd4e185d52c17b8293324db849fee304c79304cddaf90"
+      },
+      {
+        "id": "after-cancel",
+        "start": 73,
+        "end": 93,
+        "text": "공격 중 회피 입력 시 더킹으로 캔슬",
+        "checksum": "7d7bc7c5b0fc270d2a27cac5524d8c3c0e31753b6c18102b7aaa42689b28bc7c"
+      },
+      {
+        "id": "after-direction",
+        "start": 96,
+        "end": 114,
+        "text": "입력 방향에 따라 회피 방향 결정",
+        "checksum": "99756258c1c8ed8587fb9acb926cf5b345f6ff507f08f76a16cd75bc2cbe60e1"
+      },
+      {
+        "id": "after-lock",
+        "start": 117,
+        "end": 136,
+        "text": "락온 상태를 유지한 채 근거리 회피",
+        "checksum": "25496a0d4c6965b95de83f992f2501656279f4e388bbffa20cd7db07f44a6d1a"
+      },
+      {
+        "id": "intent-label",
+        "start": 138,
+        "end": 143,
+        "text": "핵심 의도",
+        "checksum": "91e72e081c073a14d7d6406b2fb68d886e708dae47d7671f884ead609a5e7092"
+      },
+      {
+        "id": "intent",
+        "start": 144,
+        "end": 188,
+        "text": "공격 흐름을 끊지 않으면서,\n보스와의 근거리 공방을 지속할 수 있는 회피 시스템",
+        "checksum": "98f7f376ee3bdaab6e29865391d4a5d586e79a52a31199c0175ffe9261e6e658"
+      }
+    ],
+    "createdAt": "2026-09-03T00:00:00.000Z"
+  },
+  "intent": {
+    "kind": "comparison",
+    "communicationGoal": {
+      "text": "공격 흐름을 끊지 않으면서,\n보스와의 근거리 공방을 지속할 수 있는 회피 시스템",
+      "sourceSpanIds": [
+        "intent"
+      ],
+      "locked": true,
+      "transform": {
+        "kind": "exact"
+      }
+    },
+    "primaryMessage": {
+      "text": "공격 흐름을 끊지 않으면서,\n보스와의 근거리 공방을 지속할 수 있는 회피 시스템",
+      "sourceSpanIds": [
+        "intent"
+      ],
+      "locked": true,
+      "transform": {
+        "kind": "exact"
+      }
+    },
+    "primaryFocusBlockId": "block-title"
+  },
+  "domain": {
+    "topic": "회피 시스템 개선",
+    "facets": [
+      "controls"
+    ]
+  },
+  "blocks": [
+    {
+      "id": "block-title",
+      "role": "primary",
+      "importance": 5,
+      "sourceSpanIds": [
+        "title"
+      ],
+      "order": 0,
+      "keepTogether": true,
+      "kind": "heading",
+      "text": {
+        "text": "회피 시스템 개선",
+        "sourceSpanIds": [
+          "title"
+        ],
+        "locked": true,
+        "transform": {
+          "kind": "exact"
+        }
+      }
+    },
+    {
+      "id": "block-before-label",
+      "role": "context",
+      "importance": 3,
+      "sourceSpanIds": [
+        "before-label"
+      ],
+      "order": 1,
+      "keepTogether": true,
+      "kind": "heading",
+      "text": {
+        "text": "기존 방식",
+        "sourceSpanIds": [
+          "before-label"
+        ],
+        "locked": true,
+        "transform": {
+          "kind": "exact"
+        }
+      }
+    },
+    {
+      "id": "block-before-cancel",
+      "role": "evidence",
+      "importance": 3,
+      "sourceSpanIds": [
+        "before-cancel"
+      ],
+      "order": 2,
+      "keepTogether": true,
+      "kind": "paragraph",
+      "text": {
+        "text": "공격 중 회피 입력 불가",
+        "sourceSpanIds": [
+          "before-cancel"
+        ],
+        "locked": true,
+        "transform": {
+          "kind": "exact"
+        }
+      }
+    },
+    {
+      "id": "block-before-direction",
+      "role": "evidence",
+      "importance": 3,
+      "sourceSpanIds": [
+        "before-direction"
+      ],
+      "order": 3,
+      "keepTogether": true,
+      "kind": "paragraph",
+      "text": {
+        "text": "구르기 중심 회피",
+        "sourceSpanIds": [
+          "before-direction"
+        ],
+        "locked": true,
+        "transform": {
+          "kind": "exact"
+        }
+      }
+    },
+    {
+      "id": "block-before-lock",
+      "role": "evidence",
+      "importance": 3,
+      "sourceSpanIds": [
+        "before-lock"
+      ],
+      "order": 4,
+      "keepTogether": true,
+      "kind": "paragraph",
+      "text": {
+        "text": "락온 중에도 동일한 회피 모션",
+        "sourceSpanIds": [
+          "before-lock"
+        ],
+        "locked": true,
+        "transform": {
+          "kind": "exact"
+        }
+      }
+    },
+    {
+      "id": "block-after-label",
+      "role": "context",
+      "importance": 4,
+      "sourceSpanIds": [
+        "after-label"
+      ],
+      "order": 5,
+      "keepTogether": true,
+      "kind": "heading",
+      "text": {
+        "text": "개선 방식",
+        "sourceSpanIds": [
+          "after-label"
+        ],
+        "locked": true,
+        "transform": {
+          "kind": "exact"
+        }
+      }
+    },
+    {
+      "id": "block-after-cancel",
+      "role": "evidence",
+      "importance": 4,
+      "sourceSpanIds": [
+        "after-cancel"
+      ],
+      "order": 6,
+      "keepTogether": true,
+      "kind": "paragraph",
+      "text": {
+        "text": "공격 중 회피 입력 시 더킹으로 캔슬",
+        "sourceSpanIds": [
+          "after-cancel"
+        ],
+        "locked": true,
+        "transform": {
+          "kind": "exact"
+        }
+      }
+    },
+    {
+      "id": "block-after-direction",
+      "role": "evidence",
+      "importance": 4,
+      "sourceSpanIds": [
+        "after-direction"
+      ],
+      "order": 7,
+      "keepTogether": true,
+      "kind": "paragraph",
+      "text": {
+        "text": "입력 방향에 따라 회피 방향 결정",
+        "sourceSpanIds": [
+          "after-direction"
+        ],
+        "locked": true,
+        "transform": {
+          "kind": "exact"
+        }
+      }
+    },
+    {
+      "id": "block-after-lock",
+      "role": "evidence",
+      "importance": 4,
+      "sourceSpanIds": [
+        "after-lock"
+      ],
+      "order": 8,
+      "keepTogether": true,
+      "kind": "paragraph",
+      "text": {
+        "text": "락온 상태를 유지한 채 근거리 회피",
+        "sourceSpanIds": [
+          "after-lock"
+        ],
+        "locked": true,
+        "transform": {
+          "kind": "exact"
+        }
+      }
+    },
+    {
+      "id": "block-intent-label",
+      "role": "context",
+      "importance": 2,
+      "sourceSpanIds": [
+        "intent-label"
+      ],
+      "order": 9,
+      "keepTogether": true,
+      "kind": "heading",
+      "text": {
+        "text": "핵심 의도",
+        "sourceSpanIds": [
+          "intent-label"
+        ],
+        "locked": true,
+        "transform": {
+          "kind": "exact"
+        }
+      }
+    },
+    {
+      "id": "block-intent",
+      "role": "context",
+      "importance": 4,
+      "sourceSpanIds": [
+        "intent"
+      ],
+      "order": 10,
+      "keepTogether": true,
+      "kind": "paragraph",
+      "text": {
+        "text": "공격 흐름을 끊지 않으면서,\n보스와의 근거리 공방을 지속할 수 있는 회피 시스템",
+        "sourceSpanIds": [
+          "intent"
+        ],
+        "locked": true,
+        "transform": {
+          "kind": "exact"
+        }
+      }
+    }
+  ],
+  "relations": [
+    {
+      "id": "change-1",
+      "fromBlockId": "block-before-cancel",
+      "toBlockId": "block-after-cancel",
+      "type": "compares-with",
+      "sourceSpanIds": [
+        "before-cancel",
+        "after-cancel"
+      ]
+    },
+    {
+      "id": "change-2",
+      "fromBlockId": "block-before-direction",
+      "toBlockId": "block-after-direction",
+      "type": "compares-with",
+      "sourceSpanIds": [
+        "before-direction",
+        "after-direction"
+      ]
+    },
+    {
+      "id": "change-3",
+      "fromBlockId": "block-before-lock",
+      "toBlockId": "block-after-lock",
+      "type": "compares-with",
+      "sourceSpanIds": [
+        "before-lock",
+        "after-lock"
+      ]
+    }
+  ],
+  "assetNeeds": [],
+  "constraints": {
+    "maxSlideCount": 1,
+    "primaryOutput": "pdf",
+    "selectableTextRequired": true,
+    "editablePptxRequired": false,
+    "contentPolicy": "verbatim",
+    "numberPolicy": "source-only",
+    "preserveOrder": false,
+    "lockedSpanIds": [
+      "title",
+      "before-label",
+      "before-cancel",
+      "before-direction",
+      "before-lock",
+      "after-label",
+      "after-cancel",
+      "after-direction",
+      "after-lock",
+      "intent-label",
+      "intent"
+    ]
+  },
+  "interpretation": {
+    "author": "user",
+    "confidence": 1,
+    "ambiguities": []
+  }
+}

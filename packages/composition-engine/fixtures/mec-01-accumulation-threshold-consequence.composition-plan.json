@@ -1,0 +1,136 @@
+{
+  "schemaVersion": "0.1",
+  "planId": "composition-f923dc8e552fd07f",
+  "slideId": "mec-01-time-break",
+  "informationPlanId": "information-mec-01-time-break",
+  "seed": 4179877006,
+  "pageProfile": {
+    "id": "pdf-presentation-16:9",
+    "outputFamily": "pdf-presentation",
+    "width": 1920,
+    "height": 1080,
+    "unit": "css-px",
+    "pixelRatio": 1
+  },
+  "retrievalBriefId": "brief-44548f9617420f49",
+  "referenceIds": [
+    "ref-oh-my-ppt-layout",
+    "ref-ppt-agent-functional"
+  ],
+  "patternFragmentIds": [
+    "pattern-accumulation-threshold-consequence"
+  ],
+  "layout": {
+    "layoutFamily": "accumulation-threshold-consequence",
+    "readingPath": "guided-sequence",
+    "rationale": "Make the threshold the strongest event without allowing it to consume the accumulation or consequence."
+  },
+  "regions": [
+    {
+      "regionId": "message-context",
+      "role": "message",
+      "flow": "column",
+      "order": 0,
+      "weight": 0.12,
+      "gapToken": "tight",
+      "paddingToken": "open"
+    },
+    {
+      "regionId": "phase-accumulation",
+      "role": "support",
+      "flow": "row",
+      "order": 1,
+      "weight": 2.4,
+      "gapToken": "open",
+      "paddingToken": "normal"
+    },
+    {
+      "regionId": "phase-threshold",
+      "role": "primary-artifact",
+      "flow": "overlay",
+      "order": 2,
+      "weight": 0.9,
+      "gapToken": "tight",
+      "paddingToken": "tight"
+    },
+    {
+      "regionId": "phase-consequence",
+      "role": "evidence",
+      "flow": "column",
+      "order": 3,
+      "weight": 1.2,
+      "gapToken": "tight",
+      "paddingToken": "open"
+    }
+  ],
+  "bindings": [
+    {
+      "blockId": "dodge-step",
+      "regionId": "phase-accumulation",
+      "fragmentRole": "accumulation.trigger",
+      "prominence": 3,
+      "readingOrder": 0
+    },
+    {
+      "blockId": "fragment-resource",
+      "regionId": "phase-accumulation",
+      "fragmentRole": "accumulation.input",
+      "prominence": 3,
+      "readingOrder": 1
+    },
+    {
+      "blockId": "freeze-step",
+      "regionId": "phase-accumulation",
+      "fragmentRole": "accumulation.process",
+      "prominence": 4,
+      "readingOrder": 2
+    },
+    {
+      "blockId": "break-state",
+      "regionId": "phase-threshold",
+      "fragmentRole": "threshold.primary",
+      "prominence": 5,
+      "readingOrder": 3
+    },
+    {
+      "blockId": "damage-modifier",
+      "regionId": "phase-consequence",
+      "fragmentRole": "consequence.modifier",
+      "prominence": 4,
+      "readingOrder": 4
+    }
+  ],
+  "styleIntent": {
+    "tone": "quiet information design field",
+    "contrastModel": "quiet-field-strong-focus",
+    "hierarchy": {
+      "primaryTextSize": 68,
+      "supportTextSize": 30,
+      "evidenceTextSize": 40,
+      "primaryWeight": 800,
+      "supportWeight": 500
+    },
+    "accent": {
+      "targetRole": "primary-artifact",
+      "color": "#5B5C8D",
+      "softColor": "#E3E2F0"
+    },
+    "motif": {
+      "family": "focus-field",
+      "color": "#6A6B9B",
+      "strokeWidth": 5
+    },
+    "palette": {
+      "background": "#F5F3EE",
+      "ink": "#222522",
+      "mutedInk": "#686C68",
+      "connector": "#777A76"
+    }
+  },
+  "qualityFloor": {
+    "requireAllBlocks": true,
+    "requireAllRelations": true,
+    "maximumSevereFindings": 0,
+    "allowCandidateOmission": true
+  }
+}

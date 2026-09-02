@@ -1,0 +1,83 @@
+{
+  "schemaVersion": "0.1",
+  "proofType": "stage-7-single-partial-revision",
+  "artifactId": "mec-01-balanced-runway-revision-1",
+  "status": "revised-needs-review",
+  "classification": "intermediate-golden-case",
+  "readyPositiveFixture": false,
+  "cycle": {
+    "status": "completed",
+    "revisionLimit": 1,
+    "revisionsPerformed": 1,
+    "additionalAutomaticRevisionAllowed": false
+  },
+  "before": {
+    "pngPath": "packages/renderer/fixtures/mec-01-polish-final-balanced-runway-final.png",
+    "renderTreePath": "packages/renderer/fixtures/mec-01-polish-final-balanced-runway-final.render-tree.json",
+    "criticReportPath": "output/v1-visual-critic/mec-01-final-balanced-runway.critic-report.json",
+    "renderTreeFingerprint": "6b17bc2f5c2f8833b343bd53315c04d429a83ea93b2ceb8f82c897d11699f996",
+    "pngSha256": "918b0797c33b4d677e73f7e7193a11453dbdc33a2a417cfbf390ffdadd71903b",
+    "submissionReadiness": "needs-review",
+    "findings": [
+      {
+        "findingId": "f-space-use-1",
+        "issueType": "space-use",
+        "severity": "warning"
+      },
+      {
+        "findingId": "f-relation-clarity-2",
+        "issueType": "relation-clarity",
+        "severity": "warning"
+      }
+    ]
+  },
+  "after": {
+    "pngPath": "packages/renderer/fixtures/mec-01-revision-1-balanced-runway.png",
+    "renderTreePath": "packages/renderer/fixtures/mec-01-revision-1-balanced-runway.render-tree.json",
+    "revisionReportPath": "output/v1-visual-critic/mec-01-revision-1-balanced-runway.revision-report.json",
+    "renderTreeFingerprint": "03b152b8e54951a3e5fb6ffa05b99743a13c5f661ef55ac9559a8a48856db186",
+    "pngSha256": "2b950e5dfd4bd463da3678ccb2f3db59dde654da8c7a14feaa9fb5c9da47bbaf",
+    "submissionReadiness": "needs-review",
+    "hardGate": {
+      "passed": true,
+      "programFindingCount": 0,
+      "sourceFidelityFindingCount": 0
+    },
+    "findings": [
+      {
+        "findingId": "f-space-use-1",
+        "issueType": "space-use",
+        "severity": "warning"
+      },
+      {
+        "findingId": "f-grouping-1",
+        "issueType": "grouping",
+        "severity": "info"
+      }
+    ]
+  },
+  "criticDelta": {
+    "resolved": [
+      "f-relation-clarity-2"
+    ],
+    "unresolved": [
+      "f-space-use-1"
+    ],
+    "newErrors": [],
+    "newNonBlockingFindings": [
+      "f-grouping-1"
+    ],
+    "readinessChanged": false
+  },
+  "userDisposition": {
+    "recordedAt": "2026-09-03",
+    "cycleApprovedAsComplete": true,
+    "readyPromotionApproved": false,
+    "instruction": "추가 미세 폴리싱을 수행하지 않고 unresolved issue를 space-use로 유지한다."
+  },
+  "nextWork": {
+    "kind": "new-ready-positive-candidate",
+    "status": "queued",
+    "mustNotReuseAsReadyCalibration": true
+  }
+}
