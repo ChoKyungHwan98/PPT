@@ -5,6 +5,7 @@
 - 검토 대상: `external-master-2025-v1` 6개 reference 이미지와 `teacher-pages.v1.json`
 - 검토 방식: 실제 이미지 관찰과 기존 `analysis.json`·Teacher mapping 대조
 - 결과 성격: curation 제안
+- Mapping correction: 03·05·06 적용 완료
 - Teacher status 변경: 없음
 - 현재 상태: 6개 모두 `seed-evidence`
 
@@ -73,19 +74,20 @@ Reference ID: `ext-2025-pokemon-initiative-team-structure`
 | --- | --- |
 | Information Structure | 대체로 일치. 좌측 운영 설명, 우측 조직 구조, 개선 이후 상태 라벨이 모두 보인다. |
 | Visual Grammar 근거 | 설명과 구조도의 병치, 상하 계층선, 책임자 강조는 실제로 관찰된다. |
-| 과잉 해석 | `membership-and-reporting` 중 `reporting`은 이미지에서 명시적으로 확정하기 어렵다. 구조선은 소속·책임 묶음으로 읽는 편이 안전하다. |
+| 과잉 해석 | 기존 `membership-and-reporting`의 `reporting` 단정은 correction에서 제거했다. 현재는 관찰 가능한 책임·소속 묶음만 기록한다. |
 | Applicability / Boundary | 합리적. 계층·책임 설명에 적합하고 시간 순서나 인과에는 부적합하다. |
 | Abstract Principle | 충분히 추상적이다. 텍스트는 운영 원칙, 도식은 구조 관계를 맡는 역할 분리가 핵심이다. |
 | Prohibited Copy | 충분함. 행사 프레임, 발표자 영상, 로고, IP, 아이콘, 정확한 2열 비율을 제외한다. |
 | 다른 장표 재사용 가치 | 높음. 조직뿐 아니라 시스템 모듈, 담당 영역, 기능 소유권 설명에도 적용 가능하다. |
-| Confidence | `medium` 유지. connector 의미를 수정한 뒤 상향 여부를 다시 판단한다. |
+| Confidence | `medium` 유지. reporting 단정은 제거했으며 사용자 승인 전에는 상향하지 않는다. |
 
-필요한 correction:
+적용한 correction:
 
-- `connectorSemantics.relationRole`의 `membership-and-reporting`을 관찰 가능한 `responsibility-and-membership` 수준으로 제한한다.
-- 구조선이 보고 체계라는 단정은 source에 명시된 경우에만 사용한다.
+- `connectorSemantics.relationRole`: `membership-and-reporting` → `responsibility-and-membership`
+- page goal과 required signal에서 reporting 단정을 제거하고 책임·소속 의미를 유지
+- `retrievalIndex.relationTags`에서 `reporting`을 제거하고 `responsibility`로 교체
 
-최종 제안: `needs-correction`
+최종 기록: `correction-applied / awaiting-user-curation-approval`
 
 ### 04 Shadowverse — Trade-off / Problem Framing
 
@@ -111,21 +113,22 @@ Reference ID: `ext-2025-shadowverse-super-evolution`
 | 검토 항목 | 판정 |
 | --- | --- |
 | Information Structure | 일치. 동일한 기준 카드에서 기존 진화와 신규 초진화가 갈라지고 수치·규칙 차이를 병렬 비교한다. |
-| Visual Grammar 근거 | 좌우 열, 같은 높이의 결과 이미지, 열 내부 변환, 중앙 차이 표식이 실제로 확인된다. |
-| 과잉 해석 | 별도의 message/claim이 화면에 없는데 `titleMessagePlacement.relationship=combined`로 기록한 것은 과하다. 제목은 기능명이고 primary claim은 분석자가 비교 결과를 종합한 값이다. |
+| Visual Grammar 근거 | 좌우 열, 같은 높이의 결과 이미지, 열 내부 변환, 중앙 차이 표식이 실제로 확인된다. occupancy는 correction에서 `balanced`로 정리했다. |
+| 과잉 해석 | 별도 message가 없는데 `combined`로 기록했던 문제를 correction에서 `absent`로 수정했다. primary claim은 화면 headline이 아니라 curator synthesis로만 유지한다. |
 | Applicability / Boundary | 합리적. 동일 기준과 pairing이 없는 비교, 세 개 이상의 대안에는 적합하지 않다. |
 | Abstract Principle | 충분히 추상적이다. 동일 기준 정렬과 제한적 변화 강조만 남겼다. |
 | Prohibited Copy | 충분함. 카드·캐릭터 IP, 행사 프레임, 색, 정확한 열 geometry를 제외한다. |
 | 다른 장표 재사용 가치 | 매우 높음. 리워크, 패치, 기능 개선, 전후 수치·규칙 비교에 직접 적용 가능하다. |
-| Confidence | `medium` 유지. message placement와 density correction 후 재검토한다. |
+| Confidence | `medium` 유지. correction은 적용했지만 사용자 승인 전에는 상향하지 않는다. |
 
-필요한 correction:
+적용한 correction:
 
-- `titleMessagePlacement.relationship`을 `combined`가 아니라 별도 message가 없음을 뜻하는 `absent`로 수정한다.
-- slide content만 기준으로 보면 `pageOccupancy.band=dense`는 과한 분류다. `balanced`가 더 적절하다.
-- `primaryClaim`은 화면에 표시된 headline이 아니라 curator synthesis임을 curation note에서 분명히 한다.
+- `titleMessagePlacement.relationship`: `combined` → `absent`
+- `pageOccupancy.band`: `dense` → `balanced`
+- `retrievalIndex.densityTags`: `dense` → `balanced`
+- `primaryClaim`은 표시된 message가 아니라 curator synthesis임을 명시
 
-최종 제안: `needs-correction`
+최종 기록: `correction-applied / awaiting-user-curation-approval`
 
 ### 06 Shadowverse — System Comparison / Countermeasure
 
@@ -133,24 +136,24 @@ Reference ID: `ext-2025-shadowverse-rules-vs-card-ability`
 
 | 검토 항목 | 판정 |
 | --- | --- |
-| Information Structure | 두 대응 레이어와 각 열의 근거→효과는 일치한다. 그러나 별도 `shared-problem` block은 현재 이미지에 보이지 않는다. |
+| Information Structure | correction 후 실제 화면에 보이는 `rule evidence → rule effect`, `content evidence → content effect` 두 local causal structure로 일치한다. |
 | Visual Grammar 근거 | 규칙/카드 능력 두 열, 열 내부 하향 화살표, 서로 다른 증거 형식은 명확히 관찰된다. |
-| 과잉 해석 | `shared-problem`을 required visible group으로 두고 두 레이어가 그 group을 직접 완화한다고 기록한 부분은 이전 문맥을 추론한 것이다. `readingPath.endRole=target`도 화면에 있는 종착점이 아니다. |
+| 과잉 해석 | 기존 `shared-problem` required group과 `endRole=target`은 제거했다. 현재 mapping은 화면에 보이는 evidence와 effect만 visible fact로 기록한다. |
 | Applicability / Boundary | 레이어별 대응이라는 적용 범위와 순차 단계·Before/After 금지는 합리적이다. |
 | Abstract Principle | 충분히 추상적이지만, 공통 문제를 반드시 화면에 표시해야 한다는 의미로 사용하면 원본보다 강한 규칙이 된다. |
 | Prohibited Copy | 충분함. 행사 프레임, 발표자 영상, 로고, 카드·IP, 색, 정확한 표 geometry를 제외한다. |
 | 다른 장표 재사용 가치 | 높음. 시스템 규칙/콘텐츠 데이터/UI 피드백처럼 서로 다른 해결 레이어를 설명할 때 유용하다. |
-| Confidence | `medium → low` 하향 제안. 관찰된 구조와 이전 문맥에서 추론한 문제를 분리한 뒤 다시 평가한다. |
+| Confidence | `medium` 유지. 하향 사유였던 visible fact와 context interpretation 혼합을 correction에서 제거했다. |
 
-필요한 correction:
+적용한 correction:
 
-- `shared-problem`을 이미지에 직접 표시된 required group으로 취급하지 않는다.
-- 화면에서 관찰되는 핵심을 `rule-layer evidence → rule effect`와 `content-layer evidence → content effect`의 두 국소 인과로 다시 구조화한다.
-- 공통 문제는 source 문맥이 추가로 확인될 때만 context 또는 inferred relation로 기록한다.
-- `readingPath.endRole`을 화면에 실제 존재하는 effect 역할로 수정한다.
-- 별도 주장형 message가 없으므로 `titleMessagePlacement.relationship=combined`를 재검토한다.
+- required `shared-problem` group과 이를 향하던 두 inferred relation 제거
+- `rule-evidence → rule-effect`, `content-evidence → content-effect` 관계로 재구성
+- `readingPath.endRole`: `target` → `content-effect`
+- `titleMessagePlacement.relationship`: `combined` → `absent`
+- page goal, primary claim, applicability, rationale, retrieval text에서 화면에 없는 공통 문제의 visible fact 단정 제거
 
-최종 제안: `needs-correction`
+최종 기록: `correction-applied / awaiting-user-curation-approval`
 
 ## 4. Curation 제안 요약
 
@@ -158,19 +161,18 @@ Reference ID: `ext-2025-shadowverse-rules-vs-card-ability`
 | --- | --- | --- | --- |
 | 01 Problem / Diagnosis | `curate-ready` | medium → high | 구조와 진단 경계가 명확함 |
 | 02 Feature Annotation | `curate-ready` | medium → high | artifact와 annotation 귀속이 명확함 |
-| 03 Organization / Structure | `needs-correction` | medium 유지 | reporting 의미를 관찰 범위로 제한 필요 |
+| 03 Organization / Structure | `correction-applied / awaiting-user-curation-approval` | medium 유지 | reporting 제거, 책임·소속으로 제한 |
 | 04 Trade-off | `curate-ready` | medium → high | 두 목표와 긴장이 명시적임 |
-| 05 Before / After | `needs-correction` | medium 유지 | message 부재와 density 수정 필요 |
-| 06 Layered Countermeasure | `needs-correction` | medium → low | 화면에 없는 shared-problem을 visible group으로 추론함 |
+| 05 Before / After | `correction-applied / awaiting-user-curation-approval` | medium 유지 | message absent, density balanced 적용 |
+| 06 Layered Countermeasure | `correction-applied / awaiting-user-curation-approval` | medium 유지 | visible local causality로 재구성 |
 
-`reject-as-teacher` 제안은 없다. 여섯 장 모두 재사용 가치가 있으나 03·05·06은 correction 후에만 승격 심사를 진행해야 한다.
+`reject-as-teacher` 제안은 없다. 03·05·06 correction은 적용되었지만 사용자 curation 승인 전이므로 여섯 장 모두 `seed-evidence`를 유지한다.
 
 ## 5. 다음 판단 지점
 
-이번 검토에서는 mapping이나 status를 변경하지 않는다. 다음 단계에서 사용자가 curation 제안을 승인하면 다음 작업을 별도로 진행할 수 있다.
+이번 correction에서는 mapping만 수정했고 Teacher status는 변경하지 않았다. 다음 단계에서 사용자가 correction 결과와 curation 제안을 승인하면 승격 심사를 별도로 진행할 수 있다.
 
-1. 03·05·06 mapping correction
-2. correction validation
-3. 01·02·04 및 수정 완료 Teacher의 개별 승격 심사
+1. 03·05·06 correction 결과 사용자 검토
+2. 01·02·04 및 correction 완료 Teacher의 개별 승격 심사
 
 승격이 승인되기 전까지 6개 모두 production Retrieval 대상이 아니다.

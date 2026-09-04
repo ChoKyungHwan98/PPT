@@ -89,6 +89,67 @@ describe('2025 External Master Reference corpus', () => {
     }
   });
 
+  it('keeps corrected Teacher mappings within directly observed visual evidence', async () => {
+    const teachers = await loadExternalMasterTeacherPageSet(referenceDir);
+    const page = (referenceId: string) => {
+      const found = teachers.pages.find((candidate) => candidate.provenance.referenceId === referenceId);
+      if (found === undefined) throw new Error(`Teacher fixture가 없습니다: ${referenceId}`);
+      return found;
+    };
+
+    const organization = page('ext-2025-pokemon-initiative-team-structure');
+    const organizationEvidence = JSON.stringify({
+      pageGoal: organization.informationStructure.pageGoal,
+      connectorSemantics: organization.visualGrammar.connectorSemantics,
+      requiredSignals: organization.applicability.requiredSignals,
+      relationTags: organization.retrievalIndex.relationTags,
+    });
+    expect(organizationEvidence).not.toContain('reporting');
+    expect(organization.visualGrammar.connectorSemantics.map(
+      (connector) => connector.relationRole,
+    )).toContain('responsibility-and-membership');
+    expect(organization.retrievalIndex.relationTags).toEqual(expect.arrayContaining([
+      'responsibility',
+      'membership',
+    ]));
+
+    const beforeAfter = page('ext-2025-shadowverse-super-evolution');
+    expect(beforeAfter.visualGrammar.titleMessagePlacement.relationship).toBe('absent');
+    expect(beforeAfter.visualGrammar.pageOccupancy.band).toBe('balanced');
+    expect(beforeAfter.retrievalIndex.densityTags).toEqual(['balanced']);
+
+    const countermeasure = page('ext-2025-shadowverse-rules-vs-card-ability');
+    const groupIds = new Set(countermeasure.informationStructure.informationGroups.map(
+      (group) => group.groupId,
+    ));
+    expect(groupIds.has('shared-problem')).toBe(false);
+    expect(countermeasure.informationStructure.relationStructure).toEqual([
+      expect.objectContaining({
+        fromGroupId: 'rule-evidence',
+        toGroupId: 'rule-effect',
+        relationType: 'produces-rule-effect',
+        scope: 'group',
+      }),
+      expect.objectContaining({
+        fromGroupId: 'content-evidence',
+        toGroupId: 'content-effect',
+        relationType: 'produces-content-effect',
+        scope: 'group',
+      }),
+    ]);
+    for (const relation of countermeasure.informationStructure.relationStructure) {
+      expect(groupIds.has(relation.fromGroupId)).toBe(true);
+      expect(groupIds.has(relation.toGroupId)).toBe(true);
+    }
+    expect(countermeasure.informationStructure.readingPath.endRole).toBe('content-effect');
+    expect(countermeasure.visualGrammar.titleMessagePlacement.relationship).toBe('absent');
+    expect(JSON.stringify(countermeasure.informationStructure)).not.toContain('shared-problem');
+    expect(teachers.pages.every(
+      (teacher) => teacher.provenance.teacherStatus === 'seed-evidence'
+        && teacher.provenance.compatibility.legacyReadyGolden === false,
+    )).toBe(true);
+  });
+
   it('rejects missing rights and missing prohibited-copy boundaries', async () => {
     const record = (await loadExternalMasterTeacherPageSet(referenceDir)).pages[0]!;
     const { rights: _rights, ...provenanceWithoutRights } = record.provenance;

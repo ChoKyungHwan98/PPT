@@ -212,7 +212,7 @@
         "curation": { "analysisVersion": "external-master-analysis-0.1", "reviewedBy": "human-assisted", "confidence": "medium" }
       },
       "informationStructure": {
-        "pageGoal": "운영 원칙을 문장으로 설명하고 실제 보고·소속 구조를 도식으로 확인시킨다.",
+        "pageGoal": "운영 원칙을 문장으로 설명하고 실제 책임·소속 구조를 도식으로 확인시킨다.",
         "primaryClaim": "작은 기능 단위 팀을 여러 개 만들고 각 팀의 오너 아래 필요한 직군을 묶어 책임을 명확하게 한다.",
         "semanticShape": "hierarchy",
         "informationGroups": [
@@ -243,7 +243,7 @@
         "visualAnchor": { "role": "organization-principle", "positionLogic": "좌측 설명과 우측 구조도를 비슷한 높이에서 시작한다.", "whyDominant": "정의와 구조를 왕복하며 확인하는 것이 핵심이기 때문이다." },
         "evidencePlacement": ["도식은 설명 옆에 두어 문장으로 정의된 조직 원칙을 즉시 검증하게 한다."],
         "connectorSemantics": [
-          { "relationRole": "membership-and-reporting", "carrier": "orthogonal hierarchy lines", "scope": "group", "decorative": false }
+          { "relationRole": "responsibility-and-membership", "carrier": "orthogonal hierarchy lines", "scope": "group", "decorative": false }
         ],
         "accentStrategy": { "semanticUses": ["책임자와 팀 묶음 구분"], "restraintRule": "색은 계층 구분을 보조하며 관계선의 의미를 바꾸지 않는다." },
         "imageTextRelationship": "도식은 구조를 보여주고 텍스트는 규모와 책임 원칙처럼 도식만으로 알 수 없는 내용을 설명한다.",
@@ -251,7 +251,7 @@
       },
       "applicability": {
         "fitsSemanticShapes": ["hierarchy"],
-        "requiredSignals": ["상위·하위 단위", "각 단위의 책임", "소속 또는 보고 관계", "도식 밖의 운영 설명"],
+        "requiredSignals": ["상위·하위 단위", "각 단위의 책임", "책임 또는 소속 관계", "도식 밖의 운영 설명"],
         "forbiddenSignals": ["시간 순서", "원인·결과 중심 구조", "계층 없는 단순 목록"],
         "useWhen": ["조직·역할·책임 구조를 설명할 때", "게임 시스템 모듈과 담당 기능의 계층을 설명할 때"],
         "doNotUseWhen": ["시간 순서나 원인·결과가 핵심일 때", "설명과 도식이 같은 내용을 그대로 반복할 때"],
@@ -276,7 +276,7 @@
       "retrievalIndex": {
         "intentTags": ["organization", "responsibility", "structure-explanation"],
         "semanticShapeTags": ["hierarchy"],
-        "relationTags": ["explained-by", "qualifies-state", "membership", "reporting"],
+        "relationTags": ["explained-by", "qualifies-state", "responsibility", "membership"],
         "groupRoleTags": ["explanation", "structural-evidence", "state"],
         "primaryArtifactTags": ["explanation-and-hierarchy-map"],
         "readingPathTags": ["left-to-right", "top-to-bottom"],
@@ -400,9 +400,9 @@
         "primaryArtifact": "aligned-comparison-field"
       },
       "visualGrammar": {
-        "pageOccupancy": { "band": "dense", "occupiedZones": ["title", "before-column", "comparison-boundary", "after-column"] },
+        "pageOccupancy": { "band": "balanced", "occupiedZones": ["title", "before-column", "comparison-boundary", "after-column"] },
         "dominantAxis": "horizontal",
-        "titleMessagePlacement": { "titleZone": "top", "relationship": "combined" },
+        "titleMessagePlacement": { "titleZone": "top", "relationship": "absent" },
         "hierarchyLevels": [
           { "level": 1, "semanticRole": "새 요소 선언", "relativeStrength": "primary" },
           { "level": 2, "semanticRole": "기존·신규 열 제목", "relativeStrength": "secondary" },
@@ -454,7 +454,7 @@
         "groupRoleTags": ["comparison-anchor", "before", "after", "contrast"],
         "primaryArtifactTags": ["aligned-comparison-field"],
         "readingPathTags": ["before-after", "left-to-right"],
-        "densityTags": ["dense"],
+        "densityTags": ["balanced"],
         "compactRetrievalText": "공통 기준을 유지한 기존·신규 기능을 같은 정보 순서와 높이로 정렬해 변화만 찾게 하는 aligned before/after spec 문법. pairing과 공통 기준이 없으면 사용하지 않는다."
       }
     },
@@ -471,26 +471,26 @@
         "curation": { "analysisVersion": "external-master-analysis-0.1", "reviewedBy": "human-assisted", "confidence": "medium" }
       },
       "informationStructure": {
-        "pageGoal": "같은 문제를 해결하는 두 개의 개입 레이어를 분리하고 각 레이어의 근거와 효과를 병렬로 설명한다.",
-        "primaryClaim": "기본 규칙 조정과 콘텐츠 능력 추가를 함께 사용해 한쪽 플레이어의 불리함을 여러 층에서 완화했다.",
+        "pageGoal": "규칙과 카드 능력이라는 서로 다른 대응 레이어를 분리하고 각 레이어의 근거와 효과를 병렬로 설명한다.",
+        "primaryClaim": "규칙 조정과 카드 능력은 각각 후공 측에 유리한 효과를 만든다.",
         "semanticShape": "layered-countermeasure",
         "informationGroups": [
-          { "groupId": "rule-layer", "groupRole": "system-countermeasure", "description": "턴, 횟수, 손패 수 같은 기본 규칙과 그 효과를 설명한다.", "order": 0, "itemCount": 2, "required": true },
-          { "groupId": "content-layer", "groupRole": "content-countermeasure", "description": "카드 능력 사례와 그 효과를 설명한다.", "order": 1, "itemCount": 1, "required": true },
-          { "groupId": "shared-problem", "groupRole": "target", "description": "두 레이어가 공통으로 대응하는 밸런스 문제다.", "order": 2, "itemCount": 1, "required": true }
+          { "groupId": "rule-evidence", "groupRole": "rule-evidence", "description": "진화 가능 턴과 진화 횟수·손패 수에 관한 규칙 근거를 보여준다.", "order": 0, "itemCount": 2, "required": true },
+          { "groupId": "rule-effect", "groupRole": "rule-effect", "description": "각 규칙 근거가 후공 측에 만드는 효과를 보여준다.", "order": 1, "itemCount": 2, "required": true },
+          { "groupId": "content-evidence", "groupRole": "content-evidence", "description": "후공 측에 유리한 카드 능력 사례를 보여준다.", "order": 2, "itemCount": 1, "required": true },
+          { "groupId": "content-effect", "groupRole": "content-effect", "description": "카드 능력으로 대응 수단이 늘어난 효과를 보여준다.", "order": 3, "itemCount": 1, "required": true }
         ],
         "relationStructure": [
-          { "fromGroupId": "rule-layer", "toGroupId": "shared-problem", "relationType": "mitigates-at-rule-level", "direction": "directed", "scope": "group", "explanation": "시스템 규칙이 구조적으로 문제를 완화한다." },
-          { "fromGroupId": "content-layer", "toGroupId": "shared-problem", "relationType": "mitigates-at-content-level", "direction": "directed", "scope": "group", "explanation": "개별 콘텐츠 능력이 추가 대응 수단을 제공한다." },
-          { "fromGroupId": "rule-layer", "toGroupId": "content-layer", "relationType": "parallel-layers", "direction": "undirected", "scope": "page", "explanation": "두 대응은 순서나 Before/After가 아니라 서로 다른 개입 층이다." }
+          { "fromGroupId": "rule-evidence", "toGroupId": "rule-effect", "relationType": "produces-rule-effect", "direction": "directed", "scope": "group", "explanation": "표시된 규칙 근거에서 후공 측에 유리한 규칙 효과가 이어진다." },
+          { "fromGroupId": "content-evidence", "toGroupId": "content-effect", "relationType": "produces-content-effect", "direction": "directed", "scope": "group", "explanation": "표시된 카드 능력 사례에서 카드 대응 수단이 늘어난 효과가 이어진다." }
         ],
-        "readingPath": { "primary": "제목 → 좌우 레이어 제목 → 각 열의 근거와 효과 → 열 사이 역할 비교", "startRole": "system-countermeasure", "endRole": "target" },
+        "readingPath": { "primary": "제목 → 규칙 근거와 효과 → 카드 능력 근거와 효과 → 두 레이어의 역할 비교", "startRole": "rule-evidence", "endRole": "content-effect" },
         "primaryArtifact": "parallel-countermeasure-layers"
       },
       "visualGrammar": {
         "pageOccupancy": { "band": "dense", "occupiedZones": ["title", "rule-layer", "content-layer", "layer-effects"] },
         "dominantAxis": "horizontal",
-        "titleMessagePlacement": { "titleZone": "top", "relationship": "combined" },
+        "titleMessagePlacement": { "titleZone": "top", "relationship": "absent" },
         "hierarchyLevels": [
           { "level": 1, "semanticRole": "대응 주제", "relativeStrength": "primary" },
           { "level": 2, "semanticRole": "개입 레이어 이름", "relativeStrength": "secondary" },
@@ -500,34 +500,34 @@
         "groupingStrategy": ["규칙과 콘텐츠 능력을 독립 영역으로 묶고 각 열에서 근거에서 효과로 이어지게 한다."],
         "whitespaceStrategy": ["두 레이어 사이 간격으로 병렬 관계를 유지하고 열 내부는 수직 인과에 사용한다."],
         "alignmentStrategy": ["두 열의 제목과 효과 결론을 맞추되 서로 다른 증거 형식을 허용한다."],
-        "visualAnchor": { "role": "parallel-intervention-layers", "positionLogic": "두 대응 레이어를 같은 폭의 병렬 영역으로 둔다.", "whyDominant": "같은 문제에 대한 서로 다른 개입 수준을 먼저 구분해야 하기 때문이다." },
+        "visualAnchor": { "role": "parallel-intervention-layers", "positionLogic": "두 대응 레이어를 같은 폭의 병렬 영역으로 둔다.", "whyDominant": "서로 다른 개입 유형과 각 레이어 내부의 근거·효과를 먼저 구분해야 하기 때문이다." },
         "evidencePlacement": ["규칙 근거는 왼쪽, 콘텐츠 사례는 오른쪽에 두고 각 효과는 해당 근거 아래에 둔다."],
         "connectorSemantics": [
           { "relationRole": "local-causality", "carrier": "downward in-column arrow", "scope": "group", "decorative": false },
           { "relationRole": "parallel-layers", "carrier": "aligned independent columns", "scope": "page", "decorative": false }
         ],
-        "accentStrategy": { "semanticUses": ["레이어 이름", "근거에서 도출된 효과"], "restraintRule": "같은 계열 색으로 공통 문제를 보이고 위치와 제목으로 레이어를 구분한다." },
+        "accentStrategy": { "semanticUses": ["레이어 이름", "근거에서 도출된 효과"], "restraintRule": "같은 계열 색으로 페이지를 통일하고 위치와 제목으로 레이어를 구분한다." },
         "imageTextRelationship": "규칙 레이어는 텍스트와 수치가 증거이고 콘텐츠 레이어는 실제 사례 이미지가 증거다.",
         "repetitionStrategy": "각 열에서 근거 → 효과 구조를 반복하되 열 사이에 순서 화살표를 만들지 않는다."
       },
       "applicability": {
         "fitsSemanticShapes": ["layered-countermeasure"],
-        "requiredSignals": ["공통 문제", "서로 다른 대응 레이어", "각 레이어의 구체 근거", "각 대응의 효과"],
+        "requiredSignals": ["서로 다른 대응 레이어", "각 레이어의 구체 근거", "각 대응의 효과"],
         "forbiddenSignals": ["순차 단계", "Before/After", "근거 없는 빈 레이어"],
         "useWhen": ["같은 문제에 시스템·콘텐츠·UI 등 여러 레이어의 대응이 있을 때", "규칙 변경과 개별 데이터 조정을 구분할 때"],
         "doNotUseWhen": ["두 항목이 실제 순차 단계일 때", "기존·신규 기능 비교일 때", "한 레이어에 근거가 없을 때"],
         "densityRange": ["balanced", "dense"],
-        "blockCount": { "min": 3, "hardLimit": false },
+        "blockCount": { "min": 4, "hardLimit": false },
         "assetRequirements": []
       },
       "qualityRationale": {
         "whyStrong": ["해결책을 옵션이 아니라 개입 레이어로 명명해 역할 차이를 먼저 이해시킨다.", "서로 다른 증거 형식도 동일한 근거→효과 구조로 비교하게 한다."],
         "problemsSolved": ["규칙과 콘텐츠 대응이 한 흐름으로 오해되는 문제", "서로 다른 증거 형식을 비교하기 어려운 문제"],
-        "priorities": ["개입 레이어 구분", "각 레이어의 근거", "공통 문제에 대한 효과"],
+        "priorities": ["개입 레이어 구분", "각 레이어의 근거", "각 레이어에서 관찰되는 효과"],
         "tradeoffs": ["한 레이어의 근거가 부족하면 같은 비중의 병렬 구조가 과장된다."]
       },
       "reuseBoundary": {
-        "reusableAbstractPrinciples": ["같은 문제의 해결책을 개입 레이어별로 분리한다.", "각 레이어 안에서만 국소 인과를 표현하고 열 사이에는 순서를 만들지 않는다."],
+        "reusableAbstractPrinciples": ["서로 다른 해결 레이어를 분리해 각 레이어의 근거와 효과를 보여준다.", "각 레이어 안에서만 국소 인과를 표현하고 열 사이에는 순서를 만들지 않는다."],
         "prohibitedCopy": ["CEDEC 행사 프레임", "발표자 영상", "회사 로고", "Shadowverse 카드와 IP", "브랜드 고유 색상", "정확한 표·테두리 좌표"],
         "exactGeometryReusable": false,
         "sourcePaletteReusable": false,
@@ -537,12 +537,12 @@
       "retrievalIndex": {
         "intentTags": ["countermeasure", "layered-solution", "system-comparison"],
         "semanticShapeTags": ["layered-countermeasure"],
-        "relationTags": ["mitigates-at-rule-level", "mitigates-at-content-level", "parallel-layers"],
-        "groupRoleTags": ["system-countermeasure", "content-countermeasure", "target"],
+        "relationTags": ["produces-rule-effect", "produces-content-effect", "parallel-layers"],
+        "groupRoleTags": ["rule-evidence", "rule-effect", "content-evidence", "content-effect"],
         "primaryArtifactTags": ["parallel-countermeasure-layers"],
         "readingPathTags": ["left-to-right", "top-to-bottom"],
         "densityTags": ["dense"],
-        "compactRetrievalText": "하나의 문제에 대한 규칙·콘텐츠 등 서로 다른 대응 레이어를 병렬로 분리하고 각 열 안에서 근거→효과를 설명하는 문법. 순차 단계나 Before/After에는 사용하지 않는다."
+        "compactRetrievalText": "규칙·콘텐츠 등 서로 다른 대응 레이어를 병렬로 분리하고 각 열 안에서 관찰 가능한 근거→효과를 설명하는 문법. 화면에 없는 공통 문제를 visible group으로 만들지 않으며 순차 단계나 Before/After에는 사용하지 않는다."
       }
     }
   ]
