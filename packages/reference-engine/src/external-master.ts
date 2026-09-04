@@ -62,6 +62,19 @@ const ExternalMasterReferenceSchema = z.strictObject({
   }),
 });
 
+/**
+ * External Master 분석 파일이 작성된 당시의 workflow snapshot이다.
+ * 현재 프로젝트 stage, Teacher status, Retrieval, scoring, production context의 입력이 아니다.
+ * `stageState`라는 legacy field 이름은 source evidence 호환을 위해 유지한다.
+ */
+const HistoricalExternalMasterWorkflowSnapshotSchema = z.strictObject({
+  stage0: z.literal('partial'),
+  stage6: z.literal('incomplete'),
+  readyPositiveFixture: z.literal('none'),
+  stage7: z.literal('not-started'),
+  criticCalled: z.literal(false),
+});
+
 export const ExternalMasterReferenceSetSchema = z.strictObject({
   schemaVersion: z.literal('0.1'),
   collectionId: z.string().min(1),
@@ -102,13 +115,8 @@ export const ExternalMasterReferenceSetSchema = z.strictObject({
       derivedFromPrinciples: z.array(z.string().min(1)).min(1),
     }),
   }),
-  stageState: z.strictObject({
-    stage0: z.literal('partial'),
-    stage6: z.literal('incomplete'),
-    readyPositiveFixture: z.literal('none'),
-    stage7: z.literal('not-started'),
-    criticCalled: z.literal(false),
-  }),
+  // Historical source snapshot only. Never interpret this as the current workflow state.
+  stageState: HistoricalExternalMasterWorkflowSnapshotSchema,
 });
 
 export type ExternalMasterReferenceSet = z.infer<typeof ExternalMasterReferenceSetSchema>;

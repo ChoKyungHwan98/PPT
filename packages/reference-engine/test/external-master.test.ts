@@ -29,6 +29,12 @@ describe('2025 External Master Reference corpus', () => {
         redistributeAsset: false,
       },
     });
+  });
+
+  it('preserves the historical analysis snapshot without treating it as current workflow state', async () => {
+    const set = await loadExternalMasterReferenceSet(referenceDir);
+
+    // Source-evidence compatibility check only. Current project status lives outside this record.
     expect(set.stageState).toEqual({
       stage0: 'partial',
       stage6: 'incomplete',
@@ -36,6 +42,7 @@ describe('2025 External Master Reference corpus', () => {
       stage7: 'not-started',
       criticCalled: false,
     });
+    expect('stageState' in set.references[0]!).toBe(false);
   });
 
   it('keeps source assets reference-only while recording the user-approved abstract V1 Pattern', async () => {

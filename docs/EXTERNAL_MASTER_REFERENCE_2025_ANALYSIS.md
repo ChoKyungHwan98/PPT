@@ -214,7 +214,19 @@
 6. `message-context` region에 message binding이 없어 질문이나 주장형 headline이 실제 렌더에 나타나지 않는다.
 7. `styleIntent`가 layout family별 고정 타입·색·motif로 끝나며, reference 분석이 primary artifact 선택과 국소 구성으로 전달되지 않는다.
 
-## 상태 유지
+## 분석 당시 Historical Workflow Snapshot
+
+아래 값은 이 External Master 분석을 등록하던 시점의 역사적 기록이다. 현재 프로젝트 workflow 상태를 뜻하지 않는다. 원본 evidence 호환을 위해 `analysis.json.stageState` 값은 보존하지만 다음 용도로 사용할 수 없다.
+
+- 현재 Stage 완료 여부 판단
+- TeacherPageRecord 복사
+- Teacher Retrieval 또는 scoring
+- Visual Designer의 production context
+- Teacher 또는 Ready Positive 승격 근거
+
+현재 프로젝트에서는 MEC-01 Stage 7 단일 revision cycle이 이미 완료되었다. 현재 상태는 `V1_IMPLEMENTATION_PLAN`과 revision proof 문서를 기준으로 판단한다.
+
+분석 당시 기록:
 
 - 단계 0: 부분 완료
 - 단계 6: 미완료

@@ -5,7 +5,22 @@
 - 상태: 설계안
 - 범위: 데이터 구조, 등록 절차, 검색 계약
 - Seed evidence: `external-master-2025-v1`의 6개 reference
-- 구현 상태: 미구현
+- 구현 상태: 기반 계약 구현 완료, Retrieval 미구현
+
+현재 구현 완료:
+
+- Controlled Vocabulary
+- `TeacherPageRecord` Zod Schema
+- External Master 6개 manual mapping
+- Schema / Rights / Status validation test
+
+현재 미구현:
+
+- production Retrieval
+- `usageMode` execution filter
+- scoring 및 retrieval benchmark
+- local reranker
+- 실제 `curated-teacher` 승격
 
 Master Teacher Corpus는 좋은 게임 기획 장표의 **표면을 복제하는 저장소**가 아니다. 각 장표가 어떤 정보를 어떤 구조로 설명했고, 왜 그 구조가 효과적이었는지를 검색 가능한 지식으로 보존한다.
 
@@ -62,7 +77,7 @@ packages/reference-engine/references/
 └─ external-master-2025-v1/
    ├─ manifest.json
    ├─ analysis.json
-   ├─ teacher-pages.v1.json       # 향후 구현 시 추가 후보
+   ├─ teacher-pages.v1.json       # 구현된 TeacherPageRecord sidecar
    └─ images...
 ```
 
@@ -72,11 +87,11 @@ packages/reference-engine/references/
 
 ### 4.1 TeacherPageRecord
 
-아래는 구현 전 계약을 검토하기 위한 TypeScript 형태의 초안이다. 실제 Zod schema를 이번 단계에서 추가하지 않는다.
+아래는 구현 계약을 읽기 쉽게 축약한 TypeScript 표현이다. 실제 Zod Schema는 `packages/contracts/src/teacher-page.ts`, 6개 mapping은 `teacher-pages.v1.json`에 구현되어 있다.
 
 ```ts
 type TeacherPageRecord = {
-  schemaVersion: '1.0-draft';
+  schemaVersion: '1.0';
 
   provenance: {
     referenceId: string;                 // 기존 ReferenceRecord와 동일 ID
@@ -108,8 +123,8 @@ type TeacherPageRecord = {
     curation: {
       analysisVersion: string;
       reviewedBy: 'human' | 'human-assisted';
-      reviewedAt: string;
-      confidence: 'low' | 'medium' | 'high';
+      reviewedAt?: string;
+      confidence: 'unassessed' | 'low' | 'medium' | 'high';
     };
   };
 
@@ -118,17 +133,20 @@ type TeacherPageRecord = {
     primaryClaim: string;
     semanticShape: string;
     informationGroups: Array<{
+      groupId: string;
       groupRole: string;                 // before, after, evidence, process 등
+      description: string;
       order: number;
       itemCount: number;
       required: boolean;
     }>;
     relationStructure: Array<{
-      fromRole: string;
-      toRole: string;
+      fromGroupId: string;
+      toGroupId: string;
       relationType: string;
       direction: 'directed' | 'undirected' | 'bidirectional';
       scope: 'local' | 'group' | 'page';
+      explanation: string;
     }>;
     readingPath: {
       primary: string;
@@ -204,7 +222,7 @@ type TeacherPageRecord = {
     exactGeometryReusable: false;
     sourcePaletteReusable: false;
     sourceIpReusable: false;
-    sourceAssetReusable: boolean;        // rights와 일치해야 함
+    sourceAssetReusable: false;
   };
 
   retrievalIndex: {
@@ -603,16 +621,26 @@ Hard constraints
 
 주의할 이름 충돌이 하나 있다. 기존 자료의 `readyGolden`은 호환을 위해 유지할 수 있지만, Teacher 여부를 나타내는 값으로 사용하면 안 된다. `compatibility.legacyReadyGolden`으로 격리하고, `teacherStatus` 및 별도의 사용자 승인 기록과 독립적으로 검증해야 한다.
 
-## 12. 향후 구현 시 최소 순서
+## 12. 구현 현황과 다음 순서
 
-이번 문서는 구현을 승인하지 않는다. 다음 구현 묶음은 아래 네 항목으로 고정한다.
+첫 구현 묶음은 완료되었다.
 
-1. controlled vocabulary 확정
-2. `TeacherPageRecord` Zod schema
-3. 기존 External Master 6개 수동 mapping
-4. schema/rights/status validation test
+1. Controlled Vocabulary
+2. `TeacherPageRecord` Zod Schema
+3. External Master 6개 manual mapping
+4. Schema / Rights / Status validation test
 
-이 묶음에서는 Retrieval을 구현하지 않는다. 위 네 항목을 검토하고 승인한 다음 단계에서만 기존 retrieval brief 확장, deterministic status filter, scoring, retrieval benchmark를 구현한다. Local reranker는 그 이후에도 실제 필요가 확인될 때만 고려한다.
+Human Curation Review는 별도 문서에 제안만 기록하며, 사용자 승인 전에는 6개 모두 `seed-evidence`를 유지한다.
+
+다음 구현 단계는 별도 승인 후 아래 순서로 진행한다.
+
+1. production `TeacherRetrievalRequest`와 `usageMode` execution filter
+2. deterministic applicability filter와 scoring breakdown
+3. human-labelled retrieval benchmark
+4. benchmark에서 필요성이 확인될 때만 local reranker
+5. 수정·검토가 끝난 Teacher의 개별 승격 심사
+
+현재는 Retrieval, scoring, benchmark, reranker, `curated-teacher` 승격을 구현하지 않는다.
 
 ## 13. V1 완료 기준
 
@@ -630,4 +658,4 @@ Master Teacher Corpus V1의 향후 구현 완료 기준은 다음과 같다.
 - legacy `readyGolden` 값이 filter, score, 승격 판단에 사용되지 않는다.
 - PatternFragment와 Ready Positive의 자동 승격 경로가 없다.
 
-현재 단계에서는 위 계약만 확정 후보로 기록하며, 코드·fixture·Renderer·Critic·Pattern은 변경하지 않는다.
+현재 단계에서는 Corpus 기반 계약과 seed mapping까지만 구현되어 있다. Retrieval 이후 기능과 Teacher 승격은 사용자 승인 전까지 진행하지 않는다.
