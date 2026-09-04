@@ -10,6 +10,7 @@ import {
   type TeacherPageRecord,
 } from '@game-presentation/contracts';
 import { loadExternalMasterTeacherPageSet } from '../src/external-master.js';
+import { buildTeacherDesignGuidance } from '../src/teacher-guidance.js';
 import { selectCuratedTeachersForInformationPlan } from '../src/teacher-selection.js';
 
 const referenceDir = fileURLToPath(new URL('../references/external-master-2025-v1/', import.meta.url));
@@ -225,6 +226,14 @@ async function select(example: { slide: SlideIR; informationPlan: InformationPla
   return selectCuratedTeachersForInformationPlan({ ...example, teachers: await teachers(), limit: 3 });
 }
 
+async function guidance(example: { slide: SlideIR; informationPlan: InformationPlan }) {
+  const corpus = await teachers();
+  const selection = selectCuratedTeachersForInformationPlan({ ...example, teachers: corpus, limit: 3 });
+  const resolution = buildTeacherDesignGuidance({ ...example, selection, teachers: corpus });
+  if (resolution.status !== 'ready') throw new Error(resolution.reason);
+  return resolution.guidance;
+}
+
 describe('deterministic curated Teacher selection', () => {
   it.each([
     ['Problem / Diagnosis', examples.diagnosis, 'process-diagnosis'],
@@ -306,5 +315,123 @@ describe('deterministic curated Teacher selection', () => {
     const result = await select(examples.tradeoff());
     expect(result.selected[0]?.mismatchedConditions).toEqual(expect.any(Array));
     expect(result.rejected.every((item) => item.reasons.length > 0)).toBe(true);
+  });
+});
+
+describe('selected Teacher to design guidance bridge', () => {
+  it.each([
+    [
+      'Problem / Diagnosis', examples.diagnosis, 'ext-2025-pokemon-problem-task-leak',
+      ['프로세스 내부의 중요한 경계를 사건처럼 드러낸다.', '기대 상태와 실제 상태를 같은 화면에서 대비한다.'],
+    ],
+    [
+      'Feature Annotation', examples.annotation, 'ext-2025-pokemon-card-format-concept',
+      ['실제 대상을 중심 증거로 두고 설명을 구체 위치에 귀속한다.'],
+    ],
+    [
+      'Organization / Structure', examples.organization, 'ext-2025-pokemon-initiative-team-structure',
+      ['설명은 원칙을, 구조도는 관계를 맡도록 역할을 분리한다.'],
+    ],
+    [
+      'Trade-off', examples.tradeoff, 'ext-2025-shadowverse-accessibility-vs-competitiveness',
+      ['두 목표를 동등하게 보여준 뒤 충돌 지점을 하나의 문제로 묶는다.'],
+    ],
+    [
+      'Before / After', examples.beforeAfter, 'ext-2025-shadowverse-super-evolution',
+      ['동일 기준의 항목을 같은 축에 정렬한다.', '변화 포인트만 제한적으로 강조한다.'],
+    ],
+    [
+      'Layered Countermeasure', examples.layered, 'ext-2025-shadowverse-rules-vs-card-ability',
+      ['서로 다른 해결 레이어를 분리해 각 레이어의 근거와 효과를 보여준다.', '각 레이어 안에서만 국소 인과를 표현하고 열 사이에는 순서를 만들지 않는다.'],
+    ],
+  ] as const)('delivers source-traced %s principles', async (_name, makeExample, referenceId, expectedPrinciples) => {
+    const result = await guidance(makeExample());
+    expect(result.primaryTeacher.referenceId).toBe(referenceId);
+    expect(result.structureLock).toMatchObject({
+      authority: 'primary-teacher-only',
+      sourceReferenceId: referenceId,
+    });
+    expect(result.guidance.abstractPrinciples.map((entry) => entry.text))
+      .toEqual(expect.arrayContaining([...expectedPrinciples]));
+    for (const section of Object.values(result.guidance)) {
+      expect(section.length).toBeGreaterThan(0);
+      expect(section.every((entry) =>
+        entry.teacherRole === 'primary' && entry.sourceReferenceId === referenceId)).toBe(true);
+    }
+  });
+
+  it('locks structure to the Primary Teacher and limits Secondary guidance to support fields', async () => {
+    const corpus = await teachers();
+    const beforeAfter = examples.beforeAfter();
+    const tradeoff = examples.tradeoff();
+    const primarySelection = selectCuratedTeachersForInformationPlan({
+      ...beforeAfter, teachers: corpus, limit: 1,
+    });
+    const secondarySelection = selectCuratedTeachersForInformationPlan({
+      ...tradeoff, teachers: corpus, limit: 1,
+    });
+    const primary = primarySelection.selected[0]!;
+    const secondary = secondarySelection.selected[0]!;
+    const mixedSelection = {
+      ...primarySelection,
+      selected: [primary, { ...secondary, rank: 2 }],
+      trace: { ...primarySelection.trace, returnedCount: 2 },
+    };
+    const resolution = buildTeacherDesignGuidance({
+      ...beforeAfter,
+      selection: mixedSelection,
+      teachers: corpus,
+    });
+    if (resolution.status !== 'ready') throw new Error(resolution.reason);
+
+    expect(resolution.guidance.primaryTeacher.semanticShape).toBe('aligned-before-after-spec');
+    expect(resolution.guidance.secondaryTeachers[0]?.semanticShape).toBe('tradeoff');
+    expect(Object.values(resolution.guidance.guidance).flat().every((entry) =>
+      entry.teacherRole === 'primary' && entry.sourceReferenceId === primary.referenceId)).toBe(true);
+    expect(resolution.guidance.secondarySupport.every((entry) =>
+      entry.teacherRole === 'secondary' && entry.sourceReferenceId === secondary.referenceId)).toBe(true);
+    expect(resolution.guidance.conflictPolicy.primaryOwnedAreas).toEqual(expect.arrayContaining([
+      'information structure', 'grouping', 'reading direction', 'alignment',
+    ]));
+  });
+
+  it('passes only abstract design knowledge and keeps source surface details in the copy boundary', async () => {
+    const corpus = await teachers();
+    for (const makeExample of [
+      examples.diagnosis,
+      examples.annotation,
+      examples.organization,
+      examples.tradeoff,
+      examples.beforeAfter,
+      examples.layered,
+    ]) {
+      const result = await guidance(makeExample());
+      expect(result.copyBoundary).toMatchObject({
+        policy: 'abstract-principles-only',
+        exactGeometryReusable: false,
+        sourcePaletteReusable: false,
+        sourceIpReusable: false,
+        sourceAssetReusable: false,
+      });
+      const source = corpus.find((teacher) =>
+        teacher.provenance.referenceId === result.primaryTeacher.referenceId)!;
+      const usableGuidance = JSON.stringify({ guidance: result.guidance, secondarySupport: result.secondarySupport });
+      expect(usableGuidance).not.toContain(source.provenance.source.origin);
+      expect(usableGuidance).not.toContain(source.provenance.pageArtifact.localAssetPath);
+      expect(usableGuidance).not.toContain(source.provenance.pageArtifact.sourceSha256);
+      expect(usableGuidance).not.toMatch(/CEDEC|Shadowverse|Pokemon|Pokémon|초진화|후공|\.png|[a-f0-9]{64}/u);
+      expect(result.copyBoundary.prohibitedCopy.length).toBeGreaterThan(0);
+    }
+  });
+
+  it('does not invent guidance when no Teacher was safely selected', async () => {
+    const corpus = await teachers();
+    const example = examples.plainSequence();
+    const selection = selectCuratedTeachersForInformationPlan({ ...example, teachers: corpus, limit: 3 });
+    const resolution = buildTeacherDesignGuidance({ ...example, selection, teachers: corpus });
+    expect(resolution).toEqual({
+      status: 'no-guidance',
+      reason: '현재 정보 구조에 안전하게 적용할 curated Teacher를 찾지 못했다.',
+    });
   });
 });

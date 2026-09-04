@@ -18,6 +18,8 @@
 - `SlideIR + InformationPlan` 기반 production Teacher 선택
 - curated-only status hard filter, 구조적 금지 조건, 설명 가능한 1~3개 순위
 - Teacher별 대표 예제와 오선택 방지 반례 테스트
+- 선택 결과를 source-traced `TeacherDesignGuidance`로 변환하는 설계 단계 handoff
+- Primary 구조 잠금, Secondary 보조 범위 제한, abstract-principles-only 복제 방지
 
 현재 미구현:
 
@@ -672,4 +674,4 @@ Master Teacher Corpus V1의 향후 구현 완료 기준은 다음과 같다.
 - legacy `readyGolden` 값이 filter, score, 승격 판단에 사용되지 않는다.
 - PatternFragment와 Ready Positive의 자동 승격 경로가 없다.
 
-현재 단계에서는 6개 Teacher의 human curation·사용자 승인·정식 등록과 기획 내용 기반 자동 선택까지 완료되었다. 선택된 Teacher 원칙을 실제 장표 설계에 전달하는 연결과 장표 재생성·품질 검증은 아직 진행하지 않았다.
+현재 단계에서는 6개 Teacher의 human curation·사용자 승인·정식 등록, 기획 내용 기반 자동 선택, 선택 원칙의 설계 단계 Guidance 전달까지 완료되었다. Guidance를 사용한 실제 배치·장표 재생성·품질 검증은 아직 진행하지 않았다.
