@@ -2,6 +2,10 @@ import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { z } from 'zod';
+import {
+  TeacherPageRecordSetSchema,
+  type TeacherPageRecordSet,
+} from '@game-presentation/contracts';
 
 const ExternalMasterReferenceSchema = z.strictObject({
   referenceId: z.string().min(1),
@@ -160,4 +164,47 @@ export async function loadExternalMasterReferenceSet(baseDir: string): Promise<E
     }
   }
   return analysis;
+}
+
+/**
+ * External Master 분석의 V1 Teacher sidecar를 로드하고 원본 provenance와 대조한다.
+ * 이 단계는 Teacher를 검색하거나 curated-teacher로 승격하지 않는다.
+ */
+export async function loadExternalMasterTeacherPageSet(baseDir: string): Promise<TeacherPageRecordSet> {
+  const teacherSet = TeacherPageRecordSetSchema.parse(
+    JSON.parse(await readFile(join(baseDir, 'teacher-pages.v1.json'), 'utf8')),
+  );
+  const sourceSet = await loadExternalMasterReferenceSet(baseDir);
+  if (teacherSet.collectionId !== sourceSet.collectionId
+    || teacherSet.sourceAnalysisFile !== 'analysis.json'
+    || teacherSet.pages.length !== sourceSet.references.length) {
+    throw new Error('Teacher sidecar와 External Master source collection이 일치하지 않습니다.');
+  }
+
+  const sourceById = new Map(sourceSet.references.map((reference) => [reference.referenceId, reference]));
+  for (const page of teacherSet.pages) {
+    const source = sourceById.get(page.provenance.referenceId);
+    if (source === undefined) {
+      throw new Error(`External Master 분석에 없는 Teacher reference입니다: ${page.provenance.referenceId}`);
+    }
+    if (page.provenance.source.origin !== source.source.origin
+      || page.provenance.year !== source.source.year
+      || page.provenance.pageArtifact.localAssetPath !== source.file
+      || page.provenance.pageArtifact.sourceSha256 !== source.source.sha256) {
+      throw new Error(`Teacher provenance와 External Master 분석이 다릅니다: ${page.provenance.referenceId}`);
+    }
+    if (page.provenance.teacherStatus !== 'seed-evidence'
+      || page.provenance.compatibility.legacyReadyGolden !== source.readyGolden) {
+      throw new Error(`External Master seed의 status 또는 compatibility 값이 올바르지 않습니다: ${page.provenance.referenceId}`);
+    }
+    if (page.provenance.rights.status !== sourceSet.rights.status
+      || page.provenance.rights.analyzeAllowed !== sourceSet.rights.allowedUse.analyze
+      || page.provenance.rights.deriveAbstractPrincipleAllowed
+        !== sourceSet.rights.allowedUse.deriveAbstractPrinciple
+      || page.provenance.rights.reuseAssetAllowed !== sourceSet.rights.allowedUse.reuseAsset
+      || page.provenance.rights.redistributeAssetAllowed !== sourceSet.rights.allowedUse.redistributeAsset) {
+      throw new Error(`Teacher rights와 External Master source rights가 다릅니다: ${page.provenance.referenceId}`);
+    }
+  }
+  return teacherSet;
 }

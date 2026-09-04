@@ -291,7 +291,7 @@ MEC-01 전용 Retrieval, Composition, Renderer 경로는 만들지 않는다.
 
 ### 단계 6 — 실제 화면 디자인 검토
 
-현재 상태: **미완료**. 실제 PNG 입력, 작은 context, 구조화 결과, token·비용 trace는 구현됐다. 그러나 사용자 승인 Positive가 없으므로 calibration을 완료할 수 없다. 단계 7 자동 수정은 시작하지 않는다.
+현재 상태: **calibration 미완료**. 실제 PNG 입력, 작은 context, 구조화 결과, token·비용 trace는 구현됐다. 그러나 Ready Positive Fixture가 0개이므로 calibration을 완료할 수 없다. MEC-01 Stage 7 단일 revision cycle은 완료됐으며 다시 실행하지 않는다. Dodge Before/After artifact도 사용자 평가에서 `portfolio-not-ready / rejected-as-ready-candidate`로 판정됐으므로 Positive 확보나 단계 6 완료의 근거로 사용하지 않는다.
 
 - 실제 PNG와 작은 구조 요약만 AI에 전달한다.
 - 디자인 품질을 정해진 항목으로 평가한다.

@@ -1,0 +1,549 @@
+{
+  "schemaVersion": "1.0",
+  "collectionId": "external-master-2025-v1",
+  "sourceAnalysisFile": "analysis.json",
+  "pages": [
+    {
+      "schemaVersion": "1.0",
+      "provenance": {
+        "referenceId": "ext-2025-pokemon-problem-task-leak",
+        "source": { "origin": "Pokemon TCG Pocket / CEDEC 2025" },
+        "year": 2025,
+        "pageArtifact": {
+          "kind": "slide-image",
+          "pageLabel": "01",
+          "localAssetPath": "01_pokemon_problem_task-leak.png",
+          "sourceSha256": "ab4d90b80aeeeb6cee1c747f15971715109ce307730c68501e1b58824d0409a0"
+        },
+        "rights": {
+          "status": "unknown",
+          "analyzeAllowed": true,
+          "deriveAbstractPrincipleAllowed": true,
+          "reuseAssetAllowed": false,
+          "redistributeAssetAllowed": false
+        },
+        "teacherStatus": "seed-evidence",
+        "compatibility": { "legacyReadyGolden": false },
+        "curation": {
+          "analysisVersion": "external-master-analysis-0.1",
+          "reviewedBy": "human-assisted",
+          "confidence": "medium"
+        }
+      },
+      "informationStructure": {
+        "pageGoal": "기존 작업 전달 방식이 만든 인식 오류와 숨은 누락을 하나의 프로세스 안에서 진단한다.",
+        "primaryClaim": "연속된 작업 전달과 진행감만으로는 UX·콘셉트·타깃 정합성이나 누락을 발견할 수 없고, 겉보기 완료 뒤에 미완료가 남는다.",
+        "semanticShape": "process-diagnosis",
+        "informationGroups": [
+          { "groupId": "stated-problem", "groupRole": "claim", "description": "상단에서 기존 방식의 문제를 문장으로 규정한다.", "order": 0, "itemCount": 1, "required": true },
+          { "groupId": "nominal-process", "groupRole": "expected-flow", "description": "여러 작업이 완료로 이어지는 정상 프로세스를 보여준다.", "order": 1, "itemCount": 1, "required": true },
+          { "groupId": "team-perception", "groupRole": "perceived-state", "description": "팀과 PM이 진행 중에 가진 인식을 짧은 발화로 보여준다.", "order": 2, "itemCount": 1, "required": true },
+          { "groupId": "hidden-omission", "groupRole": "actual-problem", "description": "프로세스 밖에 남은 누락 작업을 별도 경고로 드러낸다.", "order": 3, "itemCount": 1, "required": true }
+        ],
+        "relationStructure": [
+          { "fromGroupId": "nominal-process", "toGroupId": "team-perception", "relationType": "creates-perception", "direction": "directed", "scope": "group", "explanation": "연속된 완료 표시는 팀에게 충분히 진행되고 있다는 인식을 만든다." },
+          { "fromGroupId": "team-perception", "toGroupId": "hidden-omission", "relationType": "contradicted-by", "direction": "directed", "scope": "page", "explanation": "진행 인식과 실제 누락을 대비해 진단의 핵심을 만든다." },
+          { "fromGroupId": "nominal-process", "toGroupId": "hidden-omission", "relationType": "fails-to-surface", "direction": "directed", "scope": "page", "explanation": "기존 프로세스가 누락을 제때 드러내지 못했다는 인과를 보여준다." }
+        ],
+        "readingPath": {
+          "primary": "상단 문장 → 좌에서 우로 진행되는 프로세스 → 하단 인식 → 경계 이후의 누락 경고",
+          "startRole": "claim",
+          "endRole": "actual-problem"
+        },
+        "primaryArtifact": "diagnosed-process-flow"
+      },
+      "visualGrammar": {
+        "pageOccupancy": { "band": "balanced", "occupiedZones": ["title", "message", "process", "diagnosis"] },
+        "dominantAxis": "horizontal",
+        "titleMessagePlacement": { "titleZone": "top", "messageZone": "upper", "relationship": "stacked" },
+        "hierarchyLevels": [
+          { "level": 1, "semanticRole": "문제 선언", "relativeStrength": "primary" },
+          { "level": 2, "semanticRole": "정상처럼 보이는 작업 흐름", "relativeStrength": "secondary" },
+          { "level": 3, "semanticRole": "구성원의 인식", "relativeStrength": "supporting" },
+          { "level": 4, "semanticRole": "누락 경고", "relativeStrength": "annotation" }
+        ],
+        "groupingStrategy": ["정상 프로세스와 팀 인식을 묶고 실제 누락은 경계 밖의 진단 영역으로 분리한다."],
+        "whitespaceStrategy": ["상단 설명과 하단 증거를 분리하고 프로세스 끝의 경계를 여백으로 드러낸다."],
+        "alignmentStrategy": ["프로세스는 좌우 축에 정렬하고 인식과 누락 증거는 관련 단계 아래에 배치한다."],
+        "visualAnchor": { "role": "problem-and-diagnosis", "positionLogic": "상단 문제 문장과 프로세스 끝 경고를 연결한다.", "whyDominant": "정상 진행과 실제 누락의 모순이 페이지의 핵심이기 때문이다." },
+        "evidencePlacement": ["구성원의 인식은 프로세스 아래, 실제 누락은 시각 경계 뒤에 둔다."],
+        "connectorSemantics": [
+          { "relationRole": "process-progress", "carrier": "connected step arrows", "scope": "group", "decorative": false },
+          { "relationRole": "diagnostic-boundary", "carrier": "bracket and dashed boundary", "scope": "page", "decorative": false }
+        ],
+        "accentStrategy": { "semanticUses": ["정상 진행", "미진행", "발견된 문제"], "restraintRule": "강한 경고색은 진단과 누락에만 사용한다." },
+        "imageTextRelationship": "인물 아이콘은 관점을 식별하고 텍스트는 각 관점의 판단과 실제 문제를 설명한다.",
+        "repetitionStrategy": "연속 단계의 형태를 반복하다 누락 경계에서 반복을 끊는다."
+      },
+      "applicability": {
+        "fitsSemanticShapes": ["process-diagnosis"],
+        "requiredSignals": ["기존 프로세스 단계", "진행 중 인식", "실제 누락", "누락 경계 또는 원인"],
+        "forbiddenSignals": ["누락이나 진단이 없는 정상 순서", "근거 없는 경고"],
+        "useWhen": ["정상 절차 안의 누락이나 병목을 설명할 때", "기대 상태와 실제 상태의 차이가 핵심일 때"],
+        "doNotUseWhen": ["모든 단계가 정상적으로 이어지는 단순 메커니즘 설명", "실제 누락·오판·진단 근거가 없는 경우"],
+        "densityRange": ["balanced", "dense"],
+        "blockCount": { "min": 3, "hardLimit": false },
+        "assetRequirements": []
+      },
+      "qualityRationale": {
+        "whyStrong": ["실패한 프로세스 내부에 문제를 배치해 원인과 결과를 동시에 이해시킨다.", "팀의 인식과 실제 상태를 같은 화면에서 대비한다."],
+        "problemsSolved": ["진행감이 실제 완성으로 오인되는 문제", "프로세스 밖의 누락이 보이지 않는 문제"],
+        "priorities": ["진단", "프로세스", "인식과 실제의 대비"],
+        "tradeoffs": ["진단 근거가 없으면 경고 연출이 의미를 과장한다."]
+      },
+      "reuseBoundary": {
+        "reusableAbstractPrinciples": ["프로세스 내부의 중요한 경계를 사건처럼 드러낸다.", "기대 상태와 실제 상태를 같은 화면에서 대비한다."],
+        "prohibitedCopy": ["CEDEC 행사 프레임", "회사 로고", "Pokémon IP", "브랜드 고유 색상", "인물 아이콘 형태", "정확한 좌표와 비율"],
+        "exactGeometryReusable": false,
+        "sourcePaletteReusable": false,
+        "sourceIpReusable": false,
+        "sourceAssetReusable": false
+      },
+      "retrievalIndex": {
+        "intentTags": ["problem-framing", "diagnosis", "process-failure"],
+        "semanticShapeTags": ["process-diagnosis"],
+        "relationTags": ["creates-perception", "contradicted-by", "fails-to-surface"],
+        "groupRoleTags": ["claim", "expected-flow", "perceived-state", "actual-problem"],
+        "primaryArtifactTags": ["diagnosed-process-flow"],
+        "readingPathTags": ["left-to-right", "guided-sequence"],
+        "densityTags": ["balanced"],
+        "compactRetrievalText": "정상처럼 보이는 과정 안의 인식과 실제 누락을 대비하고, 누락 경계를 진단 사건으로 드러내는 process-diagnosis 문법. 누락 근거가 없는 단순 순서에는 사용하지 않는다."
+      }
+    },
+    {
+      "schemaVersion": "1.0",
+      "provenance": {
+        "referenceId": "ext-2025-pokemon-card-format-concept",
+        "source": { "origin": "Pokemon TCG Pocket / 2025" },
+        "year": 2025,
+        "pageArtifact": {
+          "kind": "slide-image",
+          "pageLabel": "02",
+          "localAssetPath": "02_pokemon_card-format-concept.png",
+          "sourceSha256": "452794f8bd540715f836dcc05219dbae3214d982378b11536b533664cbafad3a"
+        },
+        "rights": { "status": "unknown", "analyzeAllowed": true, "deriveAbstractPrincipleAllowed": true, "reuseAssetAllowed": false, "redistributeAssetAllowed": false },
+        "teacherStatus": "seed-evidence",
+        "compatibility": { "legacyReadyGolden": false },
+        "curation": { "analysisVersion": "external-master-analysis-0.1", "reviewedBy": "human-assisted", "confidence": "medium" }
+      },
+      "informationStructure": {
+        "pageGoal": "실제 대상의 눈에 보이는 부분과 설계 의도를 직접 연결해 전체 콘셉트의 근거를 보여준다.",
+        "primaryClaim": "포즈, 표정, 홀로그램, 기술 효과가 결합되어 대상의 힘과 박진감을 선명하게 표현한다.",
+        "semanticShape": "artifact-annotation",
+        "informationGroups": [
+          { "groupId": "primary-artifact", "groupRole": "evidence", "description": "페이지 중앙의 실제 카드 포맷이 모든 설명의 기준점이 된다.", "order": 0, "itemCount": 1, "required": true },
+          { "groupId": "feature-annotations", "groupRole": "part-explanation", "description": "포즈, 표정, 홀로그램, 기술 효과를 실제 위치에 연결한다.", "order": 1, "itemCount": 4, "required": true },
+          { "groupId": "concept-synthesis", "groupRole": "takeaway", "description": "하단 문장이 개별 요소를 하나의 전체 콘셉트로 종합한다.", "order": 2, "itemCount": 1, "required": true }
+        ],
+        "relationStructure": [
+          { "fromGroupId": "feature-annotations", "toGroupId": "primary-artifact", "relationType": "anchors-to-visible-part", "direction": "directed", "scope": "local", "explanation": "각 설계 판단이 실제 대상의 어느 부분에 구현됐는지 증명한다." },
+          { "fromGroupId": "feature-annotations", "toGroupId": "concept-synthesis", "relationType": "supports", "direction": "directed", "scope": "page", "explanation": "부분별 기능이 합쳐져 전체 경험 콘셉트를 만든다." }
+        ],
+        "readingPath": { "primary": "중앙 대상 → 주변 annotation → 하단 종합 문장", "startRole": "evidence", "endRole": "takeaway" },
+        "primaryArtifact": "annotated-primary-artifact"
+      },
+      "visualGrammar": {
+        "pageOccupancy": { "band": "balanced", "occupiedZones": ["title", "center-artifact", "surrounding-annotations", "footer-message"] },
+        "dominantAxis": "radial",
+        "titleMessagePlacement": { "titleZone": "top", "messageZone": "bottom", "relationship": "separate" },
+        "hierarchyLevels": [
+          { "level": 1, "semanticRole": "실제 대상", "relativeStrength": "primary" },
+          { "level": 2, "semanticRole": "기능 annotation", "relativeStrength": "secondary" },
+          { "level": 3, "semanticRole": "전체 콘셉트 문장", "relativeStrength": "supporting" }
+        ],
+        "groupingStrategy": ["모든 annotation이 중앙 대상을 공유하고 각 라벨은 하나의 anchor line과 묶인다."],
+        "whitespaceStrategy": ["중앙 artifact 주변 여백을 설명 공간으로 사용하고 하단은 종합 문장에 배정한다."],
+        "alignmentStrategy": ["annotation을 대상 주변에 분산하되 각 선이 설명 대상의 실제 위치에 닿게 한다."],
+        "visualAnchor": { "role": "primary-artifact", "positionLogic": "실제 대상을 페이지 중앙에 둔다.", "whyDominant": "모든 설명이 동일한 시각 증거를 참조하기 때문이다." },
+        "evidencePlacement": ["실제 대상은 중앙, 국소 설명은 대상 주변, 전체 해석은 하단에 둔다."],
+        "connectorSemantics": [
+          { "relationRole": "feature-anchor", "carrier": "one-to-one leader line", "scope": "local", "decorative": false }
+        ],
+        "accentStrategy": { "semanticUses": ["서로 다른 feature category"], "restraintRule": "색은 annotation 분류에만 쓰고 artifact보다 강하게 만들지 않는다." },
+        "imageTextRelationship": "이미지는 1차 증거이고 텍스트는 보이는 특징의 설계 의도를 해석한다.",
+        "repetitionStrategy": "같은 annotation 문법을 반복하되 각 라벨은 서로 다른 실제 위치에 귀속한다."
+      },
+      "applicability": {
+        "fitsSemanticShapes": ["artifact-annotation"],
+        "requiredSignals": ["실제 대상 또는 신뢰할 수 있는 mockup", "주석 가능한 구체 위치", "각 요소의 설계 역할", "전체 콘셉트"],
+        "forbiddenSignals": ["primary artifact 부재", "식별할 수 없는 세부 위치", "단순 순서 또는 인과만 존재"],
+        "useWhen": ["게임 UI·카드·아이템·캐릭터의 여러 설계 요소를 실제 대상에서 설명할 때"],
+        "doNotUseWhen": ["실제 대상 이미지가 없을 때", "annotation이 대상보다 강하거나 선이 과도하게 교차할 때"],
+        "densityRange": ["sparse", "balanced"],
+        "blockCount": { "min": 3, "hardLimit": false },
+        "assetRequirements": ["주석 위치를 확인할 수 있는 primary artifact 이미지 또는 mockup"]
+      },
+      "qualityRationale": {
+        "whyStrong": ["실제 결과물에서 추상 콘셉트의 근거를 찾게 한다.", "주석이 정확한 부분에 닿아 탐색 비용을 줄인다."],
+        "problemsSolved": ["기능 설명과 실제 화면 위치가 분리되는 문제", "추상 콘셉트의 근거가 보이지 않는 문제"],
+        "priorities": ["실제 대상", "국소 설계 근거", "전체 콘셉트"],
+        "tradeoffs": ["annotation이 많아지면 선 교차와 라벨 과밀이 발생한다."]
+      },
+      "reuseBoundary": {
+        "reusableAbstractPrinciples": ["실제 대상을 중심 증거로 두고 설명을 구체 위치에 귀속한다.", "부분 설명 뒤에 전체 콘셉트를 종합한다."],
+        "prohibitedCopy": ["Pokémon 카드 이미지", "캐릭터 IP", "회사 로고", "브랜드 고유 색상", "annotation 라벨 형태", "정확한 좌표와 선 길이"],
+        "exactGeometryReusable": false,
+        "sourcePaletteReusable": false,
+        "sourceIpReusable": false,
+        "sourceAssetReusable": false
+      },
+      "retrievalIndex": {
+        "intentTags": ["feature-explanation", "concept-evidence", "ui-annotation"],
+        "semanticShapeTags": ["artifact-annotation"],
+        "relationTags": ["anchors-to-visible-part", "supports"],
+        "groupRoleTags": ["evidence", "part-explanation", "takeaway"],
+        "primaryArtifactTags": ["annotated-primary-artifact"],
+        "readingPathTags": ["center-out", "top-to-bottom"],
+        "densityTags": ["balanced"],
+        "compactRetrievalText": "실제 UI·카드·아이템 같은 primary artifact를 중앙 증거로 두고, 각 설계 요소를 실제 위치에 annotation한 뒤 전체 concept으로 종합하는 문법. 식별 가능한 artifact가 없으면 사용하지 않는다."
+      }
+    },
+    {
+      "schemaVersion": "1.0",
+      "provenance": {
+        "referenceId": "ext-2025-pokemon-initiative-team-structure",
+        "source": { "origin": "Pokemon TCG Pocket / CEDEC 2025" },
+        "year": 2025,
+        "pageArtifact": { "kind": "slide-image", "pageLabel": "03", "localAssetPath": "03_pokemon_initiative-team-structure.png", "sourceSha256": "00d9d360009c08361054ba9c1d618818d543704c4e427a97235fe17c30f74345" },
+        "rights": { "status": "unknown", "analyzeAllowed": true, "deriveAbstractPrincipleAllowed": true, "reuseAssetAllowed": false, "redistributeAssetAllowed": false },
+        "teacherStatus": "seed-evidence",
+        "compatibility": { "legacyReadyGolden": false },
+        "curation": { "analysisVersion": "external-master-analysis-0.1", "reviewedBy": "human-assisted", "confidence": "medium" }
+      },
+      "informationStructure": {
+        "pageGoal": "운영 원칙을 문장으로 설명하고 실제 보고·소속 구조를 도식으로 확인시킨다.",
+        "primaryClaim": "작은 기능 단위 팀을 여러 개 만들고 각 팀의 오너 아래 필요한 직군을 묶어 책임을 명확하게 한다.",
+        "semanticShape": "hierarchy",
+        "informationGroups": [
+          { "groupId": "organization-definition", "groupRole": "explanation", "description": "팀 크기, 기능 단위, 책임자 원칙을 글로 정의한다.", "order": 0, "itemCount": 1, "required": true },
+          { "groupId": "organization-map", "groupRole": "structural-evidence", "description": "상위 책임자, PM, 여러 팀과 구성원의 소속 관계를 보여준다.", "order": 1, "itemCount": 1, "required": true },
+          { "groupId": "change-label", "groupRole": "state", "description": "도식이 개선 이후의 구조임을 표시한다.", "order": 2, "itemCount": 1, "required": true }
+        ],
+        "relationStructure": [
+          { "fromGroupId": "organization-definition", "toGroupId": "organization-map", "relationType": "explained-by", "direction": "directed", "scope": "page", "explanation": "문장으로 정의한 조직 원칙을 구조도가 구체화한다." },
+          { "fromGroupId": "change-label", "toGroupId": "organization-map", "relationType": "qualifies-state", "direction": "directed", "scope": "group", "explanation": "표시된 구조가 어느 시점의 상태인지 알려준다." }
+        ],
+        "readingPath": { "primary": "제목 → 좌측 설명 → 우측 구조도", "startRole": "explanation", "endRole": "structural-evidence" },
+        "primaryArtifact": "explanation-and-hierarchy-map"
+      },
+      "visualGrammar": {
+        "pageOccupancy": { "band": "balanced", "occupiedZones": ["title", "left-explanation", "right-hierarchy"] },
+        "dominantAxis": "horizontal",
+        "titleMessagePlacement": { "titleZone": "top", "relationship": "separate" },
+        "hierarchyLevels": [
+          { "level": 1, "semanticRole": "조직 형태의 이름", "relativeStrength": "primary" },
+          { "level": 2, "semanticRole": "운영 원칙 설명", "relativeStrength": "secondary" },
+          { "level": 3, "semanticRole": "책임 구조도", "relativeStrength": "secondary" },
+          { "level": 4, "semanticRole": "상태 라벨", "relativeStrength": "annotation" }
+        ],
+        "groupingStrategy": ["설명과 구조도를 역할이 다른 두 영역으로 병치하고 구조도 내부는 계층으로 묶는다."],
+        "whitespaceStrategy": ["설명 열과 구조도 열 사이의 간격으로 서로 다른 정보 역할을 분리한다."],
+        "alignmentStrategy": ["설명은 세로 흐름, 구조도는 상위 책임자에서 하위 팀으로 내려가는 계층 축에 맞춘다."],
+        "visualAnchor": { "role": "organization-principle", "positionLogic": "좌측 설명과 우측 구조도를 비슷한 높이에서 시작한다.", "whyDominant": "정의와 구조를 왕복하며 확인하는 것이 핵심이기 때문이다." },
+        "evidencePlacement": ["도식은 설명 옆에 두어 문장으로 정의된 조직 원칙을 즉시 검증하게 한다."],
+        "connectorSemantics": [
+          { "relationRole": "membership-and-reporting", "carrier": "orthogonal hierarchy lines", "scope": "group", "decorative": false }
+        ],
+        "accentStrategy": { "semanticUses": ["책임자와 팀 묶음 구분"], "restraintRule": "색은 계층 구분을 보조하며 관계선의 의미를 바꾸지 않는다." },
+        "imageTextRelationship": "도식은 구조를 보여주고 텍스트는 규모와 책임 원칙처럼 도식만으로 알 수 없는 내용을 설명한다.",
+        "repetitionStrategy": "하위 팀과 구성원 표식을 반복해 병렬 조직 단위를 보여준다."
+      },
+      "applicability": {
+        "fitsSemanticShapes": ["hierarchy"],
+        "requiredSignals": ["상위·하위 단위", "각 단위의 책임", "소속 또는 보고 관계", "도식 밖의 운영 설명"],
+        "forbiddenSignals": ["시간 순서", "원인·결과 중심 구조", "계층 없는 단순 목록"],
+        "useWhen": ["조직·역할·책임 구조를 설명할 때", "게임 시스템 모듈과 담당 기능의 계층을 설명할 때"],
+        "doNotUseWhen": ["시간 순서나 원인·결과가 핵심일 때", "설명과 도식이 같은 내용을 그대로 반복할 때"],
+        "densityRange": ["balanced", "dense"],
+        "blockCount": { "min": 2, "hardLimit": false },
+        "assetRequirements": []
+      },
+      "qualityRationale": {
+        "whyStrong": ["설명과 구조도가 중복하지 않고 서로 부족한 정보를 보완한다.", "시각적 크기 차이가 책임 범위를 보여준다."],
+        "problemsSolved": ["조직 원칙만 읽고 실제 관계를 파악하기 어려운 문제", "도식만으로 운영 원칙을 알 수 없는 문제"],
+        "priorities": ["운영 원칙", "계층과 책임", "상태"],
+        "tradeoffs": ["계층이 얕거나 구조도가 과도하게 복잡하면 병치의 이점이 줄어든다."]
+      },
+      "reuseBoundary": {
+        "reusableAbstractPrinciples": ["설명은 원칙을, 구조도는 관계를 맡도록 역할을 분리한다.", "텍스트와 구조도를 같은 시선 높이에서 병치한다."],
+        "prohibitedCopy": ["CEDEC 행사 프레임", "발표자 영상", "회사 로고", "Pokémon IP", "인물 아이콘 스타일", "정확한 2열 비율과 좌표"],
+        "exactGeometryReusable": false,
+        "sourcePaletteReusable": false,
+        "sourceIpReusable": false,
+        "sourceAssetReusable": false
+      },
+      "retrievalIndex": {
+        "intentTags": ["organization", "responsibility", "structure-explanation"],
+        "semanticShapeTags": ["hierarchy"],
+        "relationTags": ["explained-by", "qualifies-state", "membership", "reporting"],
+        "groupRoleTags": ["explanation", "structural-evidence", "state"],
+        "primaryArtifactTags": ["explanation-and-hierarchy-map"],
+        "readingPathTags": ["left-to-right", "top-to-bottom"],
+        "densityTags": ["balanced"],
+        "compactRetrievalText": "운영 원칙을 설명하는 문장과 책임·소속 관계를 보여주는 hierarchy map을 병치하는 문법. 시간 순서나 인과가 핵심인 페이지에는 사용하지 않는다."
+      }
+    },
+    {
+      "schemaVersion": "1.0",
+      "provenance": {
+        "referenceId": "ext-2025-shadowverse-accessibility-vs-competitiveness",
+        "source": { "origin": "Shadowverse: Worlds Beyond / CEDEC 2025" },
+        "year": 2025,
+        "pageArtifact": { "kind": "slide-image", "pageLabel": "04", "localAssetPath": "04_shadowverse_accessibility-vs-competitiveness.png", "sourceSha256": "362d30d02a379bc71300488a63a438cb147186c5f0a219589f46fb645f8f9bd2" },
+        "rights": { "status": "unknown", "analyzeAllowed": true, "deriveAbstractPrincipleAllowed": true, "reuseAssetAllowed": false, "redistributeAssetAllowed": false },
+        "teacherStatus": "seed-evidence",
+        "compatibility": { "legacyReadyGolden": false },
+        "curation": { "analysisVersion": "external-master-analysis-0.1", "reviewedBy": "human-assisted", "confidence": "medium" }
+      },
+      "informationStructure": {
+        "pageGoal": "두 설계 목표를 모두 정당한 요구로 제시하고 그 사이의 긴장을 문제로 정의한다.",
+        "primaryClaim": "쉽게 시작하게 만들려는 목표와 깊이·복잡성을 유지하려는 목표는 서로 당기는 방향이 달라 장기 운영에서 양립이 어렵다.",
+        "semanticShape": "tradeoff",
+        "informationGroups": [
+          { "groupId": "accessibility-goal", "groupRole": "goal-a", "description": "신규 사용자에게 이해하기 쉽고 플레이하기 쉬운 경험을 제공하려는 목표다.", "order": 0, "itemCount": 1, "required": true },
+          { "groupId": "competitiveness-goal", "groupRole": "goal-b", "description": "오래 플레이하도록 복잡성과 경쟁성을 보장하려는 목표다.", "order": 1, "itemCount": 1, "required": true },
+          { "groupId": "tradeoff-conclusion", "groupRole": "tension", "description": "시간이 지날수록 두 목표의 양립이 어렵다는 결론이다.", "order": 2, "itemCount": 1, "required": true }
+        ],
+        "relationStructure": [
+          { "fromGroupId": "accessibility-goal", "toGroupId": "competitiveness-goal", "relationType": "tensions-with", "direction": "bidirectional", "scope": "page", "explanation": "두 목표가 동시에 중요하지만 설계 방향이 충돌한다." },
+          { "fromGroupId": "accessibility-goal", "toGroupId": "tradeoff-conclusion", "relationType": "contributes-to-tension", "direction": "directed", "scope": "page", "explanation": "접근성 요구가 trade-off의 한 축을 만든다." },
+          { "fromGroupId": "competitiveness-goal", "toGroupId": "tradeoff-conclusion", "relationType": "contributes-to-tension", "direction": "directed", "scope": "page", "explanation": "깊이와 경쟁성 요구가 반대 축을 만든다." }
+        ],
+        "readingPath": { "primary": "상단 문제 정의 → 왼쪽 첫 관점 → 오른쪽 두 번째 관점 → 하단 종합 판단", "startRole": "goal-a", "endRole": "tension" },
+        "primaryArtifact": "opposed-goals-field"
+      },
+      "visualGrammar": {
+        "pageOccupancy": { "band": "balanced", "occupiedZones": ["title", "upper-left-viewpoint", "middle-right-viewpoint", "lower-conclusion"] },
+        "dominantAxis": "diagonal",
+        "titleMessagePlacement": { "titleZone": "top", "messageZone": "upper", "relationship": "stacked" },
+        "hierarchyLevels": [
+          { "level": 1, "semanticRole": "trade-off 제목", "relativeStrength": "primary" },
+          { "level": 2, "semanticRole": "두 목표", "relativeStrength": "secondary" },
+          { "level": 3, "semanticRole": "종합 판단", "relativeStrength": "supporting" }
+        ],
+        "groupingStrategy": ["각 목표를 독립 관점으로 묶고 결론은 두 관점 아래 별도 층에 둔다."],
+        "whitespaceStrategy": ["대각선으로 엇갈린 관점 사이 여백을 긴장과 왕복 읽기의 공간으로 사용한다."],
+        "alignmentStrategy": ["두 관점은 서로 다른 위치를 차지하되 시각적 비중은 동등하게 유지한다."],
+        "visualAnchor": { "role": "opposed-viewpoints", "positionLogic": "두 목표를 화면 양쪽과 서로 다른 높이에 배치한다.", "whyDominant": "어느 한쪽도 정답이 아닌 충돌 구조를 먼저 보여주기 때문이다." },
+        "evidencePlacement": ["각 목표의 이유를 해당 관점 안에 두고 종합 판단을 하단에 둔다."],
+        "connectorSemantics": [
+          { "relationRole": "design-tension", "carrier": "opposed position and speech direction", "scope": "page", "decorative": false }
+        ],
+        "accentStrategy": { "semanticUses": ["두 목표의 핵심어"], "restraintRule": "양쪽에 동등한 강조를 적용해 한쪽을 정답처럼 만들지 않는다." },
+        "imageTextRelationship": "관점 표식은 서로 다른 화자를 구분하고 텍스트가 실제 목표와 갈등을 전달한다.",
+        "repetitionStrategy": "동등한 발화 형식을 두 관점에 반복해 균형을 유지한다."
+      },
+      "applicability": {
+        "fitsSemanticShapes": ["tradeoff"],
+        "requiredSignals": ["목표 A", "목표 B", "각 목표의 필요 이유", "양립이 어려운 이유"],
+        "forbiddenSignals": ["한쪽이 명백한 정답", "정량 Before/After", "관점 없는 장식적 대립"],
+        "useWhen": ["서로 충돌하지만 모두 중요한 설계 목표를 설명할 때", "해결책보다 문제 프레이밍이 먼저 필요할 때"],
+        "doNotUseWhen": ["한쪽 선택이 명백히 정답일 때", "정량 사양 차이나 Before/After를 설명할 때"],
+        "densityRange": ["sparse", "balanced"],
+        "blockCount": { "min": 3, "hardLimit": false },
+        "assetRequirements": []
+      },
+      "qualityRationale": {
+        "whyStrong": ["두 요구를 각각 독립된 목소리로 보존한다.", "위치의 대립만으로 문제의 본질이 trade-off임을 알린다."],
+        "problemsSolved": ["한쪽 목표를 악역으로 만드는 문제", "두 주장 나열이 하나의 설계 문제로 묶이지 않는 문제"],
+        "priorities": ["두 목표의 동등성", "충돌", "종합 판단"],
+        "tradeoffs": ["실제 관점 차이가 없으면 대립 구도가 장식이 된다."]
+      },
+      "reuseBoundary": {
+        "reusableAbstractPrinciples": ["두 목표를 동등하게 보여준 뒤 충돌 지점을 하나의 문제로 묶는다.", "위치와 방향으로 긴장을 표현한다."],
+        "prohibitedCopy": ["CEDEC 행사 프레임", "발표자 영상", "회사 로고", "Shadowverse 캐릭터와 IP", "말풍선 외형", "브랜드 고유 색상"],
+        "exactGeometryReusable": false,
+        "sourcePaletteReusable": false,
+        "sourceIpReusable": false,
+        "sourceAssetReusable": false
+      },
+      "retrievalIndex": {
+        "intentTags": ["tradeoff", "problem-framing", "opposed-goals"],
+        "semanticShapeTags": ["tradeoff"],
+        "relationTags": ["tensions-with", "contributes-to-tension"],
+        "groupRoleTags": ["goal-a", "goal-b", "tension"],
+        "primaryArtifactTags": ["opposed-goals-field"],
+        "readingPathTags": ["diagonal", "guided-sequence"],
+        "densityTags": ["balanced"],
+        "compactRetrievalText": "동시에 중요하지만 충돌하는 두 설계 목표를 동등한 관점으로 보존하고 하단에서 하나의 trade-off 문제로 종합하는 문법. 한쪽이 정답이거나 Before/After인 경우에는 사용하지 않는다."
+      }
+    },
+    {
+      "schemaVersion": "1.0",
+      "provenance": {
+        "referenceId": "ext-2025-shadowverse-super-evolution",
+        "source": { "origin": "Shadowverse: Worlds Beyond / CEDEC 2025" },
+        "year": 2025,
+        "pageArtifact": { "kind": "slide-image", "pageLabel": "05", "localAssetPath": "05_shadowverse_super-evolution.png", "sourceSha256": "1cb60b26bcef9a1da3dbfc09112752a535a364773f208b63e19d8a7469619ede" },
+        "rights": { "status": "unknown", "analyzeAllowed": true, "deriveAbstractPrincipleAllowed": true, "reuseAssetAllowed": false, "redistributeAssetAllowed": false },
+        "teacherStatus": "seed-evidence",
+        "compatibility": { "legacyReadyGolden": false },
+        "curation": { "analysisVersion": "external-master-analysis-0.1", "reviewedBy": "human-assisted", "confidence": "medium" }
+      },
+      "informationStructure": {
+        "pageGoal": "공통 출발점을 유지한 채 두 기능의 결과와 규칙 차이를 같은 기준으로 비교한다.",
+        "primaryClaim": "새 기능은 기존 진화보다 더 강한 결과와 추가 규칙을 제공한다.",
+        "semanticShape": "aligned-before-after-spec",
+        "informationGroups": [
+          { "groupId": "shared-baseline", "groupRole": "comparison-anchor", "description": "두 열에 동일한 시작 카드와 기준 상태를 둔다.", "order": 0, "itemCount": 1, "required": true },
+          { "groupId": "existing-feature", "groupRole": "before", "description": "기존 진화의 결과 수치와 규칙을 보여준다.", "order": 1, "itemCount": 1, "required": true },
+          { "groupId": "new-feature", "groupRole": "after", "description": "초진화의 결과 수치와 추가 규칙을 보여준다.", "order": 2, "itemCount": 1, "required": true },
+          { "groupId": "difference-marker", "groupRole": "contrast", "description": "두 기능이 동일하지 않다는 비교 경계를 만든다.", "order": 3, "itemCount": 1, "required": true }
+        ],
+        "relationStructure": [
+          { "fromGroupId": "shared-baseline", "toGroupId": "existing-feature", "relationType": "transforms-to", "direction": "directed", "scope": "group", "explanation": "공통 기준이 기존 기능으로 어떻게 변하는지 보여준다." },
+          { "fromGroupId": "shared-baseline", "toGroupId": "new-feature", "relationType": "transforms-to", "direction": "directed", "scope": "group", "explanation": "같은 기준이 새 기능에서 어떻게 달라지는지 보여준다." },
+          { "fromGroupId": "existing-feature", "toGroupId": "new-feature", "relationType": "compared-on-same-criteria", "direction": "bidirectional", "scope": "page", "explanation": "이미지, 수치, 규칙 설명을 같은 위치에 맞춰 차이를 찾게 한다." }
+        ],
+        "readingPath": { "primary": "제목 → 좌우 열 제목 → 같은 높이의 증거 왕복 → 각 열 하단 사양", "startRole": "comparison-anchor", "endRole": "after" },
+        "primaryArtifact": "aligned-comparison-field"
+      },
+      "visualGrammar": {
+        "pageOccupancy": { "band": "dense", "occupiedZones": ["title", "before-column", "comparison-boundary", "after-column"] },
+        "dominantAxis": "horizontal",
+        "titleMessagePlacement": { "titleZone": "top", "relationship": "combined" },
+        "hierarchyLevels": [
+          { "level": 1, "semanticRole": "새 요소 선언", "relativeStrength": "primary" },
+          { "level": 2, "semanticRole": "기존·신규 열 제목", "relativeStrength": "secondary" },
+          { "level": 3, "semanticRole": "공통 기준과 변화 결과", "relativeStrength": "supporting" },
+          { "level": 4, "semanticRole": "규칙 설명", "relativeStrength": "annotation" }
+        ],
+        "groupingStrategy": ["각 기능을 독립 열로 묶고 열 내부의 이미지·변환·설명을 같은 순서로 정렬한다."],
+        "whitespaceStrategy": ["거의 같은 폭의 두 열과 중앙 차이 경계를 유지한다."],
+        "alignmentStrategy": ["같은 비교 기준과 증거를 두 열의 같은 높이에 맞춘다."],
+        "visualAnchor": { "role": "aligned-before-after-columns", "positionLogic": "두 결과 열을 같은 크기와 기준선에 배치한다.", "whyDominant": "독자가 차이만 찾으면 되도록 비교 비용을 낮추기 때문이다." },
+        "evidencePlacement": ["각 열에서 공통 기준, 변화 결과, 규칙 설명을 같은 순서로 둔다."],
+        "connectorSemantics": [
+          { "relationRole": "state-transformation", "carrier": "matched in-column arrow", "scope": "group", "decorative": false },
+          { "relationRole": "difference", "carrier": "central comparison marker", "scope": "page", "decorative": false }
+        ],
+        "accentStrategy": { "semanticUses": ["기존과 신규 구분", "신규 규칙의 변화"], "restraintRule": "신규를 강조해도 두 열의 비교 기준 정렬은 유지한다." },
+        "imageTextRelationship": "이미지는 시각·수치 변화를 보여주고 텍스트는 보이지 않는 규칙 차이를 설명한다.",
+        "repetitionStrategy": "두 열에서 동일한 정보 순서를 반복해 차이만 비교하게 한다."
+      },
+      "applicability": {
+        "fitsSemanticShapes": ["aligned-before-after-spec"],
+        "requiredSignals": ["공통 비교 기준", "기존 상태", "신규 상태", "공통 비교 항목", "변경된 규칙 또는 수치"],
+        "forbiddenSignals": ["서로 다른 비교 기준", "세 개 이상의 대안", "공통 기준이나 실제 차이 부재"],
+        "useWhen": ["기존·신규 기능을 비교할 때", "패치·리워크 전후 차이를 설명할 때"],
+        "doNotUseWhen": ["서로 기준이 다른 대안", "공통 기준 없이 신규만 강조하는 경우"],
+        "densityRange": ["balanced", "dense"],
+        "blockCount": { "min": 2, "hardLimit": false },
+        "pairCount": { "min": 1, "hardLimit": false },
+        "assetRequirements": []
+      },
+      "qualityRationale": {
+        "whyStrong": ["동일한 시작점과 정보 순서를 유지해 차이만 찾게 한다.", "서로 다른 증거를 같은 위치에 배치해 비교 비용을 낮춘다."],
+        "problemsSolved": ["기존과 신규의 비교 기준이 흔들리는 문제", "수치와 규칙 차이가 서로 다른 위치에 흩어지는 문제"],
+        "priorities": ["공통 비교 기준", "정렬된 변화", "추가 규칙"],
+        "tradeoffs": ["비교 대상이 세 개 이상이면 같은 정렬 구조의 가독성이 급격히 떨어진다."]
+      },
+      "reuseBoundary": {
+        "reusableAbstractPrinciples": ["동일 기준의 항목을 같은 축에 정렬한다.", "변화 포인트만 제한적으로 강조한다."],
+        "prohibitedCopy": ["CEDEC 행사 프레임", "발표자 영상", "회사 로고", "Shadowverse 카드와 캐릭터 IP", "브랜드 고유 색상", "정확한 열 크기와 테두리"],
+        "exactGeometryReusable": false,
+        "sourcePaletteReusable": false,
+        "sourceIpReusable": false,
+        "sourceAssetReusable": false
+      },
+      "retrievalIndex": {
+        "intentTags": ["feature-comparison", "before-after", "spec-change"],
+        "semanticShapeTags": ["aligned-before-after-spec"],
+        "relationTags": ["transforms-to", "compared-on-same-criteria"],
+        "groupRoleTags": ["comparison-anchor", "before", "after", "contrast"],
+        "primaryArtifactTags": ["aligned-comparison-field"],
+        "readingPathTags": ["before-after", "left-to-right"],
+        "densityTags": ["dense"],
+        "compactRetrievalText": "공통 기준을 유지한 기존·신규 기능을 같은 정보 순서와 높이로 정렬해 변화만 찾게 하는 aligned before/after spec 문법. pairing과 공통 기준이 없으면 사용하지 않는다."
+      }
+    },
+    {
+      "schemaVersion": "1.0",
+      "provenance": {
+        "referenceId": "ext-2025-shadowverse-rules-vs-card-ability",
+        "source": { "origin": "Shadowverse: Worlds Beyond / CEDEC 2025" },
+        "year": 2025,
+        "pageArtifact": { "kind": "slide-image", "pageLabel": "06", "localAssetPath": "06_shadowverse_rules-vs-card-ability.png", "sourceSha256": "c6972da8ac4e61abd4ba32f96eea583781ddbb8642cfeca5a0dea6d88b0d0726" },
+        "rights": { "status": "unknown", "analyzeAllowed": true, "deriveAbstractPrincipleAllowed": true, "reuseAssetAllowed": false, "redistributeAssetAllowed": false },
+        "teacherStatus": "seed-evidence",
+        "compatibility": { "legacyReadyGolden": false },
+        "curation": { "analysisVersion": "external-master-analysis-0.1", "reviewedBy": "human-assisted", "confidence": "medium" }
+      },
+      "informationStructure": {
+        "pageGoal": "같은 문제를 해결하는 두 개의 개입 레이어를 분리하고 각 레이어의 근거와 효과를 병렬로 설명한다.",
+        "primaryClaim": "기본 규칙 조정과 콘텐츠 능력 추가를 함께 사용해 한쪽 플레이어의 불리함을 여러 층에서 완화했다.",
+        "semanticShape": "layered-countermeasure",
+        "informationGroups": [
+          { "groupId": "rule-layer", "groupRole": "system-countermeasure", "description": "턴, 횟수, 손패 수 같은 기본 규칙과 그 효과를 설명한다.", "order": 0, "itemCount": 2, "required": true },
+          { "groupId": "content-layer", "groupRole": "content-countermeasure", "description": "카드 능력 사례와 그 효과를 설명한다.", "order": 1, "itemCount": 1, "required": true },
+          { "groupId": "shared-problem", "groupRole": "target", "description": "두 레이어가 공통으로 대응하는 밸런스 문제다.", "order": 2, "itemCount": 1, "required": true }
+        ],
+        "relationStructure": [
+          { "fromGroupId": "rule-layer", "toGroupId": "shared-problem", "relationType": "mitigates-at-rule-level", "direction": "directed", "scope": "group", "explanation": "시스템 규칙이 구조적으로 문제를 완화한다." },
+          { "fromGroupId": "content-layer", "toGroupId": "shared-problem", "relationType": "mitigates-at-content-level", "direction": "directed", "scope": "group", "explanation": "개별 콘텐츠 능력이 추가 대응 수단을 제공한다." },
+          { "fromGroupId": "rule-layer", "toGroupId": "content-layer", "relationType": "parallel-layers", "direction": "undirected", "scope": "page", "explanation": "두 대응은 순서나 Before/After가 아니라 서로 다른 개입 층이다." }
+        ],
+        "readingPath": { "primary": "제목 → 좌우 레이어 제목 → 각 열의 근거와 효과 → 열 사이 역할 비교", "startRole": "system-countermeasure", "endRole": "target" },
+        "primaryArtifact": "parallel-countermeasure-layers"
+      },
+      "visualGrammar": {
+        "pageOccupancy": { "band": "dense", "occupiedZones": ["title", "rule-layer", "content-layer", "layer-effects"] },
+        "dominantAxis": "horizontal",
+        "titleMessagePlacement": { "titleZone": "top", "relationship": "combined" },
+        "hierarchyLevels": [
+          { "level": 1, "semanticRole": "대응 주제", "relativeStrength": "primary" },
+          { "level": 2, "semanticRole": "개입 레이어 이름", "relativeStrength": "secondary" },
+          { "level": 3, "semanticRole": "각 레이어의 근거", "relativeStrength": "supporting" },
+          { "level": 4, "semanticRole": "효과 결론", "relativeStrength": "annotation" }
+        ],
+        "groupingStrategy": ["규칙과 콘텐츠 능력을 독립 영역으로 묶고 각 열에서 근거에서 효과로 이어지게 한다."],
+        "whitespaceStrategy": ["두 레이어 사이 간격으로 병렬 관계를 유지하고 열 내부는 수직 인과에 사용한다."],
+        "alignmentStrategy": ["두 열의 제목과 효과 결론을 맞추되 서로 다른 증거 형식을 허용한다."],
+        "visualAnchor": { "role": "parallel-intervention-layers", "positionLogic": "두 대응 레이어를 같은 폭의 병렬 영역으로 둔다.", "whyDominant": "같은 문제에 대한 서로 다른 개입 수준을 먼저 구분해야 하기 때문이다." },
+        "evidencePlacement": ["규칙 근거는 왼쪽, 콘텐츠 사례는 오른쪽에 두고 각 효과는 해당 근거 아래에 둔다."],
+        "connectorSemantics": [
+          { "relationRole": "local-causality", "carrier": "downward in-column arrow", "scope": "group", "decorative": false },
+          { "relationRole": "parallel-layers", "carrier": "aligned independent columns", "scope": "page", "decorative": false }
+        ],
+        "accentStrategy": { "semanticUses": ["레이어 이름", "근거에서 도출된 효과"], "restraintRule": "같은 계열 색으로 공통 문제를 보이고 위치와 제목으로 레이어를 구분한다." },
+        "imageTextRelationship": "규칙 레이어는 텍스트와 수치가 증거이고 콘텐츠 레이어는 실제 사례 이미지가 증거다.",
+        "repetitionStrategy": "각 열에서 근거 → 효과 구조를 반복하되 열 사이에 순서 화살표를 만들지 않는다."
+      },
+      "applicability": {
+        "fitsSemanticShapes": ["layered-countermeasure"],
+        "requiredSignals": ["공통 문제", "서로 다른 대응 레이어", "각 레이어의 구체 근거", "각 대응의 효과"],
+        "forbiddenSignals": ["순차 단계", "Before/After", "근거 없는 빈 레이어"],
+        "useWhen": ["같은 문제에 시스템·콘텐츠·UI 등 여러 레이어의 대응이 있을 때", "규칙 변경과 개별 데이터 조정을 구분할 때"],
+        "doNotUseWhen": ["두 항목이 실제 순차 단계일 때", "기존·신규 기능 비교일 때", "한 레이어에 근거가 없을 때"],
+        "densityRange": ["balanced", "dense"],
+        "blockCount": { "min": 3, "hardLimit": false },
+        "assetRequirements": []
+      },
+      "qualityRationale": {
+        "whyStrong": ["해결책을 옵션이 아니라 개입 레이어로 명명해 역할 차이를 먼저 이해시킨다.", "서로 다른 증거 형식도 동일한 근거→효과 구조로 비교하게 한다."],
+        "problemsSolved": ["규칙과 콘텐츠 대응이 한 흐름으로 오해되는 문제", "서로 다른 증거 형식을 비교하기 어려운 문제"],
+        "priorities": ["개입 레이어 구분", "각 레이어의 근거", "공통 문제에 대한 효과"],
+        "tradeoffs": ["한 레이어의 근거가 부족하면 같은 비중의 병렬 구조가 과장된다."]
+      },
+      "reuseBoundary": {
+        "reusableAbstractPrinciples": ["같은 문제의 해결책을 개입 레이어별로 분리한다.", "각 레이어 안에서만 국소 인과를 표현하고 열 사이에는 순서를 만들지 않는다."],
+        "prohibitedCopy": ["CEDEC 행사 프레임", "발표자 영상", "회사 로고", "Shadowverse 카드와 IP", "브랜드 고유 색상", "정확한 표·테두리 좌표"],
+        "exactGeometryReusable": false,
+        "sourcePaletteReusable": false,
+        "sourceIpReusable": false,
+        "sourceAssetReusable": false
+      },
+      "retrievalIndex": {
+        "intentTags": ["countermeasure", "layered-solution", "system-comparison"],
+        "semanticShapeTags": ["layered-countermeasure"],
+        "relationTags": ["mitigates-at-rule-level", "mitigates-at-content-level", "parallel-layers"],
+        "groupRoleTags": ["system-countermeasure", "content-countermeasure", "target"],
+        "primaryArtifactTags": ["parallel-countermeasure-layers"],
+        "readingPathTags": ["left-to-right", "top-to-bottom"],
+        "densityTags": ["dense"],
+        "compactRetrievalText": "하나의 문제에 대한 규칙·콘텐츠 등 서로 다른 대응 레이어를 병렬로 분리하고 각 열 안에서 근거→효과를 설명하는 문법. 순차 단계나 Before/After에는 사용하지 않는다."
+      }
+    }
+  ]
+}

@@ -1,8 +1,21 @@
 {
   "artifactId": "dodge-feature-spec-01",
-  "status": "candidate-awaiting-user-review",
+  "status": "portfolio-not-ready",
+  "classification": "rejected-as-ready-candidate",
   "readyPositiveFixture": false,
   "readyPromotionApproval": null,
+  "golden": false,
+  "additionalPolishingAllowed": false,
+  "retention": "preserve-negative-intermediate-evidence",
+  "criticBenchmarkEligibility": "candidate-only-not-registered",
+  "userReview": {
+    "reviewer": "user",
+    "decision": "rejected-as-ready-candidate",
+    "reason": "사용자가 실제 PNG를 확인한 결과 포트폴리오 제출 품질이 아니라고 명시적으로 판단했다.",
+    "reviewedPngSha256": "6d1c21aabb634cc48bb25d5c10c3191db96255ca90412d21c477389185329588",
+    "structuralAssessment": "hard-gate-passed",
+    "visualQualityAssessment": "insufficient-for-portfolio-submission"
+  },
   "criticCalled": false,
   "polishIterations": 0,
   "pngRenderCount": 1,

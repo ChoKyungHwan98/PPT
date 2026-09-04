@@ -1,6 +1,15 @@
-# Before / After Feature Spec — 첫 실제 후보
+# Before / After Feature Spec — 후보 평가 기록
 
-상태: `candidate-awaiting-user-review`. Ready Positive Fixture가 아니다. 사용자 이미지 평가 전 Critic을 호출하지 않는다.
+최종 상태: `portfolio-not-ready / rejected-as-ready-candidate`.
+
+사용자가 실제 PNG를 확인하고 포트폴리오 제출 품질이 아니라고 명시적으로 판단했다. 사용자 검토 대기 상태는 종료됐다.
+
+- Ready Positive Fixture 아님. Golden 아님.
+- 추가 polishing 금지. 기존 PNG와 구조·검증 증거는 삭제하지 않는다.
+- 구조는 정상이나 visual quality가 부족한 negative/intermediate evidence로 보존한다.
+- 이후 Critic benchmark fixture 후보로 검토할 수 있으나, 현재 benchmark에 등록하거나 새 AI 평가를 실행한 것은 아니다.
+
+판정 대상 PNG의 SHA256은 `6d1c21aabb634cc48bb25d5c10c3191db96255ca90412d21c477389185329588`이며, 동일 판정은 `dodge-feature-spec-01.proof.json`의 status / classification / userReview에 기록한다.
 
 ## 1. Source
 
@@ -108,7 +117,7 @@ Composition regions:
 - `.png`
 - `.proof.json`
 
-## 9. 이번 변경 파일
+## 9. 후보 제작 당시 변경 파일
 
 신규:
 
@@ -142,4 +151,6 @@ Composition regions:
 
 `pnpm verify`: 타입 검사 및 테스트 33개 파일 / 118개 테스트 PASS.
 
-이 문서는 테스트 통과를 제출 품질 승인으로 해석하지 않는다. 사용자가 첫 실제 PNG를 보고 판단할 때까지 현재 결과를 보존하며 재렌더링·Critic·자동 승격을 실행하지 않는다. MEC-01의 종료 상태와 단계 0/6의 미완료 상태는 그대로 유지한다.
+테스트와 Hard Gate PASS는 구조·원문 보존에 대한 증거다. 사용자의 visual quality 거절 판정은 그대로 유지하며 이 artifact를 Ready Positive 또는 Golden으로 승격하지 않는다. 추가 polishing 없이 기존 결과를 보존한다.
+
+현재 Ready Positive는 0개다. 단계 0은 부분 완료, 단계 6은 Positive calibration 미완료이며 MEC-01 Stage 7 단일 revision cycle은 완료된 상태로 유지한다. MEC-01 revision을 다시 실행하지 않는다. 이번 상태 정리에서는 새 PNG·Critic·AI benchmark를 실행하지 않았으며 Stage 8/9도 시작하지 않는다.

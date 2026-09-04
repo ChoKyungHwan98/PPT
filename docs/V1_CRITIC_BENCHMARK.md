@@ -3,10 +3,19 @@
 ## 현재 판정
 
 - OpenRouter 연결, 실제 PNG 입력, 구조화 출력, 작은 context, token·비용 기록은 동작한다.
-- 단계 0과 단계 6은 **미완료**다.
+- 단계 0은 **부분 완료**, 단계 6은 **calibration 미완료**다.
 - 기존 `positive-golden-case`는 사용자가 최종 제출 품질로 승인하지 않았으므로 `intermediate-golden-case / needs-review`로 재분류했다.
 - 현재 `ready` Positive Fixture는 **없다**. 따라서 단계 완료 판정도 존재하지 않는다.
 - MEC-01 Stage 7 Partial Revision은 정확히 1회 실행 후 종료했다. 결과는 `intermediate-golden-case / revised-needs-review`이며 `ready` Positive Fixture가 아니다.
+- Dodge Before/After artifact는 사용자 평가에서 `portfolio-not-ready / rejected-as-ready-candidate`로 판정됐다. Ready Positive도 Golden도 아니다.
+
+## Dodge Before/After 보존 상태
+
+`dodge-feature-spec-01`은 구조·원문 보존 검사를 통과했지만, 사용자가 실제 PNG를 보고 포트폴리오 제출 품질이 부족하다고 판단했다. 추가 polishing 없이 negative/intermediate evidence로 보존한다.
+
+이후 Critic benchmark fixture 후보로 사용할 수 있으나 아직 benchmark fixture로 등록하지 않았다. 세부 finding과 모델 판정을 임의로 만들지 않는다. 이번 재분류에서 새 PNG, Critic 또는 AI benchmark를 실행하지 않는다.
+
+Ready Positive는 여전히 **0개**이며 MEC-01의 미해결 `space-use`, 완료된 단일 revision cycle과 재실행 금지를 유지한다. Stage 8/9는 시작하지 않는다.
 
 ## 입력 경계
 

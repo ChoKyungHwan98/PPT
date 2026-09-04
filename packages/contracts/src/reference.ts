@@ -4,6 +4,12 @@ import { validateInformationPlan, type InformationPlan } from './information-pla
 import type { SlideIR } from './slide-ir.js';
 
 export const DensityBandSchema = z.enum(['sparse', 'balanced', 'dense']);
+export const ReferenceRightsStatusSchema = z.enum([
+  'known-license',
+  'public-domain',
+  'user-owned',
+  'unknown',
+]);
 export const ReadingPathSchema = z.enum([
   'left-to-right',
   'top-to-bottom',
@@ -31,7 +37,7 @@ export const ReferenceRecordSchema = z
       checkedAt: z.iso.datetime(),
     }),
     rights: z.strictObject({
-      status: z.enum(['known-license', 'public-domain', 'user-owned', 'unknown']),
+      status: ReferenceRightsStatusSchema,
       licenseId: z.string().min(1).optional(),
       licenseUrl: z.url().optional(),
     }),

@@ -1,7 +1,14 @@
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
-import { SEED_PATTERN_FRAGMENTS, SEED_REFERENCE_CORPUS } from '@game-presentation/contracts';
-import { loadExternalMasterReferenceSet } from '../src/external-master.js';
+import {
+  SEED_PATTERN_FRAGMENTS,
+  SEED_REFERENCE_CORPUS,
+  TeacherPageRecordSchema,
+} from '@game-presentation/contracts';
+import {
+  loadExternalMasterReferenceSet,
+  loadExternalMasterTeacherPageSet,
+} from '../src/external-master.js';
 
 const referenceDir = fileURLToPath(new URL('../references/external-master-2025-v1/', import.meta.url));
 
@@ -51,5 +58,85 @@ describe('2025 External Master Reference corpus', () => {
       'before-after comparison',
       'two-alternative comparison',
     ]);
+  });
+
+  it('validates all six manually mapped Teacher pages against source provenance', async () => {
+    const source = await loadExternalMasterReferenceSet(referenceDir);
+    const teachers = await loadExternalMasterTeacherPageSet(referenceDir);
+    const sourceIds = new Set(source.references.map((reference) => reference.referenceId));
+
+    expect(teachers.pages).toHaveLength(6);
+    expect(teachers.pages.every((page) => TeacherPageRecordSchema.safeParse(page).success)).toBe(true);
+    expect(teachers.pages.every((page) => sourceIds.has(page.provenance.referenceId))).toBe(true);
+    expect(teachers.pages.every((page) => page.provenance.teacherStatus === 'seed-evidence')).toBe(true);
+    expect(teachers.pages.every(
+      (page) => page.provenance.compatibility.legacyReadyGolden === false,
+    )).toBe(true);
+    expect(new Set(teachers.pages.map(
+      (page) => page.informationStructure.semanticShape,
+    )).size).toBe(6);
+    for (const page of teachers.pages) {
+      expect(page.provenance.rights).toBeDefined();
+      expect(page.applicability).toBeDefined();
+      expect(page.reuseBoundary.prohibitedCopy.length).toBeGreaterThan(0);
+    }
+  });
+
+  it('rejects missing rights and missing prohibited-copy boundaries', async () => {
+    const record = (await loadExternalMasterTeacherPageSet(referenceDir)).pages[0]!;
+    const { rights: _rights, ...provenanceWithoutRights } = record.provenance;
+    const { prohibitedCopy: _prohibitedCopy, ...boundaryWithoutProhibitedCopy } = record.reuseBoundary;
+    expect(TeacherPageRecordSchema.safeParse({
+      ...record,
+      provenance: provenanceWithoutRights,
+    }).success).toBe(false);
+    expect(TeacherPageRecordSchema.safeParse({
+      ...record,
+      reuseBoundary: boundaryWithoutProhibitedCopy,
+    }).success).toBe(false);
+  });
+
+  it('rejects unsafe source reuse and non-abstract Teacher reuse boundaries', async () => {
+    const record = (await loadExternalMasterTeacherPageSet(referenceDir)).pages[0]!;
+    expect(TeacherPageRecordSchema.safeParse({
+      ...record,
+      reuseBoundary: { ...record.reuseBoundary, sourceAssetReusable: true },
+    }).success).toBe(false);
+    expect(TeacherPageRecordSchema.safeParse({
+      ...record,
+      provenance: {
+        ...record.provenance,
+        rights: {
+          ...record.provenance.rights,
+          status: 'unknown',
+          reuseAssetAllowed: true,
+        },
+      },
+    }).success).toBe(false);
+    for (const field of ['exactGeometryReusable', 'sourcePaletteReusable', 'sourceIpReusable'] as const) {
+      expect(TeacherPageRecordSchema.safeParse({
+        ...record,
+        reuseBoundary: { ...record.reuseBoundary, [field]: true },
+      }).success).toBe(false);
+    }
+  });
+
+  it('rejects invalid status while keeping legacyReadyGolden structurally independent', async () => {
+    const record = (await loadExternalMasterTeacherPageSet(referenceDir)).pages[0]!;
+    expect(TeacherPageRecordSchema.safeParse({
+      ...record,
+      provenance: { ...record.provenance, teacherStatus: 'ready-golden' },
+    }).success).toBe(false);
+
+    const legacyTrue = TeacherPageRecordSchema.parse({
+      ...record,
+      provenance: {
+        ...record.provenance,
+        teacherStatus: 'seed-evidence',
+        compatibility: { legacyReadyGolden: true },
+      },
+    });
+    expect(legacyTrue.provenance.teacherStatus).toBe('seed-evidence');
+    expect(legacyTrue.provenance.compatibility.legacyReadyGolden).toBe(true);
   });
 });
