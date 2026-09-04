@@ -39,12 +39,26 @@ export function validateAlignedFeatureFidelity(input: { slide: SlideIR; informat
     const after = textNodes.find((node) => node.semanticBlockId === relation.toBlockId);
     const carriers = input.tree.nodes.filter((node) => node.visible && node.relationId === relation.id);
     const carrier = carriers[0];
+    const beforeRegion = before?.parentId === undefined
+      ? undefined
+      : input.tree.nodes.find((node) => node.kind === 'group' && node.nodeId === before.parentId);
+    const afterRegion = after?.parentId === undefined
+      ? undefined
+      : input.tree.nodes.find((node) => node.kind === 'group' && node.nodeId === after.parentId);
+    const carrierRegion = carrier?.parentId === undefined
+      ? undefined
+      : input.tree.nodes.find((node) => node.kind === 'group' && node.nodeId === carrier.parentId);
+    const baselineOwnership = before?.parentId === after?.parentId && before?.parentId === carrier?.parentId
+      && before?.compositionRegionId === after?.compositionRegionId;
+    const guidedOwnership = beforeRegion?.parentId !== undefined
+      && beforeRegion.parentId === afterRegion?.parentId
+      && beforeRegion.parentId === carrierRegion?.parentId
+      && before?.compositionRegionId !== after?.compositionRegionId;
     if (!before || !after || carriers.length !== 1 || !carrier
       || carrier.kind !== 'shape' || carrier.visualRole !== 'relation-carrier'
       || carrier.relationVisualRole !== 'comparison-change'
       || before.visualRole !== 'comparison-before' || after.visualRole !== 'comparison-after'
-      || before.parentId !== after.parentId || before.parentId !== carrier.parentId
-      || before.compositionRegionId !== after.compositionRegionId
+      || (!baselineOwnership && !guidedOwnership)
       || before.box.x >= after.box.x) {
       add(`pair-${relation.id}`, 'missing-relation', 'Visible aligned pair does not match the authored relation.');
     }

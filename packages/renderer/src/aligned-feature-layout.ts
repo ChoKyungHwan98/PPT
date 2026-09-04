@@ -10,6 +10,13 @@ type Binding = CompositionPlan['bindings'][number];
 type Box = RenderNode['box'];
 type Input = { slide: SlideIR; informationPlan: InformationPlan; plan: CompositionPlan };
 
+export type AlignedFeaturePresentationRevision = {
+  revisionId: 'critic-targeted-revision-1';
+  tightenSpaceUse: boolean;
+  strengthenGrouping: boolean;
+  strengthenRelation: boolean;
+};
+
 function content(input: Input, binding: Binding): ContentRef {
   const block = input.slide.blocks.find((entry) => entry.id === binding.blockId);
   if (!block || (block.kind !== 'heading' && block.kind !== 'paragraph')) {
@@ -82,28 +89,63 @@ function wrappedMeasures(ref: ContentRef, binding: Binding, width: number, measu
 
 export function buildAlignedFeatureRenderTree(input: Input & {
   measures: Map<string, TextMeasurement>; fonts: FontAsset[];
+  presentationRevision?: AlignedFeaturePresentationRevision;
 }) {
   const { plan } = input;
   const width = plan.pageProfile.width;
   const height = plan.pageProfile.height;
   const scale = width / 1920;
-  const bounds: Box = { x: width * 0.05, y: height * 0.07, width: width * 0.90, height: height * 0.84 };
+  const revision = input.presentationRevision;
+  const bounds: Box = revision?.tightenSpaceUse
+    ? { x: width * 0.045, y: height * 0.045, width: width * 0.91, height: height * 0.90 }
+    : { x: width * 0.05, y: height * 0.07, width: width * 0.90, height: height * 0.84 };
+  const teacherGuided = plan.regions.some((region) => region.regionId === 'comparison-shared-basis');
   const roots = plan.regions.filter((region) => region.parentRegionId === undefined).sort((a, b) => a.order - b.order);
-  const total = roots.reduce((sum, region) => sum + region.weight, 0);
+  const effectiveWeight = (region: CompositionPlan['regions'][number]) => {
+    if (revision?.tightenSpaceUse && teacherGuided && region.regionId === 'comparison-shared-basis') return 0.24;
+    if (revision?.tightenSpaceUse && teacherGuided && region.regionId === 'comparison-field') return 0.76;
+    if (revision?.strengthenRelation && /^comparison-pair-\d+-(?:before|after)$/u.test(region.regionId)) return 0.42;
+    if (revision?.strengthenRelation && /^comparison-pair-\d+-change$/u.test(region.regionId)) return 0.16;
+    return region.weight;
+  };
+  const total = roots.reduce((sum, region) => sum + effectiveWeight(region), 0);
   const boxes = new Map<string, Box>();
   let y = bounds.y;
   for (const root of roots) {
-    const box = { x: bounds.x, y, width: bounds.width, height: bounds.height * root.weight / total };
+    const box = { x: bounds.x, y, width: bounds.width, height: bounds.height * effectiveWeight(root) / total };
     boxes.set(root.regionId, box);
     y += box.height;
     const children = plan.regions.filter((region) => region.parentRegionId === root.regionId).sort((a, b) => a.order - b.order);
-    const sum = children.reduce((value, region) => value + region.weight, 0);
+    const sum = children.reduce((value, region) => value + effectiveWeight(region), 0);
     let childY = box.y;
     for (const child of children) {
-      const childBox = { ...box, y: childY, height: box.height * child.weight / sum };
+      const childBox = { ...box, y: childY, height: box.height * effectiveWeight(child) / sum };
       boxes.set(child.regionId, childBox);
       childY += childBox.height;
     }
+  }
+  if (teacherGuided) {
+    const layoutChildren = (parentId: string): void => {
+      const parent = plan.regions.find((region) => region.regionId === parentId);
+      const parentBox = boxes.get(parentId);
+      if (!parent || !parentBox) return;
+      const children = plan.regions
+        .filter((region) => region.parentRegionId === parentId)
+        .sort((a, b) => a.order - b.order);
+      if (children.length === 0) return;
+      const totalWeight = children.reduce((sum, child) => sum + effectiveWeight(child), 0);
+      let offset = parent.flow === 'row' ? parentBox.x : parentBox.y;
+      for (const child of children) {
+        const ratio = effectiveWeight(child) / totalWeight;
+        const childBox = parent.flow === 'row'
+          ? { x: offset, y: parentBox.y, width: parentBox.width * ratio, height: parentBox.height }
+          : { x: parentBox.x, y: offset, width: parentBox.width, height: parentBox.height * ratio };
+        boxes.set(child.regionId, childBox);
+        offset += parent.flow === 'row' ? childBox.width : childBox.height;
+        layoutChildren(child.regionId);
+      }
+    };
+    for (const root of roots) layoutChildren(root.regionId);
   }
   const requiredBox = (id: string) => {
     const box = boxes.get(id);
@@ -114,9 +156,11 @@ export function buildAlignedFeatureRenderTree(input: Input & {
   const headers = requiredBox('comparison-heading');
   const gap = 112 * scale;
   const columnWidth = (field.width - gap) / 2;
-  const leftX = field.x + 32 * scale;
-  const rightX = field.x + columnWidth + gap + 32 * scale;
-  const textWidth = columnWidth - 64 * scale;
+  const guidedBeforeHeader = teacherGuided ? requiredBox('comparison-before-heading') : undefined;
+  const guidedAfterHeader = teacherGuided ? requiredBox('comparison-after-heading') : undefined;
+  const leftX = guidedBeforeHeader ? guidedBeforeHeader.x + 32 * scale : field.x + 32 * scale;
+  const rightX = guidedAfterHeader ? guidedAfterHeader.x + 32 * scale : field.x + columnWidth + gap + 32 * scale;
+  const textWidth = guidedBeforeHeader ? guidedBeforeHeader.width - 64 * scale : columnWidth - 64 * scale;
   const nodes: RenderNode[] = plan.regions.map((region) => ({
     nodeId: `region-${region.regionId}`, kind: 'group',
     ...(region.parentRegionId ? { parentId: `region-${region.parentRegionId}` } : {}),
@@ -124,10 +168,12 @@ export function buildAlignedFeatureRenderTree(input: Input & {
     visualRole: region.parentRegionId ? 'comparison-pair' : 'comparison-field',
     zIndex: 0, box: requiredBox(region.regionId), clip: false, visible: true,
   }));
-  const tonalBox = {
-    x: rightX - 52 * scale, y: headers.y,
-    width: columnWidth + 40 * scale, height: field.y + field.height - headers.y,
-  };
+  const tonalBox = teacherGuided && guidedAfterHeader
+    ? { x: guidedAfterHeader.x, y: headers.y, width: guidedAfterHeader.width, height: field.y + field.height - headers.y }
+    : {
+        x: rightX - 52 * scale, y: headers.y,
+        width: columnWidth + 40 * scale, height: field.y + field.height - headers.y,
+      };
   nodes.push(vectorNode({
     nodeId: 'comparison-after-field', parentId: 'region-comparison-field',
     compositionRegionId: 'comparison-field', visualRole: 'comparison-field',
@@ -137,13 +183,38 @@ export function buildAlignedFeatureRenderTree(input: Input & {
     vectorNode({ nodeId: id, shape: 'path', box: { x, y, width: length, height: Math.max(1, strokeWidth) },
       pathData: `M ${x} ${y} H ${x + length}`, stroke: color, strokeWidth, zIndex: 2 });
   nodes.push(rule('comparison-after-rule', tonalBox.x, headers.y, tonalBox.width, plan.styleIntent.accent.color, 4 * scale));
-  nodes.push(rule('comparison-before-rule', field.x, headers.y, columnWidth, plan.styleIntent.motif.color, plan.styleIntent.motif.strokeWidth));
-  const pairRegions = plan.regions.filter((region) => region.parentRegionId === 'comparison-field').sort((a, b) => a.order - b.order);
+  nodes.push(rule(
+    'comparison-before-rule',
+    guidedBeforeHeader?.x ?? field.x,
+    headers.y,
+    guidedBeforeHeader?.width ?? columnWidth,
+    plan.styleIntent.motif.color,
+    plan.styleIntent.motif.strokeWidth,
+  ));
+  const pairRegions = plan.regions
+    .filter((region) => region.parentRegionId === 'comparison-field' && /^comparison-pair-\d+$/u.test(region.regionId))
+    .sort((a, b) => a.order - b.order);
   for (const [index, region] of pairRegions.entries()) {
     const box = requiredBox(region.regionId);
     if (index < pairRegions.length - 1) {
-      nodes.push(rule(`comparison-row-left-${index}`, leftX, box.y + box.height, textWidth, plan.styleIntent.motif.color, 1));
-      nodes.push(rule(`comparison-row-right-${index}`, rightX, box.y + box.height, textWidth, plan.styleIntent.motif.color, 1));
+      const beforeBox = teacherGuided ? requiredBox(`${region.regionId}-before`) : undefined;
+      const afterBox = teacherGuided ? requiredBox(`${region.regionId}-after`) : undefined;
+      nodes.push(rule(
+        `comparison-row-left-${index}`,
+        beforeBox ? beforeBox.x + 32 * scale : leftX,
+        box.y + box.height,
+        beforeBox ? beforeBox.width - 64 * scale : textWidth,
+        plan.styleIntent.motif.color,
+        revision?.strengthenGrouping ? 1.4 * scale : 1,
+      ));
+      nodes.push(rule(
+        `comparison-row-right-${index}`,
+        afterBox ? afterBox.x + 32 * scale : rightX,
+        box.y + box.height,
+        afterBox ? afterBox.width - 64 * scale : textWidth,
+        plan.styleIntent.motif.color,
+        revision?.strengthenGrouping ? 1.4 * scale : 1,
+      ));
     }
   }
   for (const binding of [...plan.bindings].sort((a, b) => a.readingOrder - b.readingOrder)) {
@@ -154,8 +225,12 @@ export function buildAlignedFeatureRenderTree(input: Input & {
     const isAfter = role === 'comparison.after' || role === 'comparison.after-label';
     const isTitle = role === 'comparison.title';
     const isMessage = role === 'comparison.message';
-    const x = isBefore ? leftX : isAfter ? rightX : isMessage ? bounds.x + 264 * scale : bounds.x;
-    const availableWidth = isBefore || isAfter ? textWidth : isMessage ? bounds.width - 264 * scale : bounds.width;
+    const x = teacherGuided && (isBefore || isAfter)
+      ? box.x + 32 * scale
+      : isBefore ? leftX : isAfter ? rightX : isMessage ? bounds.x + 264 * scale : bounds.x;
+    const availableWidth = teacherGuided && (isBefore || isAfter)
+      ? box.width - 64 * scale
+      : isBefore || isAfter ? textWidth : isMessage ? bounds.width - 264 * scale : bounds.width;
     const lines = wrappedMeasures(ref, binding, availableWidth, input.measures);
     const first = lines[0]!;
     const lineHeight = first.size * 1.4;
@@ -186,26 +261,50 @@ export function buildAlignedFeatureRenderTree(input: Input & {
   for (const relation of input.slide.relations) {
     const before = plan.bindings.find((binding) => binding.blockId === relation.fromBlockId);
     const after = plan.bindings.find((binding) => binding.blockId === relation.toBlockId);
-    if (relation.type !== 'compares-with' || !before || !after || before.regionId !== after.regionId
-      || before.fragmentRole !== 'comparison.before' || after.fragmentRole !== 'comparison.after') {
+    const beforeRegion = before ? plan.regions.find((region) => region.regionId === before.regionId) : undefined;
+    const afterRegion = after ? plan.regions.find((region) => region.regionId === after.regionId) : undefined;
+    const pairRegionId = teacherGuided ? beforeRegion?.parentRegionId : before?.regionId;
+    const changeRegionId = teacherGuided && pairRegionId !== undefined ? `${pairRegionId}-change` : undefined;
+    const pairMatches = teacherGuided
+      ? pairRegionId !== undefined && pairRegionId === afterRegion?.parentRegionId
+        && plan.regions.some((region) => region.regionId === changeRegionId && region.parentRegionId === pairRegionId)
+      : before?.regionId === after?.regionId;
+    if (relation.type !== 'compares-with' || !before || !after || !pairMatches
+      || before.fragmentRole !== 'comparison.before' || after.fragmentRole !== 'comparison.after'
+      || pairRegionId === undefined) {
       throw new Error('Composition pairing does not match the authored comparison relation.');
     }
-    const box = requiredBox(before.regionId);
-    const x = field.x + columnWidth + gap / 2 - 20 * scale;
+    const box = requiredBox(pairRegionId);
+    const changeBox = teacherGuided && changeRegionId ? requiredBox(changeRegionId) : undefined;
+    const arrowLength = revision?.strengthenRelation ? 72 * scale : 40 * scale;
+    const arrowHead = revision?.strengthenRelation ? 10 * scale : 7 * scale;
+    const x = changeBox
+      ? changeBox.x + (changeBox.width - arrowLength) / 2
+      : field.x + columnWidth + gap / 2 - arrowLength / 2;
     const cy = box.y + box.height / 2;
     nodes.push(vectorNode({
-      nodeId: `comparison-change-${relation.id}`, parentId: `region-${before.regionId}`,
+      nodeId: `comparison-change-${relation.id}`, parentId: `region-${changeRegionId ?? pairRegionId}`,
       relationId: relation.id, relationVisualRole: 'comparison-change', visualRole: 'relation-carrier',
-      compositionRegionId: before.regionId, shape: 'path',
-      box: { x, y: cy - 7 * scale, width: 40 * scale, height: 14 * scale },
-      pathData: `M ${x} ${cy} H ${x + 40 * scale} M ${x + 33 * scale} ${cy - 7 * scale} L ${x + 40 * scale} ${cy} L ${x + 33 * scale} ${cy + 7 * scale}`,
-      stroke: plan.styleIntent.palette.connector, strokeWidth: 1.6 * scale,
+      compositionRegionId: changeRegionId ?? pairRegionId, shape: 'path',
+      box: { x, y: cy - arrowHead, width: arrowLength, height: arrowHead * 2 },
+      pathData: `M ${x} ${cy} H ${x + arrowLength} M ${x + arrowLength - arrowHead} ${cy - arrowHead} L ${x + arrowLength} ${cy} L ${x + arrowLength - arrowHead} ${cy + arrowHead}`,
+      stroke: plan.styleIntent.palette.connector,
+      strokeWidth: revision?.strengthenRelation ? 2.2 * scale : 1.6 * scale,
     }));
   }
   return RenderTreeSchema.parse({
-    schemaVersion: '0.1', renderTreeId: `render-${plan.planId}`, compositionPlanId: plan.planId,
+    schemaVersion: '0.1',
+    renderTreeId: `render-${plan.planId}${revision === undefined ? '' : `-${revision.revisionId}`}`,
+    compositionPlanId: plan.planId,
     slideId: input.slide.slideId, pageProfile: plan.pageProfile, layoutFamily: plan.layout.layoutFamily,
     background: plan.styleIntent.palette.background, nodes,
-    deterministicFingerprint: contentHash({ slide: input.slide, plan, nodes, fonts: input.fonts.map((font) => font.fileHash), version: 'aligned-feature-spec-v1' }),
+    deterministicFingerprint: contentHash({
+      slide: input.slide,
+      plan,
+      nodes,
+      fonts: input.fonts.map((font) => font.fileHash),
+      version: 'aligned-feature-spec-v1',
+      presentationRevision: revision ?? null,
+    }),
   });
 }

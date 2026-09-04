@@ -192,6 +192,7 @@ describe('visual critic execution boundary', () => {
       slide,
       informationPlan: createMec01InformationPlan(slide),
       hardGate: passedGate(),
+      rubricIds: ['space-use', 'grouping'],
     });
     expect(captured?.imageEvidence?.bytes).toEqual(new Uint8Array([1, 2, 3, 4]));
     expect(Object.keys(captured?.compactState as object)).toEqual([
@@ -204,6 +205,8 @@ describe('visual critic execution boundary', () => {
       'hardGate',
     ]);
     expect(JSON.stringify(captured?.compactState)).not.toContain('repository');
+    expect((captured?.compactState as { rubric: Array<{ id: string }> }).rubric.map((item) => item.id))
+      .toEqual(['grouping', 'space-use']);
     expect(result.inputTrace.includedFields).toHaveLength(7);
   });
 });

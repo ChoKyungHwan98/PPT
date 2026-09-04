@@ -1,0 +1,745 @@
+{
+  "schemaVersion": "0.1",
+  "renderTreeId": "render-composition-48581193ea89935c-critic-targeted-revision-1",
+  "compositionPlanId": "composition-48581193ea89935c",
+  "slideId": "generic-reward-comparison",
+  "pageProfile": {
+    "id": "pdf-presentation-16:9",
+    "outputFamily": "pdf-presentation",
+    "width": 1920,
+    "height": 1080,
+    "unit": "css-px",
+    "pixelRatio": 1
+  },
+  "layoutFamily": "aligned-before-after-spec",
+  "background": "#F8F7F3",
+  "nodes": [
+    {
+      "nodeId": "region-comparison-shared-basis",
+      "compositionRegionId": "comparison-shared-basis",
+      "visualRole": "comparison-field",
+      "zIndex": 0,
+      "box": {
+        "x": 86.39999999999999,
+        "y": 48.6,
+        "width": 1747.2,
+        "height": 233.28
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "group"
+    },
+    {
+      "nodeId": "region-page-heading",
+      "parentId": "region-comparison-shared-basis",
+      "compositionRegionId": "page-heading",
+      "visualRole": "comparison-pair",
+      "zIndex": 0,
+      "box": {
+        "x": 86.39999999999999,
+        "y": 48.6,
+        "width": 1747.2,
+        "height": 104.976
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "group"
+    },
+    {
+      "nodeId": "region-message-context",
+      "parentId": "region-comparison-shared-basis",
+      "compositionRegionId": "message-context",
+      "visualRole": "comparison-pair",
+      "zIndex": 0,
+      "box": {
+        "x": 86.39999999999999,
+        "y": 153.576,
+        "width": 1747.2,
+        "height": 128.304
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "group"
+    },
+    {
+      "nodeId": "region-comparison-field",
+      "compositionRegionId": "comparison-field",
+      "visualRole": "comparison-field",
+      "zIndex": 0,
+      "box": {
+        "x": 86.39999999999999,
+        "y": 281.88,
+        "width": 1747.2,
+        "height": 738.72
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "group"
+    },
+    {
+      "nodeId": "region-comparison-heading",
+      "parentId": "region-comparison-field",
+      "compositionRegionId": "comparison-heading",
+      "visualRole": "comparison-pair",
+      "zIndex": 0,
+      "box": {
+        "x": 86.39999999999999,
+        "y": 281.88,
+        "width": 1747.2,
+        "height": 112.68610169491527
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "group"
+    },
+    {
+      "nodeId": "region-comparison-before-heading",
+      "parentId": "region-comparison-heading",
+      "compositionRegionId": "comparison-before-heading",
+      "visualRole": "comparison-pair",
+      "zIndex": 0,
+      "box": {
+        "x": 86.39999999999999,
+        "y": 281.88,
+        "width": 873.6,
+        "height": 112.68610169491527
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "group"
+    },
+    {
+      "nodeId": "region-comparison-after-heading",
+      "parentId": "region-comparison-heading",
+      "compositionRegionId": "comparison-after-heading",
+      "visualRole": "comparison-pair",
+      "zIndex": 0,
+      "box": {
+        "x": 960,
+        "y": 281.88,
+        "width": 873.6,
+        "height": 112.68610169491527
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "group"
+    },
+    {
+      "nodeId": "region-comparison-pair-0",
+      "parentId": "region-comparison-field",
+      "compositionRegionId": "comparison-pair-0",
+      "visualRole": "comparison-pair",
+      "zIndex": 0,
+      "box": {
+        "x": 86.39999999999999,
+        "y": 394.56610169491523,
+        "width": 1747.2,
+        "height": 313.0169491525424
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "group"
+    },
+    {
+      "nodeId": "region-comparison-pair-0-before",
+      "parentId": "region-comparison-pair-0",
+      "compositionRegionId": "comparison-pair-0-before",
+      "visualRole": "comparison-pair",
+      "zIndex": 0,
+      "box": {
+        "x": 86.39999999999999,
+        "y": 394.56610169491523,
+        "width": 768.768,
+        "height": 313.0169491525424
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "group"
+    },
+    {
+      "nodeId": "region-comparison-pair-0-change",
+      "parentId": "region-comparison-pair-0",
+      "compositionRegionId": "comparison-pair-0-change",
+      "visualRole": "comparison-pair",
+      "zIndex": 0,
+      "box": {
+        "x": 855.168,
+        "y": 394.56610169491523,
+        "width": 209.664,
+        "height": 313.0169491525424
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "group"
+    },
+    {
+      "nodeId": "region-comparison-pair-0-after",
+      "parentId": "region-comparison-pair-0",
+      "compositionRegionId": "comparison-pair-0-after",
+      "visualRole": "comparison-pair",
+      "zIndex": 0,
+      "box": {
+        "x": 1064.8319999999999,
+        "y": 394.56610169491523,
+        "width": 768.768,
+        "height": 313.0169491525424
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "group"
+    },
+    {
+      "nodeId": "region-comparison-pair-1",
+      "parentId": "region-comparison-field",
+      "compositionRegionId": "comparison-pair-1",
+      "visualRole": "comparison-pair",
+      "zIndex": 0,
+      "box": {
+        "x": 86.39999999999999,
+        "y": 707.5830508474576,
+        "width": 1747.2,
+        "height": 313.0169491525424
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "group"
+    },
+    {
+      "nodeId": "region-comparison-pair-1-before",
+      "parentId": "region-comparison-pair-1",
+      "compositionRegionId": "comparison-pair-1-before",
+      "visualRole": "comparison-pair",
+      "zIndex": 0,
+      "box": {
+        "x": 86.39999999999999,
+        "y": 707.5830508474576,
+        "width": 768.768,
+        "height": 313.0169491525424
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "group"
+    },
+    {
+      "nodeId": "region-comparison-pair-1-change",
+      "parentId": "region-comparison-pair-1",
+      "compositionRegionId": "comparison-pair-1-change",
+      "visualRole": "comparison-pair",
+      "zIndex": 0,
+      "box": {
+        "x": 855.168,
+        "y": 707.5830508474576,
+        "width": 209.664,
+        "height": 313.0169491525424
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "group"
+    },
+    {
+      "nodeId": "region-comparison-pair-1-after",
+      "parentId": "region-comparison-pair-1",
+      "compositionRegionId": "comparison-pair-1-after",
+      "visualRole": "comparison-pair",
+      "zIndex": 0,
+      "box": {
+        "x": 1064.8319999999999,
+        "y": 707.5830508474576,
+        "width": 768.768,
+        "height": 313.0169491525424
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "group"
+    },
+    {
+      "nodeId": "comparison-after-field",
+      "parentId": "region-comparison-field",
+      "compositionRegionId": "comparison-field",
+      "visualRole": "comparison-field",
+      "zIndex": 1,
+      "box": {
+        "x": 960,
+        "y": 281.88,
+        "width": 873.6,
+        "height": 738.72
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "shape",
+      "shape": "rect",
+      "paint": {
+        "fill": "#E8EEE9"
+      }
+    },
+    {
+      "nodeId": "comparison-after-rule",
+      "zIndex": 2,
+      "box": {
+        "x": 960,
+        "y": 281.88,
+        "width": 873.6,
+        "height": 4
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "shape",
+      "shape": "path",
+      "paint": {
+        "stroke": "#254E44",
+        "strokeWidth": 4
+      },
+      "pathData": "M 960 281.88 H 1833.6"
+    },
+    {
+      "nodeId": "comparison-before-rule",
+      "zIndex": 2,
+      "box": {
+        "x": 86.39999999999999,
+        "y": 281.88,
+        "width": 873.6,
+        "height": 1.5
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "shape",
+      "shape": "path",
+      "paint": {
+        "stroke": "#B9C8BF",
+        "strokeWidth": 1.5
+      },
+      "pathData": "M 86.39999999999999 281.88 H 960"
+    },
+    {
+      "nodeId": "comparison-row-left-0",
+      "zIndex": 2,
+      "box": {
+        "x": 118.39999999999999,
+        "y": 707.5830508474576,
+        "width": 704.768,
+        "height": 1
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "shape",
+      "shape": "path",
+      "paint": {
+        "stroke": "#B9C8BF",
+        "strokeWidth": 1
+      },
+      "pathData": "M 118.39999999999999 707.5830508474576 H 823.168"
+    },
+    {
+      "nodeId": "comparison-row-right-0",
+      "zIndex": 2,
+      "box": {
+        "x": 1096.8319999999999,
+        "y": 707.5830508474576,
+        "width": 704.768,
+        "height": 1
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "shape",
+      "shape": "path",
+      "paint": {
+        "stroke": "#B9C8BF",
+        "strokeWidth": 1
+      },
+      "pathData": "M 1096.8319999999999 707.5830508474576 H 1801.6"
+    },
+    {
+      "nodeId": "comparison-text-block-title",
+      "parentId": "region-page-heading",
+      "semanticBlockId": "block-title",
+      "compositionRegionId": "page-heading",
+      "visualRole": "page-title",
+      "zIndex": 5,
+      "box": {
+        "x": 82.39999999999999,
+        "y": 52.6,
+        "width": 411.746875,
+        "height": 73
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "text",
+      "text": "보상 구조 개선",
+      "sourceSpanIds": [
+        "title"
+      ],
+      "sourceTransform": {
+        "kind": "exact"
+      },
+      "font": {
+        "family": "Pretendard",
+        "fileHash": "c16b88c670d23e83fa1170c954cbc4822d3b8dad3c3cde15d798a94b43d97985",
+        "size": 72,
+        "weight": 700,
+        "lineHeight": 100.8,
+        "letterSpacing": -0.4
+      },
+      "color": "#242E2A",
+      "align": "start",
+      "sourceUsage": "content",
+      "lines": [
+        {
+          "text": "보상 구조 개선",
+          "x": 86.39999999999999,
+          "baselineY": 114.6,
+          "advanceWidth": 403.746875
+        }
+      ]
+    },
+    {
+      "nodeId": "comparison-text-block-message",
+      "parentId": "region-message-context",
+      "semanticBlockId": "block-message",
+      "compositionRegionId": "message-context",
+      "visualRole": "message-context",
+      "zIndex": 5,
+      "box": {
+        "x": 346.4,
+        "y": 159.576,
+        "width": 843.403515625,
+        "height": 46
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "text",
+      "text": "플레이 목표에 맞는 보상을 선택할 수 있는 보상 구조",
+      "sourceSpanIds": [
+        "message"
+      ],
+      "sourceTransform": {
+        "kind": "exact"
+      },
+      "font": {
+        "family": "Pretendard",
+        "fileHash": "6d0af5258997aec7354a6e340fc2325ba321c410ca48b3af858c8c3d6e92a324",
+        "size": 42,
+        "weight": 400,
+        "lineHeight": 58.8,
+        "letterSpacing": -0.4
+      },
+      "color": "#242E2A",
+      "align": "start",
+      "sourceUsage": "content",
+      "lines": [
+        {
+          "text": "플레이 목표에 맞는 보상을 선택할 수 있는 보상 구조",
+          "x": 350.4,
+          "baselineY": 197.576,
+          "advanceWidth": 835.403515625
+        }
+      ]
+    },
+    {
+      "nodeId": "comparison-text-block-before-label",
+      "parentId": "region-comparison-before-heading",
+      "semanticBlockId": "block-before-label",
+      "compositionRegionId": "comparison-before-heading",
+      "visualRole": "comparison-header",
+      "zIndex": 5,
+      "box": {
+        "x": 114.39999999999999,
+        "y": 318.2230508474576,
+        "width": 209.95,
+        "height": 40
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "text",
+      "text": "기존 보상 구조",
+      "sourceSpanIds": [
+        "before-label"
+      ],
+      "sourceTransform": {
+        "kind": "exact"
+      },
+      "font": {
+        "family": "Pretendard",
+        "fileHash": "6d0af5258997aec7354a6e340fc2325ba321c410ca48b3af858c8c3d6e92a324",
+        "size": 36,
+        "weight": 400,
+        "lineHeight": 50.4,
+        "letterSpacing": -0.4
+      },
+      "color": "#626A64",
+      "align": "start",
+      "sourceUsage": "content",
+      "lines": [
+        {
+          "text": "기존 보상 구조",
+          "x": 118.39999999999999,
+          "baselineY": 351.2230508474576,
+          "advanceWidth": 201.95
+        }
+      ]
+    },
+    {
+      "nodeId": "comparison-text-block-after-label",
+      "parentId": "region-comparison-after-heading",
+      "semanticBlockId": "block-after-label",
+      "compositionRegionId": "comparison-after-heading",
+      "visualRole": "comparison-header",
+      "zIndex": 5,
+      "box": {
+        "x": 988,
+        "y": 317.7230508474576,
+        "width": 208.4734375,
+        "height": 41
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "text",
+      "text": "개선 보상 구조",
+      "sourceSpanIds": [
+        "after-label"
+      ],
+      "sourceTransform": {
+        "kind": "exact"
+      },
+      "font": {
+        "family": "Pretendard",
+        "fileHash": "c16b88c670d23e83fa1170c954cbc4822d3b8dad3c3cde15d798a94b43d97985",
+        "size": 36,
+        "weight": 700,
+        "lineHeight": 50.4,
+        "letterSpacing": -0.4
+      },
+      "color": "#254E44",
+      "align": "start",
+      "sourceUsage": "content",
+      "lines": [
+        {
+          "text": "개선 보상 구조",
+          "x": 992,
+          "baselineY": 350.7230508474576,
+          "advanceWidth": 200.4734375
+        }
+      ]
+    },
+    {
+      "nodeId": "comparison-text-block-before-1",
+      "parentId": "region-comparison-pair-0-before",
+      "semanticBlockId": "block-before-1",
+      "compositionRegionId": "comparison-pair-0-before",
+      "visualRole": "comparison-before",
+      "zIndex": 5,
+      "box": {
+        "x": 114.39999999999999,
+        "y": 531.0745762711864,
+        "width": 194.621875,
+        "height": 40
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "text",
+      "text": "보상 상자 1개",
+      "sourceSpanIds": [
+        "before-1"
+      ],
+      "sourceTransform": {
+        "kind": "exact"
+      },
+      "font": {
+        "family": "Pretendard",
+        "fileHash": "6d0af5258997aec7354a6e340fc2325ba321c410ca48b3af858c8c3d6e92a324",
+        "size": 36,
+        "weight": 400,
+        "lineHeight": 50.4,
+        "letterSpacing": -0.4
+      },
+      "color": "#626A64",
+      "align": "start",
+      "sourceUsage": "content",
+      "lines": [
+        {
+          "text": "보상 상자 1개",
+          "x": 118.39999999999999,
+          "baselineY": 564.0745762711864,
+          "advanceWidth": 186.621875
+        }
+      ]
+    },
+    {
+      "nodeId": "comparison-text-block-after-1",
+      "parentId": "region-comparison-pair-0-after",
+      "semanticBlockId": "block-after-1",
+      "compositionRegionId": "comparison-pair-0-after",
+      "visualRole": "comparison-after",
+      "zIndex": 5,
+      "box": {
+        "x": 1092.8319999999999,
+        "y": 528.0745762711864,
+        "width": 231.68828125,
+        "height": 46
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "text",
+      "text": "보상 상자 2개",
+      "sourceSpanIds": [
+        "after-1"
+      ],
+      "sourceTransform": {
+        "kind": "exact"
+      },
+      "font": {
+        "family": "Pretendard",
+        "fileHash": "c16b88c670d23e83fa1170c954cbc4822d3b8dad3c3cde15d798a94b43d97985",
+        "size": 42,
+        "weight": 700,
+        "lineHeight": 58.8,
+        "letterSpacing": -0.4
+      },
+      "color": "#254E44",
+      "align": "start",
+      "sourceUsage": "content",
+      "lines": [
+        {
+          "text": "보상 상자 2개",
+          "x": 1096.8319999999999,
+          "baselineY": 566.0745762711864,
+          "advanceWidth": 223.68828125
+        }
+      ]
+    },
+    {
+      "nodeId": "comparison-text-block-before-2",
+      "parentId": "region-comparison-pair-1-before",
+      "semanticBlockId": "block-before-2",
+      "compositionRegionId": "comparison-pair-1-before",
+      "visualRole": "comparison-before",
+      "zIndex": 5,
+      "box": {
+        "x": 114.39999999999999,
+        "y": 844.0915254237287,
+        "width": 209.95,
+        "height": 40
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "text",
+      "text": "주간 보상 고정",
+      "sourceSpanIds": [
+        "before-2"
+      ],
+      "sourceTransform": {
+        "kind": "exact"
+      },
+      "font": {
+        "family": "Pretendard",
+        "fileHash": "6d0af5258997aec7354a6e340fc2325ba321c410ca48b3af858c8c3d6e92a324",
+        "size": 36,
+        "weight": 400,
+        "lineHeight": 50.4,
+        "letterSpacing": -0.4
+      },
+      "color": "#626A64",
+      "align": "start",
+      "sourceUsage": "content",
+      "lines": [
+        {
+          "text": "주간 보상 고정",
+          "x": 118.39999999999999,
+          "baselineY": 877.0915254237287,
+          "advanceWidth": 201.95
+        }
+      ]
+    },
+    {
+      "nodeId": "comparison-text-block-after-2",
+      "parentId": "region-comparison-pair-1-after",
+      "semanticBlockId": "block-after-2",
+      "compositionRegionId": "comparison-pair-1-after",
+      "visualRole": "comparison-after",
+      "zIndex": 5,
+      "box": {
+        "x": 1092.8319999999999,
+        "y": 841.0915254237287,
+        "width": 242.35234375,
+        "height": 46
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "text",
+      "text": "주간 보상 선택",
+      "sourceSpanIds": [
+        "after-2"
+      ],
+      "sourceTransform": {
+        "kind": "exact"
+      },
+      "font": {
+        "family": "Pretendard",
+        "fileHash": "c16b88c670d23e83fa1170c954cbc4822d3b8dad3c3cde15d798a94b43d97985",
+        "size": 42,
+        "weight": 700,
+        "lineHeight": 58.8,
+        "letterSpacing": -0.4
+      },
+      "color": "#254E44",
+      "align": "start",
+      "sourceUsage": "content",
+      "lines": [
+        {
+          "text": "주간 보상 선택",
+          "x": 1096.8319999999999,
+          "baselineY": 879.0915254237287,
+          "advanceWidth": 234.35234375
+        }
+      ]
+    },
+    {
+      "nodeId": "comparison-change-change-1",
+      "parentId": "region-comparison-pair-0-change",
+      "relationId": "change-1",
+      "compositionRegionId": "comparison-pair-0-change",
+      "visualRole": "relation-carrier",
+      "relationVisualRole": "comparison-change",
+      "zIndex": 2,
+      "box": {
+        "x": 940,
+        "y": 544.0745762711864,
+        "width": 40,
+        "height": 14
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "shape",
+      "shape": "path",
+      "paint": {
+        "stroke": "#778D81",
+        "strokeWidth": 1.6
+      },
+      "pathData": "M 940 551.0745762711864 H 980 M 973 544.0745762711864 L 980 551.0745762711864 L 973 558.0745762711864"
+    },
+    {
+      "nodeId": "comparison-change-change-2",
+      "parentId": "region-comparison-pair-1-change",
+      "relationId": "change-2",
+      "compositionRegionId": "comparison-pair-1-change",
+      "visualRole": "relation-carrier",
+      "relationVisualRole": "comparison-change",
+      "zIndex": 2,
+      "box": {
+        "x": 940,
+        "y": 857.0915254237287,
+        "width": 40,
+        "height": 14
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "shape",
+      "shape": "path",
+      "paint": {
+        "stroke": "#778D81",
+        "strokeWidth": 1.6
+      },
+      "pathData": "M 940 864.0915254237287 H 980 M 973 857.0915254237287 L 980 864.0915254237287 L 973 871.0915254237287"
+    }
+  ],
+  "deterministicFingerprint": "9f9a0bf8a0ee3ad3926a796923f1e69750b9edd0886a970b018e1e2bb6844597"
+}

@@ -1,0 +1,22 @@
+{
+  "fixtureId": "generic-reward-comparison",
+  "rawText": "보상 구조 개선\n\n기존 보상 구조\n- 보상 상자 1개\n- 주간 보상 고정\n\n개선 보상 구조\n- 보상 상자 2개\n- 주간 보상 선택\n\n플레이 목표에 맞는 보상을 선택할 수 있는 보상 구조",
+  "segments": [
+    { "id": "title", "text": "보상 구조 개선" },
+    { "id": "before-label", "text": "기존 보상 구조" },
+    { "id": "before-1", "text": "보상 상자 1개" },
+    { "id": "before-2", "text": "주간 보상 고정" },
+    { "id": "after-label", "text": "개선 보상 구조" },
+    { "id": "after-1", "text": "보상 상자 2개" },
+    { "id": "after-2", "text": "주간 보상 선택" },
+    { "id": "message", "text": "플레이 목표에 맞는 보상을 선택할 수 있는 보상 구조" }
+  ],
+  "titleSegmentId": "title",
+  "messageSegmentId": "message",
+  "before": { "labelSegmentId": "before-label", "itemSegmentIds": ["before-1", "before-2"] },
+  "after": { "labelSegmentId": "after-label", "itemSegmentIds": ["after-1", "after-2"] },
+  "pairs": [
+    { "beforeSegmentId": "before-1", "afterSegmentId": "after-1" },
+    { "beforeSegmentId": "before-2", "afterSegmentId": "after-2" }
+  ]
+}

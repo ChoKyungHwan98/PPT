@@ -9,6 +9,7 @@ import {
   type SlideIR,
   type VisualCriticFixture,
   type VisualCriticFinding,
+  type VisualIssueType,
   type VisualCritiqueReport,
 } from '@game-presentation/contracts';
 import type { HardGateResult } from './hard-gate.js';
@@ -151,6 +152,7 @@ export async function runVisualCritic(input: {
   hardGate: HardGateResult;
   contextBudgetBytes?: number;
   requestIdSalt?: string;
+  rubricIds?: readonly VisualIssueType[];
 }): Promise<VisualCriticRun> {
   if (!input.hardGate.passed) {
     throw new Error('Hard Gate FAIL 결과는 Visual Critic으로 보낼 수 없습니다.');
@@ -160,12 +162,22 @@ export async function runVisualCritic(input: {
     throw new Error('선택한 provider는 vision과 structured output을 모두 지원해야 합니다.');
   }
 
+  const rubricIds = input.rubricIds === undefined ? undefined : new Set(input.rubricIds);
+  const rubric = rubricIds === undefined
+    ? VISUAL_CRITIC_RUBRIC
+    : VISUAL_CRITIC_RUBRIC.filter((item) => rubricIds.has(item.id));
+  if (rubric.length === 0 || (rubricIds !== undefined && rubric.length !== rubricIds.size)) {
+    throw new Error('Visual Critic rubric 범위가 유효하지 않습니다.');
+  }
+  const scopedSystemInstruction = rubricIds === undefined
+    ? SYSTEM_INSTRUCTION
+    : `${SYSTEM_INSTRUCTION}\n이번 실행에서는 제공된 rubric의 issueType만 평가하고 findings에도 그 issueType만 사용한다.`;
   const compactState = {
     artifactId: input.artifactId,
     pageGoal: input.goal,
     semanticSummary: semanticSummary(input.slide),
     informationPlan: informationStructure(input.informationPlan),
-    rubric: VISUAL_CRITIC_RUBRIC,
+    rubric,
     submissionReadinessAnchors: SUBMISSION_READINESS_ANCHORS,
     hardGate: {
       status: 'passed',
@@ -194,7 +206,7 @@ export async function runVisualCritic(input: {
       requestId,
       task: 'visual-critique',
       contextHash: contentHash({ compactState, imageSha256 }),
-      systemInstruction: SYSTEM_INSTRUCTION,
+      systemInstruction: scopedSystemInstruction,
       compactState,
       imageEvidence: { mimeType: 'image/png', bytes: input.pngBytes },
       contextArtifactIds,
@@ -206,6 +218,9 @@ export async function runVisualCritic(input: {
   const report = VisualCritiqueReportSchema.parse({ schemaVersion: '0.1', ...result.value });
   if (report.artifactId !== input.artifactId) {
     throw new Error('Critic 응답이 다른 artifact를 가리킵니다.');
+  }
+  if (rubricIds !== undefined && report.findings.some((finding) => !rubricIds.has(finding.issueType))) {
+    throw new Error('Critic이 요청한 rubric 범위 밖의 finding을 반환했습니다.');
   }
   return {
     report,

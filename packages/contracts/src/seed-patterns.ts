@@ -3,6 +3,38 @@ import { PatternFragmentSchema, type PatternFragment } from './reference.js';
 export const SEED_PATTERN_FRAGMENTS: PatternFragment[] = [
   PatternFragmentSchema.parse({
     schemaVersion: '0.1',
+    fragmentId: 'pattern-organization-explanation-hierarchy',
+    sourceReferenceIds: ['ext-2025-pokemon-initiative-team-structure'],
+    abstractionLevel: 'structural',
+    compatibleIntents: ['hierarchy'],
+    semanticShape: 'hierarchy',
+    relationshipShape: ['part-of'],
+    readingPath: 'top-to-bottom',
+    densityBand: 'balanced',
+    primaryArtifactRole: 'explanation-and-hierarchy-map',
+    topology: {
+      family: 'organization-explanation-hierarchy',
+      orderedRoles: ['title', 'operating-principle', 'hierarchy-root', 'hierarchy-descendants'],
+      emphasisRule: 'Keep the operating principle distinct from the responsibility and membership hierarchy it explains.',
+      groupingRule: 'Separate explanation from the hierarchy artifact; nest each authored child under its authored part-of parent.',
+    },
+    constraints: [
+      'Preserve every authored hierarchy node and part-of relation.',
+      'Do not turn responsibility or membership into a timeline or causal sequence.',
+      'Do not repeat the hierarchy labels as explanatory copy.',
+      'Primary Teacher structure cannot be replaced by secondary guidance.',
+    ],
+    prohibitedCopy: [
+      'source coordinates',
+      'source column ratio',
+      'source palette',
+      'source iconography',
+      'Pokemon IP',
+      'CEDEC frame',
+    ],
+  }),
+  PatternFragmentSchema.parse({
+    schemaVersion: '0.1',
     fragmentId: 'pattern-aligned-before-after-spec',
     sourceReferenceIds: ['ext-2025-shadowverse-super-evolution'],
     abstractionLevel: 'structural',

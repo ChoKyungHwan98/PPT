@@ -1,0 +1,27 @@
+{
+  "fixtureId": "generic-combat-system-organization",
+  "rawText": "전투 시스템 역할 구조\n전투 규칙의 책임 범위를 기능 단위로 분리한다.\n전투 시스템 책임자\n플레이어 전투\n이동/회피\n공격/방어\n보스 전투\n패턴 선택\n페이즈 전환",
+  "segments": [
+    { "id": "title", "text": "전투 시스템 역할 구조" },
+    { "id": "message", "text": "전투 규칙의 책임 범위를 기능 단위로 분리한다." },
+    { "id": "root", "text": "전투 시스템 책임자" },
+    { "id": "player", "text": "플레이어 전투" },
+    { "id": "move-dodge", "text": "이동/회피" },
+    { "id": "attack-defense", "text": "공격/방어" },
+    { "id": "boss", "text": "보스 전투" },
+    { "id": "pattern", "text": "패턴 선택" },
+    { "id": "phase", "text": "페이즈 전환" }
+  ],
+  "titleSegmentId": "title",
+  "messageSegmentId": "message",
+  "facets": ["combat"],
+  "nodes": [
+    { "segmentId": "root" },
+    { "segmentId": "player", "parentSegmentId": "root" },
+    { "segmentId": "move-dodge", "parentSegmentId": "player" },
+    { "segmentId": "attack-defense", "parentSegmentId": "player" },
+    { "segmentId": "boss", "parentSegmentId": "root" },
+    { "segmentId": "pattern", "parentSegmentId": "boss" },
+    { "segmentId": "phase", "parentSegmentId": "boss" }
+  ]
+}

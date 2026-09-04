@@ -11,7 +11,11 @@ import {
 import type { FontAsset } from './font.js';
 import type { TextMeasureRequest, TextMeasurement } from './measure.js';
 import { measuredTextNode, vectorNode } from './node-builders.js';
-import { alignedFeatureMeasureRequests, buildAlignedFeatureRenderTree } from './aligned-feature-layout.js';
+import {
+  alignedFeatureMeasureRequests,
+  buildAlignedFeatureRenderTree,
+  type AlignedFeaturePresentationRevision,
+} from './aligned-feature-layout.js';
 import {
   classifyRelationVisualRole,
   messagePresentationRecord,
@@ -1447,9 +1451,17 @@ export function buildInformationRenderTree(input: {
   measures: Map<string, TextMeasurement>;
   fonts: FontAsset[];
   accumulationLayoutPolish?: AccumulationLayoutPolishProfile;
+  alignedFeaturePresentationRevision?: AlignedFeaturePresentationRevision;
 }) {
   requirePlanForInformation(input.plan, input.informationPlan);
-  if (input.plan.layout.layoutFamily === 'aligned-before-after-spec') return buildAlignedFeatureRenderTree(input);
+  if (input.plan.layout.layoutFamily === 'aligned-before-after-spec') {
+    return buildAlignedFeatureRenderTree({
+      ...input,
+      ...(input.alignedFeaturePresentationRevision === undefined
+        ? {}
+        : { presentationRevision: input.alignedFeaturePresentationRevision }),
+    });
+  }
   const accumulationLayoutPolish = input.accumulationLayoutPolish ?? DEFAULT_ACCUMULATION_LAYOUT_POLISH;
   const placements = placeRegions(input.plan, accumulationLayoutPolish);
   const placementByRegion = new Map(placements.map((placement) => [placement.region.regionId, placement]));

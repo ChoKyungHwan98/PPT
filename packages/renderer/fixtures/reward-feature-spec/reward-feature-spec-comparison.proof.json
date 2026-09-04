@@ -1,0 +1,211 @@
+{
+  "artifactId": "reward-feature-spec-teacher-guidance-comparison",
+  "sourcePath": "packages/source-ingestion/fixtures/reward-feature-spec.source.json",
+  "criticCalled": false,
+  "automaticRevision": false,
+  "readyPositiveFixture": false,
+  "teacherGuidance": {
+    "primaryTeacher": {
+      "referenceId": "ext-2025-shadowverse-super-evolution",
+      "semanticShape": "aligned-before-after-spec"
+    },
+    "structureLock": {
+      "authority": "primary-teacher-only",
+      "semanticShape": "aligned-before-after-spec",
+      "sourceReferenceId": "ext-2025-shadowverse-super-evolution",
+      "rule": "정보 구조, 그룹, reading path, 정렬 축은 Primary Teacher만 결정한다."
+    }
+  },
+  "sourceParity": {
+    "sameSlideId": true,
+    "sameInformationPlanId": true,
+    "sourceSpanCount": 8,
+    "relationCount": 2
+  },
+  "variants": [
+    {
+      "name": "baseline",
+      "pngPath": "packages/renderer/fixtures/reward-feature-spec/reward-feature-spec-baseline.png",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 48235,
+      "sha256": "ab4475c0ea1469cd11c1d45ba9f22197513718d61a4d67a1a4e3120c0cf32db5",
+      "compositionPlanId": "composition-e5ca4ea178b890a8",
+      "renderTreeFingerprint": "ecf1ade86c534a3450a57a07a550653d49fbffed4813fa542dd2f0173361ae3e",
+      "regions": [
+        {
+          "regionId": "page-heading",
+          "parentRegionId": null,
+          "flow": "row",
+          "order": 0
+        },
+        {
+          "regionId": "message-context",
+          "parentRegionId": null,
+          "flow": "row",
+          "order": 1
+        },
+        {
+          "regionId": "comparison-heading",
+          "parentRegionId": null,
+          "flow": "row",
+          "order": 2
+        },
+        {
+          "regionId": "comparison-field",
+          "parentRegionId": null,
+          "flow": "row",
+          "order": 3
+        },
+        {
+          "regionId": "comparison-pair-0",
+          "parentRegionId": "comparison-field",
+          "flow": "row",
+          "order": 0
+        },
+        {
+          "regionId": "comparison-pair-1",
+          "parentRegionId": "comparison-field",
+          "flow": "row",
+          "order": 1
+        }
+      ],
+      "hardGate": {
+        "passed": true,
+        "programFindings": [],
+        "sourceFidelityFindings": [],
+        "findings": []
+      },
+      "missingText": [],
+      "missingTokens": []
+    },
+    {
+      "name": "teacher-guided",
+      "pngPath": "packages/renderer/fixtures/reward-feature-spec/reward-feature-spec-teacher-guided.png",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 49293,
+      "sha256": "0420383925b80a35f3d2358eea05027eefd2147d5c4b8250bed8edfeb212c7d3",
+      "compositionPlanId": "composition-48581193ea89935c",
+      "renderTreeFingerprint": "1281ed6e4f69542f208c078b6069145fdbe6313ec056849159378fab2229781e",
+      "regions": [
+        {
+          "regionId": "comparison-shared-basis",
+          "parentRegionId": null,
+          "flow": "column",
+          "order": 0
+        },
+        {
+          "regionId": "page-heading",
+          "parentRegionId": "comparison-shared-basis",
+          "flow": "column",
+          "order": 0
+        },
+        {
+          "regionId": "message-context",
+          "parentRegionId": "comparison-shared-basis",
+          "flow": "column",
+          "order": 1
+        },
+        {
+          "regionId": "comparison-field",
+          "parentRegionId": null,
+          "flow": "column",
+          "order": 1
+        },
+        {
+          "regionId": "comparison-heading",
+          "parentRegionId": "comparison-field",
+          "flow": "row",
+          "order": 0
+        },
+        {
+          "regionId": "comparison-before-heading",
+          "parentRegionId": "comparison-heading",
+          "flow": "row",
+          "order": 0
+        },
+        {
+          "regionId": "comparison-after-heading",
+          "parentRegionId": "comparison-heading",
+          "flow": "row",
+          "order": 1
+        },
+        {
+          "regionId": "comparison-pair-0",
+          "parentRegionId": "comparison-field",
+          "flow": "row",
+          "order": 0
+        },
+        {
+          "regionId": "comparison-pair-0-before",
+          "parentRegionId": "comparison-pair-0",
+          "flow": "row",
+          "order": 0
+        },
+        {
+          "regionId": "comparison-pair-0-change",
+          "parentRegionId": "comparison-pair-0",
+          "flow": "row",
+          "order": 1
+        },
+        {
+          "regionId": "comparison-pair-0-after",
+          "parentRegionId": "comparison-pair-0",
+          "flow": "row",
+          "order": 2
+        },
+        {
+          "regionId": "comparison-pair-1",
+          "parentRegionId": "comparison-field",
+          "flow": "row",
+          "order": 1
+        },
+        {
+          "regionId": "comparison-pair-1-before",
+          "parentRegionId": "comparison-pair-1",
+          "flow": "row",
+          "order": 0
+        },
+        {
+          "regionId": "comparison-pair-1-change",
+          "parentRegionId": "comparison-pair-1",
+          "flow": "row",
+          "order": 1
+        },
+        {
+          "regionId": "comparison-pair-1-after",
+          "parentRegionId": "comparison-pair-1",
+          "flow": "row",
+          "order": 2
+        }
+      ],
+      "hardGate": {
+        "passed": true,
+        "programFindings": [],
+        "sourceFidelityFindings": [],
+        "findings": []
+      },
+      "missingText": [],
+      "missingTokens": []
+    }
+  ],
+  "fontHashes": [
+    {
+      "family": "Pretendard",
+      "weight": 400,
+      "sha256": "6d0af5258997aec7354a6e340fc2325ba321c410ca48b3af858c8c3d6e92a324"
+    },
+    {
+      "family": "Pretendard",
+      "weight": 700,
+      "sha256": "c16b88c670d23e83fa1170c954cbc4822d3b8dad3c3cde15d798a94b43d97985"
+    },
+    {
+      "family": "Pretendard",
+      "weight": 800,
+      "sha256": "eedbd2877218242323bdff816684f7f5c325e54ae820d5b78eec9a5e5c7edef6"
+    }
+  ],
+  "renderer": "RenderTree → SVG/HTML → Chromium screenshot"
+}

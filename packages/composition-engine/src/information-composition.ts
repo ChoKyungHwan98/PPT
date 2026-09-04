@@ -10,9 +10,10 @@ import {
   type ReferenceRetrievalBrief,
   type SlideIR,
 } from '@game-presentation/contracts';
-import type { ReferenceSearchResult } from '@game-presentation/reference-engine';
+import type { ReferenceSearchResult, TeacherDesignGuidance } from '@game-presentation/reference-engine';
 import { styleIntentForPattern } from './design-intent.js';
 import { alignedFeatureComposition } from './aligned-feature-composition.js';
+import { organizationComposition } from './organization-composition.js';
 
 type PhaseName = 'accumulation' | 'threshold' | 'consequence';
 type PhaseContract = NonNullable<PatternFragment['phaseContract']>;
@@ -243,6 +244,7 @@ export function createCompositionPlanFromInformationPlan(input: {
   informationPlan: InformationPlan;
   retrieval: { brief: ReferenceRetrievalBrief; results: ReferenceSearchResult[] };
   fragments: PatternFragment[];
+  teacherGuidance?: TeacherDesignGuidance;
 }): CompositionPlan {
   const informationIssues = validateInformationPlan(input.informationPlan, input.slide);
   if (informationIssues.length > 0) {
@@ -254,20 +256,45 @@ export function createCompositionPlanFromInformationPlan(input: {
   if (input.retrieval.brief.semanticShape !== input.informationPlan.semanticShape) {
     throw new Error('Retrieval 결과의 설명 구조가 InformationPlan과 다릅니다.');
   }
+  if (input.teacherGuidance !== undefined
+    && (input.teacherGuidance.slideId !== input.slide.slideId
+      || input.teacherGuidance.informationPlanId !== input.informationPlan.informationPlanId)) {
+    throw new Error('Teacher Guidance가 다른 SlideIR 또는 InformationPlan을 가리킵니다.');
+  }
 
   const selected = matchingFragment(input);
+  const alignedTeacherGuidance = selected.fragment.comparisonContract !== undefined
+    && input.teacherGuidance?.structureLock.semanticShape === 'aligned-before-after-spec'
+    ? input.teacherGuidance
+    : undefined;
+  const organizationTeacherGuidance = selected.fragment.semanticShape === 'hierarchy'
+    && input.teacherGuidance?.structureLock.semanticShape === 'hierarchy'
+    ? input.teacherGuidance
+    : undefined;
+  const activeTeacherGuidance = alignedTeacherGuidance ?? organizationTeacherGuidance;
   const stableInput = {
     slideId: input.slide.slideId,
     informationPlanId: input.informationPlan.informationPlanId,
     retrievalBriefId: input.retrieval.brief.briefId,
     fragmentId: selected.fragment.fragmentId,
+    teacherStructureLock: activeTeacherGuidance === undefined
+      ? undefined
+      : {
+          authority: activeTeacherGuidance.structureLock.authority,
+          semanticShape: activeTeacherGuidance.structureLock.semanticShape,
+          application: alignedTeacherGuidance === undefined
+            ? 'explanation-and-authored-hierarchy'
+            : 'shared-basis-paired-axis',
+        },
   };
   const fingerprint = contentHash(stableInput).slice(0, 16);
   const groupByBlockId = new Map(
     input.informationPlan.groups.flatMap((group) => group.blockIds.map((blockId) => [blockId, group] as const)),
   );
-  const phasePlan = selected.fragment.comparisonContract !== undefined
-    ? alignedFeatureComposition(input.slide, input.informationPlan)
+  const phasePlan = organizationTeacherGuidance !== undefined
+    ? organizationComposition(input.slide, input.informationPlan, organizationTeacherGuidance)
+    : selected.fragment.comparisonContract !== undefined
+    ? alignedFeatureComposition(input.slide, input.informationPlan, alignedTeacherGuidance)
     : phaseComposition({
     slide: input.slide,
     informationPlan: input.informationPlan,
@@ -287,7 +314,11 @@ export function createCompositionPlanFromInformationPlan(input: {
     layout: {
       layoutFamily: selected.fragment.topology.family,
       readingPath: selected.fragment.readingPath,
-      rationale: selected.fragment.topology.emphasisRule,
+      rationale: organizationTeacherGuidance !== undefined
+        ? 'Primary Teacher Guidance에 따라 운영 원문과 authored 책임·소속 hierarchy를 서로 다른 역할로 병치한다.'
+        : alignedTeacherGuidance === undefined
+          ? selected.fragment.topology.emphasisRule
+          : 'Primary Teacher Guidance에 따라 공통 기준 아래 Before/After 대응쌍을 같은 축에 정렬한다.',
     },
     regions: phasePlan?.regions ?? [
       {

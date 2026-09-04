@@ -4,7 +4,14 @@ import sharp from 'sharp';
 import { beforeAll, afterAll, describe, expect, it } from 'vitest';
 import { SEED_PATTERN_FRAGMENTS, SEED_REFERENCE_CORPUS, RenderTreeSchema, validateCompositionPlan, resolveAlignedFeatureSpec } from '@game-presentation/contracts';
 import { createCompositionPlanFromInformationPlan } from '@game-presentation/composition-engine';
-import { externalComparisonReferenceRecords, loadExternalMasterReferenceSet, retrieveReferencesForInformationPlan } from '@game-presentation/reference-engine';
+import {
+  buildTeacherDesignGuidance,
+  externalComparisonReferenceRecords,
+  loadExternalMasterReferenceSet,
+  loadExternalMasterTeacherPageSet,
+  retrieveReferencesForInformationPlan,
+  selectCuratedTeachersForInformationPlan,
+} from '@game-presentation/reference-engine';
 import { fileURLToPath } from 'node:url';
 import { interpretAuthoredFeatureComparison, type AuthoredFeatureComparison } from '../../source-ingestion/src/authored-feature-comparison.js';
 import { interpretMec01Source, createMec01InformationPlan } from '../../source-ingestion/src/mec-01-semantic.js';
@@ -15,8 +22,10 @@ import { measureTextBatch } from '../src/measure.js';
 import { runHardGate } from '../src/hard-gate.js';
 
 const source = JSON.parse(await readFile(new URL('../../source-ingestion/fixtures/dodge-feature-spec.source.json', import.meta.url), 'utf8')) as AuthoredFeatureComparison;
+const rewardSource = JSON.parse(await readFile(new URL('../../source-ingestion/fixtures/reward-feature-spec.source.json', import.meta.url), 'utf8')) as AuthoredFeatureComparison;
 const referenceDir = fileURLToPath(new URL('../../reference-engine/references/external-master-2025-v1', import.meta.url));
 const referenceSet = await loadExternalMasterReferenceSet(referenceDir);
+const teachers = (await loadExternalMasterTeacherPageSet(referenceDir)).pages;
 const corpus = [...SEED_REFERENCE_CORPUS, ...externalComparisonReferenceRecords(referenceSet, referenceDir)];
 
 function genericSource(count: number): AuthoredFeatureComparison {
@@ -100,6 +109,58 @@ describe('aligned Before / After Feature Spec', () => {
     input.slide.relations[1]!.toBlockId = input.slide.relations[0]!.toBlockId;
     expect(resolveAlignedFeatureSpec(input.slide, input.informationPlan)).toBeUndefined();
     expect(() => compose(input)).toThrow();
+  });
+  it('renders the Teacher-guided comparison topology with the production renderer and Hard Gate', async () => {
+    const input = interpretAuthoredFeatureComparison(rewardSource);
+    const retrieval = retrieveReferencesForInformationPlan({
+      ...input, corpus, audience: 'game-design-reviewer', outputProfile: 'pdf-presentation', limit: 4,
+    });
+    const selection = selectCuratedTeachersForInformationPlan({ ...input, teachers, limit: 3 });
+    const resolution = buildTeacherDesignGuidance({ ...input, selection, teachers });
+    if (resolution.status !== 'ready') throw new Error(resolution.reason);
+    const plan = createCompositionPlanFromInformationPlan({
+      ...input, retrieval, fragments: SEED_PATTERN_FRAGMENTS, teacherGuidance: resolution.guidance,
+    });
+    const measures = await measureTextBatch(
+      browser,
+      fonts,
+      informationMeasureRequests({ ...input, plan }),
+      { requireLoadedFonts: true },
+    );
+    const tree = buildInformationRenderTree({ ...input, plan, measures, fonts });
+    expect(runHardGate({ ...input, tree })).toEqual({
+      passed: true,
+      programFindings: [],
+      sourceFidelityFindings: [],
+      findings: [],
+    });
+    expect(tree.nodes.some((node) => node.kind === 'group'
+      && node.compositionRegionId === 'comparison-shared-basis')).toBe(true);
+    for (const relation of input.slide.relations) {
+      const before = tree.nodes.find((node) => node.semanticBlockId === relation.fromBlockId)!;
+      const after = tree.nodes.find((node) => node.semanticBlockId === relation.toBlockId)!;
+      const carrier = tree.nodes.find((node) => node.relationId === relation.id)!;
+      expect(before.box.y + before.box.height / 2).toBe(after.box.y + after.box.height / 2);
+      expect(before.box.x).toBeLessThan(carrier.box.x);
+      expect(carrier.box.x).toBeLessThan(after.box.x);
+    }
+    const revisedTree = buildInformationRenderTree({
+      ...input,
+      plan,
+      measures,
+      fonts,
+      alignedFeaturePresentationRevision: {
+        revisionId: 'critic-targeted-revision-1',
+        tightenSpaceUse: true,
+        strengthenGrouping: true,
+        strengthenRelation: true,
+      },
+    });
+    expect(runHardGate({ ...input, tree: revisedTree }).passed).toBe(true);
+    expect(revisedTree.compositionPlanId).toBe(tree.compositionPlanId);
+    expect(revisedTree.renderTreeId).toContain('critic-targeted-revision-1');
+    expect(revisedTree.nodes.filter((node) => node.kind === 'group').map((node) => node.compositionRegionId))
+      .toEqual(tree.nodes.filter((node) => node.kind === 'group').map((node) => node.compositionRegionId));
   });
   it('preserves the first production PNG as an unapproved candidate with zero Critic calls', async () => {
     const [png, treeText, proofText] = await Promise.all([
