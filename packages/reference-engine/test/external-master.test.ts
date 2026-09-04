@@ -67,7 +67,7 @@ describe('2025 External Master Reference corpus', () => {
     ]);
   });
 
-  it('validates all six manually mapped Teacher pages against source provenance', async () => {
+  it('validates all six user-approved curated Teacher pages against source provenance', async () => {
     const source = await loadExternalMasterReferenceSet(referenceDir);
     const teachers = await loadExternalMasterTeacherPageSet(referenceDir);
     const sourceIds = new Set(source.references.map((reference) => reference.referenceId));
@@ -75,7 +75,20 @@ describe('2025 External Master Reference corpus', () => {
     expect(teachers.pages).toHaveLength(6);
     expect(teachers.pages.every((page) => TeacherPageRecordSchema.safeParse(page).success)).toBe(true);
     expect(teachers.pages.every((page) => sourceIds.has(page.provenance.referenceId))).toBe(true);
-    expect(teachers.pages.every((page) => page.provenance.teacherStatus === 'seed-evidence')).toBe(true);
+    expect(teachers.pages.every((page) => page.provenance.teacherStatus === 'curated-teacher')).toBe(true);
+    expect(teachers.pages.every((page) => page.provenance.curation.reviewedBy === 'human')).toBe(true);
+    expect(teachers.pages.every((page) => page.provenance.curation.reviewedAt === '2026-09-04')).toBe(true);
+    expect(Object.fromEntries(teachers.pages.map((page) => [
+      page.provenance.pageArtifact.pageLabel,
+      page.provenance.curation.confidence,
+    ]))).toEqual({
+      '01': 'high',
+      '02': 'high',
+      '03': 'medium',
+      '04': 'high',
+      '05': 'medium',
+      '06': 'medium',
+    });
     expect(teachers.pages.every(
       (page) => page.provenance.compatibility.legacyReadyGolden === false,
     )).toBe(true);
@@ -145,7 +158,7 @@ describe('2025 External Master Reference corpus', () => {
     expect(countermeasure.visualGrammar.titleMessagePlacement.relationship).toBe('absent');
     expect(JSON.stringify(countermeasure.informationStructure)).not.toContain('shared-problem');
     expect(teachers.pages.every(
-      (teacher) => teacher.provenance.teacherStatus === 'seed-evidence'
+      (teacher) => teacher.provenance.teacherStatus === 'curated-teacher'
         && teacher.provenance.compatibility.legacyReadyGolden === false,
     )).toBe(true);
   });

@@ -4,12 +4,13 @@
 
 - 검토 대상: `external-master-2025-v1` 6개 reference 이미지와 `teacher-pages.v1.json`
 - 검토 방식: 실제 이미지 관찰과 기존 `analysis.json`·Teacher mapping 대조
-- 결과 성격: curation 제안
+- 결과 성격: human curation 완료 기록
 - Mapping correction: 03·05·06 적용 완료
-- Teacher status 변경: 없음
-- 현재 상태: 6개 모두 `seed-evidence`
+- 사용자 승인일: 2026-09-04
+- Teacher status 변경: 6개 모두 `curated-teacher`
+- 현재 usable curated Teacher: 6개
 
-이 문서의 `curate-ready`는 바로 `curated-teacher`로 승격한다는 뜻이 아니다. mapping correction 여부를 판정한 것이며, 실제 승격에는 사용자 승인이 별도로 필요하다.
+이 문서의 기존 `curate-ready`와 correction 기록은 승격 전 검토 이력이다. 2026-09-04 사용자 승인으로 6개 mapping 모두 정식 Teacher로 승격되었다. 이 승인은 추출한 디자인 원칙을 production Teacher 지식으로 참고할 수 있다는 뜻이며, Ready Positive·Golden·Renderer 품질 승인·사용자 취향 기록을 뜻하지 않는다.
 
 판정 의미:
 
@@ -47,7 +48,7 @@ Reference ID: `ext-2025-pokemon-problem-task-leak`
 | 다른 장표 재사용 가치 | 높음. 제작 과정 병목, 요구사항 누락, QA gap, 검수 실패 설명에 재사용 가능하다. |
 | Confidence | `medium → high` 상향 제안. 정보 구조와 시각 근거가 명확하다. |
 
-최종 제안: `curate-ready`
+최종 상태: `curated-teacher` (사용자 승인 완료, confidence `high`)
 
 ### 02 Pokémon — Feature Concept / UI Annotation
 
@@ -64,7 +65,7 @@ Reference ID: `ext-2025-pokemon-card-format-concept`
 | 다른 장표 재사용 가치 | 높음. 전투 UI, HUD, 아이템, 스킬 화면, 보스 패턴 screenshot 설명에 유용하다. |
 | Confidence | `medium → high` 상향 제안. 촬영 원본의 원근 왜곡은 있으나 구조 판독에는 영향이 없다. |
 
-최종 제안: `curate-ready`
+최종 상태: `curated-teacher` (사용자 승인 완료, confidence `high`)
 
 ### 03 Pokémon — Organization / Structure
 
@@ -87,7 +88,7 @@ Reference ID: `ext-2025-pokemon-initiative-team-structure`
 - page goal과 required signal에서 reporting 단정을 제거하고 책임·소속 의미를 유지
 - `retrievalIndex.relationTags`에서 `reporting`을 제거하고 `responsibility`로 교체
 
-최종 기록: `correction-applied / awaiting-user-curation-approval`
+최종 상태: `curated-teacher` (correction 승인 완료, confidence `medium`)
 
 ### 04 Shadowverse — Trade-off / Problem Framing
 
@@ -104,7 +105,7 @@ Reference ID: `ext-2025-shadowverse-accessibility-vs-competitiveness`
 | 다른 장표 재사용 가치 | 높음. 접근성 대 깊이, 리스크 대 보상, 편의성 대 숙련도 같은 게임 설계 trade-off에 적합하다. |
 | Confidence | `medium → high` 상향 제안. 제목과 세 발화가 semantic relation을 명시적으로 뒷받침한다. |
 
-최종 제안: `curate-ready`
+최종 상태: `curated-teacher` (사용자 승인 완료, confidence `high`)
 
 ### 05 Shadowverse — Before / After / Feature Spec
 
@@ -128,7 +129,7 @@ Reference ID: `ext-2025-shadowverse-super-evolution`
 - `retrievalIndex.densityTags`: `dense` → `balanced`
 - `primaryClaim`은 표시된 message가 아니라 curator synthesis임을 명시
 
-최종 기록: `correction-applied / awaiting-user-curation-approval`
+최종 상태: `curated-teacher` (correction 승인 완료, confidence `medium`)
 
 ### 06 Shadowverse — System Comparison / Countermeasure
 
@@ -153,26 +154,28 @@ Reference ID: `ext-2025-shadowverse-rules-vs-card-ability`
 - `titleMessagePlacement.relationship`: `combined` → `absent`
 - page goal, primary claim, applicability, rationale, retrieval text에서 화면에 없는 공통 문제의 visible fact 단정 제거
 
-최종 기록: `correction-applied / awaiting-user-curation-approval`
+최종 상태: `curated-teacher` (correction 승인 완료, confidence `medium`)
 
 ## 4. Curation 제안 요약
 
-| Reference | 제안 | Confidence 제안 | 핵심 판단 |
+| Reference | 최종 상태 | Confidence | 핵심 판단 |
 | --- | --- | --- | --- |
-| 01 Problem / Diagnosis | `curate-ready` | medium → high | 구조와 진단 경계가 명확함 |
-| 02 Feature Annotation | `curate-ready` | medium → high | artifact와 annotation 귀속이 명확함 |
-| 03 Organization / Structure | `correction-applied / awaiting-user-curation-approval` | medium 유지 | reporting 제거, 책임·소속으로 제한 |
-| 04 Trade-off | `curate-ready` | medium → high | 두 목표와 긴장이 명시적임 |
-| 05 Before / After | `correction-applied / awaiting-user-curation-approval` | medium 유지 | message absent, density balanced 적용 |
-| 06 Layered Countermeasure | `correction-applied / awaiting-user-curation-approval` | medium 유지 | visible local causality로 재구성 |
+| 01 Problem / Diagnosis | `curated-teacher` | high | 구조와 진단 경계가 명확함 |
+| 02 Feature Annotation | `curated-teacher` | high | artifact와 annotation 귀속이 명확함 |
+| 03 Organization / Structure | `curated-teacher` | medium | reporting 제거, 책임·소속으로 제한 |
+| 04 Trade-off | `curated-teacher` | high | 두 목표와 긴장이 명시적임 |
+| 05 Before / After | `curated-teacher` | medium | message absent, density balanced 적용 |
+| 06 Layered Countermeasure | `curated-teacher` | medium | visible local causality로 재구성 |
 
-`reject-as-teacher` 제안은 없다. 03·05·06 correction은 적용되었지만 사용자 curation 승인 전이므로 여섯 장 모두 `seed-evidence`를 유지한다.
+`reject-as-teacher`는 없다. 6개 모두 사용자 승인을 거쳐 production에서 참고 가능한 `curated-teacher`가 되었다. `legacyReadyGolden=false`는 유지하며 Ready Positive 또는 Golden으로 승격하지 않는다.
 
-## 5. 다음 판단 지점
+## 5. 승인 경계
 
-이번 correction에서는 mapping만 수정했고 Teacher status는 변경하지 않았다. 다음 단계에서 사용자가 correction 결과와 curation 제안을 승인하면 승격 심사를 별도로 진행할 수 있다.
+이번 승격은 6개 Teacher에서 추출한 추상 디자인 원칙의 정식 사용만 승인한다.
 
-1. 03·05·06 correction 결과 사용자 검토
-2. 01·02·04 및 correction 완료 Teacher의 개별 승격 심사
+- Ready Positive 또는 Golden 결과물 승인 아님
+- 현재 Renderer가 같은 품질을 만든다는 승인 아님
+- 사용자 취향으로 저장하는 승인 아님
+- 원본 이미지·색·좌표·IP·asset 재사용 승인 아님
 
-승격이 승인되기 전까지 6개 모두 production Retrieval 대상이 아니다.
+Retrieval, scoring, benchmark 및 모델 연결은 아직 구현하지 않는다.

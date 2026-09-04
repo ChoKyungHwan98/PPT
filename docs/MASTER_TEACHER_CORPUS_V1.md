@@ -4,8 +4,9 @@
 
 - 상태: 설계안
 - 범위: 데이터 구조, 등록 절차, 검색 계약
-- Seed evidence: `external-master-2025-v1`의 6개 reference
-- 구현 상태: 기반 계약 구현 완료, Retrieval 미구현
+- Source evidence: `external-master-2025-v1`의 6개 reference
+- 구현 상태: 기반 계약, 6개 Teacher human curation, production용 deterministic Teacher 선택기 구현 완료
+- 현재 usable curated Teacher: 6개 (사용자 승인일 2026-09-04)
 
 현재 구현 완료:
 
@@ -13,14 +14,16 @@
 - `TeacherPageRecord` Zod Schema
 - External Master 6개 manual mapping
 - Schema / Rights / Status validation test
+- External Master 6개 human curation 및 `curated-teacher` 승격
+- `SlideIR + InformationPlan` 기반 production Teacher 선택
+- curated-only status hard filter, 구조적 금지 조건, 설명 가능한 1~3개 순위
+- Teacher별 대표 예제와 오선택 방지 반례 테스트
 
 현재 미구현:
 
-- production Retrieval
-- `usageMode` execution filter
-- scoring 및 retrieval benchmark
+- curation/benchmark용 범용 `TeacherRetrievalRequest` 실행 경로
+- human-labelled retrieval benchmark corpus
 - local reranker
-- 실제 `curated-teacher` 승격
 
 Master Teacher Corpus는 좋은 게임 기획 장표의 **표면을 복제하는 저장소**가 아니다. 각 장표가 어떤 정보를 어떤 구조로 설명했고, 왜 그 구조가 효과적이었는지를 검색 가능한 지식으로 보존한다.
 
@@ -66,7 +69,7 @@ V1에서는 새 package나 별도 검색 엔진을 만들지 않는다. 기존 `
 | `ReferenceRecord` | 출처, 권리, 허용 사용, hash, 검색용 요약 tag | Teacher 상세 분석을 가리키는 연결 정보 |
 | `ReferenceRetrievalBrief` | SlideIR/InformationPlan에서 만든 검색 brief | group 역할, cardinality, 금지 조건 등 정밀 검색 field |
 | `retrieveReferences()` | deterministic 1차 검색 | applicability hard filter와 세부 score 설명 |
-| `external-master-2025-v1/manifest.json` | 원본 목록, source, year, grammar, readyGolden=false | 변경 없이 seed provenance로 사용 |
+| `external-master-2025-v1/manifest.json` | 원본 목록, source, year, grammar, readyGolden=false | 변경 없이 source provenance로 사용 |
 | `analysis.json` | 6개 장표의 현재 상세 분석 | Teacher schema로 정규화할 원천 자료 |
 | `PatternFragment` | 구현 가능한 구조 계약 | Teacher와 자동 연결·자동 승격하지 않음 |
 
@@ -313,27 +316,34 @@ External Reference
 
 Teacher Grammar가 만들어졌다는 사실은 Pattern 구현이나 Ready 품질을 의미하지 않는다.
 
-## 5. Seed Reference 6개 매핑
+## 5. Curated Teacher 6개 매핑
+
+아래 6개 External Master는 human curation과 사용자 승인을 완료해 현재 모두 `curated-teacher`다. 이는 추출한 추상 디자인 원칙을 선택기가 참고할 수 있다는 뜻이며, Ready Positive·Golden·Renderer 품질 승인을 뜻하지 않는다. 6개 모두 `compatibility.legacyReadyGolden=false`를 유지한다.
 
 | Reference | Information Structure | Visual Grammar 핵심 | Applicability | Boundary | 재사용 원칙 |
 | --- | --- | --- | --- | --- | --- |
-| `ext-master-01-pokemon-problem-diagnosis` | process → perceived progress → hidden gap → diagnosed problem | 좌→우 과정 안에서 누락 지점을 경계 사건으로 강조 | 정상처럼 보이는 과정 안의 누락·병목을 진단할 때 | 단순 순서 설명, 누락이나 진단이 없는 메커니즘 | 과정 내부의 중요한 경계를 별도 사건으로 드러낸다 |
-| `ext-master-02-pokemon-feature-annotation` | primary artifact → feature annotations → concept synthesis | 중앙 실제 대상, 주변 주석, center-out reading | 실제 UI·오브젝트의 여러 설계 요소를 설명할 때 | 중심 artifact가 없거나 텍스트만으로 완결되는 내용 | 설명을 artifact에 직접 귀속시켜 추적 비용을 줄인다 |
-| `ext-master-03-pokemon-organization-structure` | operating explanation + responsibility hierarchy | 설명과 구조도를 병치하고 상호 보완 | 조직, 역할, 책임, 모듈 관계를 함께 설명할 때 | 단일 선형 과정이나 비교가 핵심일 때 | 설명은 원칙을, 구조도는 관계를 맡도록 역할을 분리한다 |
-| `ext-master-04-shadowverse-tradeoff` | goal A ↔ goal B → unresolved tension | 대립 축, 균형 잡힌 두 관점, 중심 긴장 | 동시에 만족하기 어려운 두 설계 목표를 보여줄 때 | 단순 Before/After, 한쪽이 명백히 정답인 경우 | 두 목표를 동등하게 보여준 뒤 충돌 지점을 중심에 둔다 |
-| `ext-master-05-shadowverse-before-after` | shared baseline → before vs after → aligned spec difference | 좌우 정렬, 같은 기준의 대응쌍, 제한된 변화 강조 | 동일 기준으로 기존·개선 사양을 비교할 때 | pairing이 없거나 인과 흐름이 핵심일 때 | 같은 기준의 항목을 같은 행에 맞춰 변화 추적 비용을 줄인다 |
-| `ext-master-06-shadowverse-countermeasure` | shared problem ← rule-level response + content-level response | 서로 다른 해결 레이어 병렬화, 각 레이어의 국소 인과 | 하나의 문제에 서로 다른 수준의 대응이 있을 때 | 두 열이 같은 항목의 Before/After이거나 단순 선택지일 때 | 해결책을 레이어별로 분리하되 공통 문제와의 관계를 유지한다 |
+| `ext-2025-pokemon-problem-task-leak` | process → perceived progress → hidden gap → diagnosed problem | 좌→우 과정 안에서 누락 지점을 경계 사건으로 강조 | 정상처럼 보이는 과정 안의 누락·병목을 진단할 때 | 단순 순서 설명, 누락이나 진단이 없는 메커니즘 | 과정 내부의 중요한 경계를 별도 사건으로 드러낸다 |
+| `ext-2025-pokemon-card-format-concept` | primary artifact → feature annotations → concept synthesis | 중앙 실제 대상, 주변 주석, center-out reading | 실제 UI·오브젝트의 여러 설계 요소를 설명할 때 | 중심 artifact가 없거나 텍스트만으로 완결되는 내용 | 설명을 artifact에 직접 귀속시켜 추적 비용을 줄인다 |
+| `ext-2025-pokemon-initiative-team-structure` | operating explanation + responsibility hierarchy | 설명과 구조도를 병치하고 상호 보완 | 조직, 역할, 책임, 모듈 관계를 함께 설명할 때 | 단일 선형 과정이나 비교가 핵심일 때 | 설명은 원칙을, 구조도는 관계를 맡도록 역할을 분리한다 |
+| `ext-2025-shadowverse-accessibility-vs-competitiveness` | goal A ↔ goal B → unresolved tension | 대립 축, 균형 잡힌 두 관점, 중심 긴장 | 동시에 만족하기 어려운 두 설계 목표를 보여줄 때 | 단순 Before/After, 한쪽이 명백히 정답인 경우 | 두 목표를 동등하게 보여준 뒤 충돌 지점을 중심에 둔다 |
+| `ext-2025-shadowverse-super-evolution` | shared baseline → before vs after → aligned spec difference | 좌우 정렬, 같은 기준의 대응쌍, 제한된 변화 강조 | 동일 기준으로 기존·개선 사양을 비교할 때 | pairing이 없거나 인과 흐름이 핵심일 때 | 같은 기준의 항목을 같은 행에 맞춰 변화 추적 비용을 줄인다 |
+| `ext-2025-shadowverse-rules-vs-card-ability` | rule evidence → rule effect ∥ content evidence → content effect | 서로 다른 해결 레이어 병렬화, 각 레이어 내부의 국소 인과 | 규칙·콘텐츠 등 서로 다른 해결 레이어의 근거와 효과를 나란히 설명할 때 | 순차 단계, Before/After, 한 레이어에 근거나 효과가 없는 경우 | 해결 레이어를 분리하고 각 레이어 안에서만 근거→효과 관계를 표현한다. 화면에 없는 공통 문제를 visible fact로 만들지 않는다 |
 
 ### 5.1 상세 매핑 예시: Before / After Feature Spec
 
 ```json
 {
   "provenance": {
-    "referenceId": "ext-master-05-shadowverse-before-after",
+    "referenceId": "ext-2025-shadowverse-super-evolution",
     "source": { "origin": "Shadowverse: Worlds Beyond / CEDEC 2025" },
     "year": 2025,
-    "teacherStatus": "seed-evidence",
+    "teacherStatus": "curated-teacher",
     "compatibility": { "legacyReadyGolden": false },
+    "curation": {
+      "reviewedBy": "human",
+      "reviewedAt": "2026-09-04",
+      "confidence": "medium"
+    },
     "rights": {
       "status": "unknown",
       "analyzeAllowed": true,
@@ -343,20 +353,22 @@ Teacher Grammar가 만들어졌다는 사실은 Pattern 구현이나 Ready 품�
     }
   },
   "informationStructure": {
-    "pageGoal": "기존 사양과 신규 사양의 차이를 같은 기준으로 즉시 이해시킨다.",
-    "primaryClaim": "변화한 기능 사양을 기존 사양과 대응시켜 설명한다.",
+    "pageGoal": "공통 출발점을 유지한 채 두 기능의 결과와 규칙 차이를 같은 기준으로 비교한다.",
+    "primaryClaim": "새 기능은 기존 진화보다 더 강한 결과와 추가 규칙을 제공한다.",
     "semanticShape": "aligned-before-after-spec",
     "informationGroups": [
-      { "groupRole": "before", "order": 1, "itemCount": 1, "required": true },
-      { "groupRole": "after", "order": 2, "itemCount": 1, "required": true }
+      { "groupId": "shared-baseline", "groupRole": "comparison-anchor", "order": 0, "itemCount": 1, "required": true },
+      { "groupId": "existing-feature", "groupRole": "before", "order": 1, "itemCount": 1, "required": true },
+      { "groupId": "new-feature", "groupRole": "after", "order": 2, "itemCount": 1, "required": true },
+      { "groupId": "difference-marker", "groupRole": "contrast", "order": 3, "itemCount": 1, "required": true }
     ],
     "relationStructure": [
       {
-        "fromRole": "before-item",
-        "toRole": "after-item",
-        "relationType": "compares-with",
+        "fromGroupId": "existing-feature",
+        "toGroupId": "new-feature",
+        "relationType": "compared-on-same-criteria",
         "direction": "bidirectional",
-        "scope": "local"
+        "scope": "page"
       }
     ],
     "readingPath": {
@@ -367,10 +379,10 @@ Teacher Grammar가 만들어졌다는 사실은 Pattern 구현이나 Ready 품�
     "primaryArtifact": "aligned-comparison-field"
   },
   "applicability": {
-    "fitsSemanticShapes": ["comparison"],
-    "requiredSignals": ["two authored groups", "authored one-to-one comparison relation"],
-    "forbiddenSignals": ["causal-chain-only", "unpaired alternatives"],
-    "densityRange": ["sparse", "balanced"],
+    "fitsSemanticShapes": ["aligned-before-after-spec"],
+    "requiredSignals": ["공통 비교 기준", "기존 상태", "신규 상태", "공통 비교 항목", "변경된 규칙 또는 수치"],
+    "forbiddenSignals": ["서로 다른 비교 기준", "세 개 이상의 대안", "공통 기준이나 실제 차이 부재"],
+    "densityRange": ["balanced", "dense"],
     "blockCount": { "min": 2, "hardLimit": false },
     "pairCount": { "min": 1, "hardLimit": false },
     "assetRequirements": []
@@ -630,23 +642,25 @@ Hard constraints
 3. External Master 6개 manual mapping
 4. Schema / Rights / Status validation test
 
-Human Curation Review는 별도 문서에 제안만 기록하며, 사용자 승인 전에는 6개 모두 `seed-evidence`를 유지한다.
+Human Curation Review와 03·05·06 correction은 완료되었다. 2026-09-04 사용자 승인으로 6개 모두 `curated-teacher`이며, 현재 production Teacher 선택기의 정식 후보로 사용할 수 있다. 이 상태는 Ready Positive·Golden·Renderer 품질 승인과 독립적이다.
+
+현재 구현된 production 선택기는 `curated-teacher`만 허용하며, 직접 reference ID를 지정해도 `seed-evidence`와 `retired`를 반환하지 않는다. 목적·관계·그룹·실제 artifact·정보량·금지 조건을 순서대로 판정하고 최대 1~3개의 설명 가능한 결과를 반환한다.
 
 다음 구현 단계는 별도 승인 후 아래 순서로 진행한다.
 
-1. production `TeacherRetrievalRequest`와 `usageMode` execution filter
-2. deterministic applicability filter와 scoring breakdown
-3. human-labelled retrieval benchmark
+1. 실제 pipeline에서 선택 결과를 소비할 위치 결정
+2. human-labelled retrieval benchmark 확장
+3. curation/benchmark mode가 필요할 때만 범용 `usageMode` 계약 구현
 4. benchmark에서 필요성이 확인될 때만 local reranker
-5. 수정·검토가 끝난 Teacher의 개별 승격 심사
+5. corpus 확장 시 새 Teacher의 개별 검토 및 사용자 승격 승인
 
-현재는 Retrieval, scoring, benchmark, reranker, `curated-teacher` 승격을 구현하지 않는다.
+현재는 Renderer 연결, Teacher Grammar 자동 생성, embedding/vector DB, local reranker를 구현하지 않는다.
 
 ## 13. V1 완료 기준
 
 Master Teacher Corpus V1의 향후 구현 완료 기준은 다음과 같다.
 
-- 6개 seed reference가 schema validation을 통과한다.
+- 6개 curated Teacher가 schema validation을 통과한다.
 - 모든 Teacher에 provenance, rights, applicability, reuse boundary가 있다.
 - 6개 모두 `compatibility.legacyReadyGolden=false`이며 Teacher status와 분리되어 있다.
 - production mode에서 `seed-evidence`와 `retired`가 모델 context에 도달하지 않는다.
@@ -658,4 +672,4 @@ Master Teacher Corpus V1의 향후 구현 완료 기준은 다음과 같다.
 - legacy `readyGolden` 값이 filter, score, 승격 판단에 사용되지 않는다.
 - PatternFragment와 Ready Positive의 자동 승격 경로가 없다.
 
-현재 단계에서는 Corpus 기반 계약과 seed mapping까지만 구현되어 있다. Retrieval 이후 기능과 Teacher 승격은 사용자 승인 전까지 진행하지 않는다.
+현재 단계에서는 6개 Teacher의 human curation·사용자 승인·정식 등록과 기획 내용 기반 자동 선택까지 완료되었다. 선택된 Teacher 원칙을 실제 장표 설계에 전달하는 연결과 장표 재생성·품질 검증은 아직 진행하지 않았다.

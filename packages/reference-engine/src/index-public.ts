@@ -9,4 +9,5 @@ export * from './page-analysis.js';
 export * from './policy.js';
 export * from './queue.js';
 export * from './store.js';
+export * from './teacher-selection.js';
 export * from './worker.js';

@@ -176,7 +176,7 @@ export async function loadExternalMasterReferenceSet(baseDir: string): Promise<E
 
 /**
  * External Master 분석의 V1 Teacher sidecar를 로드하고 원본 provenance와 대조한다.
- * 이 단계는 Teacher를 검색하거나 curated-teacher로 승격하지 않는다.
+ * 이 함수는 Teacher를 검색하거나 상태를 변경하지 않고 sidecar에 기록된 승인 상태를 검증해 반환한다.
  */
 export async function loadExternalMasterTeacherPageSet(baseDir: string): Promise<TeacherPageRecordSet> {
   const teacherSet = TeacherPageRecordSetSchema.parse(
@@ -201,9 +201,8 @@ export async function loadExternalMasterTeacherPageSet(baseDir: string): Promise
       || page.provenance.pageArtifact.sourceSha256 !== source.source.sha256) {
       throw new Error(`Teacher provenance와 External Master 분석이 다릅니다: ${page.provenance.referenceId}`);
     }
-    if (page.provenance.teacherStatus !== 'seed-evidence'
-      || page.provenance.compatibility.legacyReadyGolden !== source.readyGolden) {
-      throw new Error(`External Master seed의 status 또는 compatibility 값이 올바르지 않습니다: ${page.provenance.referenceId}`);
+    if (page.provenance.compatibility.legacyReadyGolden !== source.readyGolden) {
+      throw new Error(`External Master Teacher의 compatibility 값이 올바르지 않습니다: ${page.provenance.referenceId}`);
     }
     if (page.provenance.rights.status !== sourceSet.rights.status
       || page.provenance.rights.analyzeAllowed !== sourceSet.rights.allowedUse.analyze

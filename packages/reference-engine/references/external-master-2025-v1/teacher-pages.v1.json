@@ -22,12 +22,13 @@
           "reuseAssetAllowed": false,
           "redistributeAssetAllowed": false
         },
-        "teacherStatus": "seed-evidence",
+        "teacherStatus": "curated-teacher",
         "compatibility": { "legacyReadyGolden": false },
         "curation": {
           "analysisVersion": "external-master-analysis-0.1",
-          "reviewedBy": "human-assisted",
-          "confidence": "medium"
+          "reviewedBy": "human",
+          "reviewedAt": "2026-09-04",
+          "confidence": "high"
         }
       },
       "informationStructure": {
@@ -123,9 +124,9 @@
           "sourceSha256": "452794f8bd540715f836dcc05219dbae3214d982378b11536b533664cbafad3a"
         },
         "rights": { "status": "unknown", "analyzeAllowed": true, "deriveAbstractPrincipleAllowed": true, "reuseAssetAllowed": false, "redistributeAssetAllowed": false },
-        "teacherStatus": "seed-evidence",
+        "teacherStatus": "curated-teacher",
         "compatibility": { "legacyReadyGolden": false },
-        "curation": { "analysisVersion": "external-master-analysis-0.1", "reviewedBy": "human-assisted", "confidence": "medium" }
+        "curation": { "analysisVersion": "external-master-analysis-0.1", "reviewedBy": "human", "reviewedAt": "2026-09-04", "confidence": "high" }
       },
       "informationStructure": {
         "pageGoal": "실제 대상의 눈에 보이는 부분과 설계 의도를 직접 연결해 전체 콘셉트의 근거를 보여준다.",
@@ -207,9 +208,9 @@
         "year": 2025,
         "pageArtifact": { "kind": "slide-image", "pageLabel": "03", "localAssetPath": "03_pokemon_initiative-team-structure.png", "sourceSha256": "00d9d360009c08361054ba9c1d618818d543704c4e427a97235fe17c30f74345" },
         "rights": { "status": "unknown", "analyzeAllowed": true, "deriveAbstractPrincipleAllowed": true, "reuseAssetAllowed": false, "redistributeAssetAllowed": false },
-        "teacherStatus": "seed-evidence",
+        "teacherStatus": "curated-teacher",
         "compatibility": { "legacyReadyGolden": false },
-        "curation": { "analysisVersion": "external-master-analysis-0.1", "reviewedBy": "human-assisted", "confidence": "medium" }
+        "curation": { "analysisVersion": "external-master-analysis-0.1", "reviewedBy": "human", "reviewedAt": "2026-09-04", "confidence": "medium" }
       },
       "informationStructure": {
         "pageGoal": "운영 원칙을 문장으로 설명하고 실제 책임·소속 구조를 도식으로 확인시킨다.",
@@ -292,9 +293,9 @@
         "year": 2025,
         "pageArtifact": { "kind": "slide-image", "pageLabel": "04", "localAssetPath": "04_shadowverse_accessibility-vs-competitiveness.png", "sourceSha256": "362d30d02a379bc71300488a63a438cb147186c5f0a219589f46fb645f8f9bd2" },
         "rights": { "status": "unknown", "analyzeAllowed": true, "deriveAbstractPrincipleAllowed": true, "reuseAssetAllowed": false, "redistributeAssetAllowed": false },
-        "teacherStatus": "seed-evidence",
+        "teacherStatus": "curated-teacher",
         "compatibility": { "legacyReadyGolden": false },
-        "curation": { "analysisVersion": "external-master-analysis-0.1", "reviewedBy": "human-assisted", "confidence": "medium" }
+        "curation": { "analysisVersion": "external-master-analysis-0.1", "reviewedBy": "human", "reviewedAt": "2026-09-04", "confidence": "high" }
       },
       "informationStructure": {
         "pageGoal": "두 설계 목표를 모두 정당한 요구로 제시하고 그 사이의 긴장을 문제로 정의한다.",
@@ -377,9 +378,9 @@
         "year": 2025,
         "pageArtifact": { "kind": "slide-image", "pageLabel": "05", "localAssetPath": "05_shadowverse_super-evolution.png", "sourceSha256": "1cb60b26bcef9a1da3dbfc09112752a535a364773f208b63e19d8a7469619ede" },
         "rights": { "status": "unknown", "analyzeAllowed": true, "deriveAbstractPrincipleAllowed": true, "reuseAssetAllowed": false, "redistributeAssetAllowed": false },
-        "teacherStatus": "seed-evidence",
+        "teacherStatus": "curated-teacher",
         "compatibility": { "legacyReadyGolden": false },
-        "curation": { "analysisVersion": "external-master-analysis-0.1", "reviewedBy": "human-assisted", "confidence": "medium" }
+        "curation": { "analysisVersion": "external-master-analysis-0.1", "reviewedBy": "human", "reviewedAt": "2026-09-04", "confidence": "medium" }
       },
       "informationStructure": {
         "pageGoal": "공통 출발점을 유지한 채 두 기능의 결과와 규칙 차이를 같은 기준으로 비교한다.",
@@ -466,9 +467,9 @@
         "year": 2025,
         "pageArtifact": { "kind": "slide-image", "pageLabel": "06", "localAssetPath": "06_shadowverse_rules-vs-card-ability.png", "sourceSha256": "c6972da8ac4e61abd4ba32f96eea583781ddbb8642cfeca5a0dea6d88b0d0726" },
         "rights": { "status": "unknown", "analyzeAllowed": true, "deriveAbstractPrincipleAllowed": true, "reuseAssetAllowed": false, "redistributeAssetAllowed": false },
-        "teacherStatus": "seed-evidence",
+        "teacherStatus": "curated-teacher",
         "compatibility": { "legacyReadyGolden": false },
-        "curation": { "analysisVersion": "external-master-analysis-0.1", "reviewedBy": "human-assisted", "confidence": "medium" }
+        "curation": { "analysisVersion": "external-master-analysis-0.1", "reviewedBy": "human", "reviewedAt": "2026-09-04", "confidence": "medium" }
       },
       "informationStructure": {
         "pageGoal": "규칙과 카드 능력이라는 서로 다른 대응 레이어를 분리하고 각 레이어의 근거와 효과를 병렬로 설명한다.",
