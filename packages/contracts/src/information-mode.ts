@@ -82,8 +82,16 @@ export function applyInformationDesignMode(input: {
   informationPlan: InformationPlan;
   resolution: InformationDesignModeResolution;
 }): InformationPlan {
-  if (input.resolution.mode === 'document' || input.slide.constraints.preserveOrder) {
+  if (input.slide.constraints.preserveOrder) {
     return InformationPlanSchema.parse(input.informationPlan);
+  }
+  if (input.resolution.mode === 'document') {
+    return InformationPlanSchema.parse({
+      ...input.informationPlan,
+      readingOrder: [...input.slide.blocks]
+        .sort((left, right) => left.order - right.order)
+        .map((block) => block.id),
+    });
   }
   const messageIds = messageBlockIds(input.slide, input.informationPlan);
   if (messageIds.length === 0) return InformationPlanSchema.parse(input.informationPlan);

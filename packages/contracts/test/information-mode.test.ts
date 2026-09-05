@@ -28,6 +28,19 @@ describe('Information Design mode boundary', () => {
     expect(validateInformationPlanForMode({ slide, informationPlan, resolution: resolveInformationDesignMode('presentation') })).toEqual([]);
   });
 
+  it('produces a detail-order document plan and a message-led presentation plan from the same semantics', () => {
+    const { slide, informationPlan } = interpretAuthoredFeatureComparison(parseAuthoredComparison(authoredContent));
+    const document = applyInformationDesignMode({ slide, informationPlan, resolution: resolveInformationDesignMode('document') });
+    const presentation = applyInformationDesignMode({ slide, informationPlan, resolution: resolveInformationDesignMode('presentation') });
+    expect(document.readingOrder).toEqual([...slide.blocks].sort((a, b) => a.order - b.order).map((block) => block.id));
+    expect(presentation.readingOrder.slice(0, 2)).toEqual([informationPlan.primaryArtifactBlockId, informationPlan.readingOrder[1]]);
+    expect(document.readingOrder).not.toEqual(presentation.readingOrder);
+    expect(new Set(document.readingOrder)).toEqual(new Set(presentation.readingOrder));
+    expect(document.relationIds).toEqual(presentation.relationIds);
+    expect(validateInformationPlanForMode({ slide, informationPlan: document, resolution: resolveInformationDesignMode('document') })).toEqual([]);
+    expect(validateInformationPlanForMode({ slide, informationPlan: presentation, resolution: resolveInformationDesignMode('presentation') })).toEqual([]);
+  });
+
   it('rejects a presentation plan that leaves the authored message until the end', () => {
     const { slide, informationPlan } = interpretAuthoredFeatureComparison(parseAuthoredComparison(authoredContent));
     const messageBlockId = informationPlan.readingOrder[1]!;

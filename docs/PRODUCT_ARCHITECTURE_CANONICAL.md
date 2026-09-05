@@ -73,7 +73,7 @@ Presentation mode가 우선하는 것:
 
 - message, persuasion, compression, hierarchy, readability, story
 
-R2는 이 경계를 deterministic mode policy로 해석하고 InformationPlan 검증에 적용한다. Document는 모든 작성 detail 보존을, Presentation은 source를 잃지 않는 message-led 흐름을 요구한다. 아직 서로 다른 Visual Grammar나 layout을 자동 생성하는 단계는 아니다.
+R4는 이 경계를 deterministic mode policy로 해석하고 InformationPlan에 실제 적용한다. Document는 작성자가 입력한 detail 순서를 유지하고, Presentation은 같은 원문을 잃지 않으면서 message를 먼저 읽게 한다. 두 mode는 동일 SlideIR과 relation을 공유하지만 InformationPlan reading order가 실제로 다르며, source fidelity는 모두 통과해야 한다. 서로 다른 Visual Grammar나 layout을 자동 생성하는 것은 이 mode 분기의 책임이 아니다.
 
 ## 5. AI Roles
 
