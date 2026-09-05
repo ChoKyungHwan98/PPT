@@ -3,7 +3,7 @@ import { readFile } from 'node:fs/promises';
 import { basename, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { OpenAICompatibleVisualCriticProvider, OpenRouterAIProvider } from '@game-presentation/renderer/studio';
-import { runStudioDesignJob, runStudioVisualCritic } from './design-job.js';
+import { recordStudioUserDecision, runStudioDesignJob, runStudioVisualCritic } from './design-job.js';
 
 const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../../..');
 const port = Number(process.env.PPT_DESIGNER_PORT ?? '8766');
@@ -70,6 +70,14 @@ const server = createServer(async (request, response) => {
         : new OpenAICompatibleVisualCriticProvider({ endpoint: process.env.LOCAL_CRITIC_ENDPOINT ?? 'http://127.0.0.1:8000/v1/chat/completions', model: process.env.LOCAL_CRITIC_MODEL ?? 'afx-team/UI-UX', localExecution: true });
       const result = await runStudioVisualCritic({ metadataPath, provider });
       json(response, 200, { output: result.output, run: result.run }); return;
+    }
+    const decisionMatch = url.pathname.match(/^\/api\/designer\/jobs\/([^/]+)\/decision$/u);
+    if (request.method === 'POST' && decisionMatch) {
+      const artifactId = decodeURIComponent(decisionMatch[1]!);
+      if (!/^slide-[0-9]+-[a-z0-9]+$/iu.test(artifactId)) throw new Error('잘못된 작업 번호입니다.');
+      const metadataPath = resolve(repositoryRoot, 'output/studio-jobs', artifactId, 'job.json');
+      const result = await recordStudioUserDecision({ metadataPath, event: await body(request) as never });
+      json(response, 200, { output: result.output, eventId: result.event.eventId }); return;
     }
     json(response, 404, { error: 'Not found' });
   } catch (error) { json(response, 400, { error: error instanceof Error ? error.message : String(error) }); }

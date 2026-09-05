@@ -3,6 +3,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { basename, dirname, resolve } from 'node:path';
 import {
   AuthoringRunTraceSchema,
+  DesignEvaluationEventSchema,
   InformationPlanSchema,
   RenderTreeSchema,
   SEED_PATTERN_FRAGMENTS,
@@ -10,12 +11,16 @@ import {
   SlideIRSchema,
   StudioDesignInputSchema,
   StudioDesignOutputSchema,
+  applyInformationDesignMode,
   contentHash,
+  resolveInformationDesignMode,
   sha256Bytes,
   validateCompositionPlan,
   validateInformationPlan,
+  validateInformationPlanForMode,
   type AIProvider,
   type AuthoringRunTrace,
+  type DesignEvaluationEvent,
   type ReferenceRecord,
   type StudioDesignInput,
   type StudioDesignOutput,
@@ -50,6 +55,8 @@ import {
 } from '@game-presentation/renderer/studio';
 import {
   recordCriticRun,
+  recordHarnessEvaluation,
+  recordHarnessUserDecision,
   runAuthoringHarness,
   type AuthoringHarnessContext,
   type AuthoringHarnessPorts,
@@ -115,13 +122,17 @@ function buildPorts(input: StudioDesignInput, options: StudioAuthoringOptions): 
       SlideIRSchema.parse(requireContext(context.slide, 'SlideIR'));
     },
     resolveMode() {
-      // R1 records the boundary without adding the not-yet-approved mode-specific design branch.
-      return input.mode;
+      return resolveInformationDesignMode(input.mode);
     },
     designInformation(context) {
       const slide = requireContext(context.slide, 'SlideIR');
-      const plan = InformationPlanSchema.parse(requireContext(context.informationPlanCandidate, 'InformationPlan'));
-      const issues = validateInformationPlan(plan, slide);
+      const candidate = InformationPlanSchema.parse(requireContext(context.informationPlanCandidate, 'InformationPlan'));
+      const modeResolution = requireContext(context.modeResolution, 'Mode Resolution');
+      const plan = applyInformationDesignMode({ slide, informationPlan: candidate, resolution: modeResolution });
+      const issues = [
+        ...validateInformationPlan(plan, slide),
+        ...validateInformationPlanForMode({ slide, informationPlan: plan, resolution: modeResolution }),
+      ];
       if (issues.length > 0) throw new Error(`Information Plan 계약 실패: ${JSON.stringify(issues)}`);
       return plan;
     },
@@ -362,4 +373,37 @@ export async function runV1StudioVisualCritic(input: {
   }, null, 2) + '\n');
   await writeFile(resolve(dirname(input.metadataPath), 'authoring-run.json'), JSON.stringify(updatedTrace, null, 2) + '\n');
   return { output: updatedOutput, run: critic.run, trace: updatedTrace };
+}
+
+function sameList(left: readonly string[], right: readonly string[]): boolean {
+  return left.length === right.length && left.every((value, index) => value === right[index]);
+}
+
+export async function recordV1StudioUserDecision(input: {
+  metadataPath: string;
+  event: DesignEvaluationEvent;
+}): Promise<{ output: StudioDesignOutput; event: DesignEvaluationEvent; trace: AuthoringRunTrace; evaluationPath: string }> {
+  const metadata = JSON.parse(await readFile(input.metadataPath, 'utf8')) as Record<string, unknown>;
+  const output = StudioDesignOutputSchema.parse(metadata.output);
+  const trace = AuthoringRunTraceSchema.parse(metadata.authoringTrace);
+  const event = DesignEvaluationEventSchema.parse(input.event);
+  if (event.artifactId !== output.artifactId) throw new Error('사용자 판단이 다른 artifact를 가리킵니다.');
+  if (event.png.sha256 !== output.trace.pngSha256) throw new Error('사용자 판단의 PNG hash가 현재 artifact와 다릅니다.');
+  if (event.authoredContentHash !== output.trace.authoredContentHash) throw new Error('사용자 판단의 원문 hash가 현재 run과 다릅니다.');
+  if (event.semanticShape !== output.trace.semanticShape) throw new Error('사용자 판단의 semantic shape가 현재 run과 다릅니다.');
+  if (!sameList(event.selectedTeacherIds, output.trace.selectedTeacherIds)) throw new Error('사용자 판단의 Teacher trace가 현재 run과 다릅니다.');
+  if (!sameList(event.appliedGuidanceIds, output.trace.appliedGuidanceIds)) throw new Error('사용자 판단의 Guidance trace가 현재 run과 다릅니다.');
+
+  const decisionTrace = recordHarnessUserDecision(trace, event.userDecision);
+  const evaluationHash = contentHash(event);
+  const updatedTrace = recordHarnessEvaluation(decisionTrace, { eventId: event.eventId, hash: evaluationHash });
+  const evaluationPath = resolve(dirname(input.metadataPath), 'evaluation.json');
+  await writeFile(evaluationPath, JSON.stringify(event, null, 2) + '\n');
+  await writeFile(input.metadataPath, JSON.stringify({
+    ...metadata,
+    authoringTrace: updatedTrace,
+    evaluationEvent: event,
+  }, null, 2) + '\n');
+  await writeFile(resolve(dirname(input.metadataPath), 'authoring-run.json'), JSON.stringify(updatedTrace, null, 2) + '\n');
+  return { output, event, trace: updatedTrace, evaluationPath };
 }

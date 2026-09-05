@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   AUTHORING_HARNESS_STATES,
   FakeAIProvider,
+  resolveInformationDesignMode,
   StudioDesignInputSchema,
   StudioDesignOutputSchema,
   contentHash,
@@ -39,7 +40,7 @@ function fakePorts(calls: string[], hardGatePassed = true): AuthoringHarnessPort
     ingest() { calls.push('ingest'); return { syntax: 'fixture' }; },
     interpret() { calls.push('interpret'); return { slide, informationPlanCandidate: informationPlan }; },
     validateSemantic() { calls.push('semantic'); },
-    resolveMode() { calls.push('mode'); return 'document'; },
+    resolveMode() { calls.push('mode'); return resolveInformationDesignMode('document'); },
     designInformation() { calls.push('information'); return informationPlan; },
     retrieveReferences() { calls.push('retrieval'); return { ids: ['reference-1'] }; },
     selectTeachers() {
@@ -141,6 +142,7 @@ describe('Authoring Harness', () => {
   it('links each artifact trace to the artifact created by the previous domain stage', async () => {
     const result = await runAuthoringHarness(input, { runId: 'run-artifacts', ports: fakePorts([]) });
     expect(result.trace.sourceHash).toHaveLength(64);
+    expect(result.trace.modeResolution?.id).toBe('document-information-design-v1');
     expect(result.trace.slideIR).toEqual({ id: 'slide-test', hash: contentHash(result.context.slide) });
     expect(result.trace.informationPlan).toEqual({ id: 'information-test', hash: contentHash(result.context.informationPlan) });
     expect(result.trace.selectedTeacherIds).toEqual(['teacher-1']);

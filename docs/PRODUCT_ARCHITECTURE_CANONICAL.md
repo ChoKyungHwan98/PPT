@@ -73,7 +73,7 @@ Presentation mode가 우선하는 것:
 
 - message, persuasion, compression, hierarchy, readability, story
 
-R1은 이 경계를 trace에 기록하지만 mode별 Information Design 분기를 새로 구현하지 않는다. 실제 분기는 별도 승인 뒤 확장한다.
+R2는 이 경계를 deterministic mode policy로 해석하고 InformationPlan 검증에 적용한다. Document는 모든 작성 detail 보존을, Presentation은 source를 잃지 않는 message-led 흐름을 요구한다. 아직 서로 다른 Visual Grammar나 layout을 자동 생성하는 단계는 아니다.
 
 ## 5. AI Roles
 
@@ -176,3 +176,15 @@ R1 이후에도 다음 동작은 그대로 유지한다.
 - 새로운 Teacher·Pattern·Visual Grammar
 - Ready Positive 승격
 - Product shell UI
+
+## 10. R2 Mode and Decision Connection
+
+R2는 두 개의 끊어진 extension point를 실제 실행 기록에 연결한다.
+
+1. `MODE_RESOLVE`는 `document-information-design-v1` 또는 `presentation-information-design-v1` policy artifact를 만들고 hash를 trace에 남긴다.
+2. `INFORMATION_DESIGN`은 공통 Source Fidelity 계약에 더해 선택된 mode policy를 검사한다.
+3. Document와 Presentation 모두 작성 원문과 관계를 누락하지 않는다. Presentation의 compression은 구조 수준만 허용하며 source omission을 허용하지 않는다.
+4. 사용자의 승인·거절은 현재 artifact, PNG hash, 원문 hash, Teacher와 Guidance trace가 모두 일치할 때만 기록된다.
+5. 사용자 판단은 Teacher 품질이나 Preference 규칙으로 자동 변환되지 않는다.
+
+R2에서도 새 Teacher, 새 Visual Grammar, layout 변경, Renderer polish, AI Router는 구현하지 않는다.

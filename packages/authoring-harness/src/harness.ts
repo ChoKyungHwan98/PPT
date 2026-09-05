@@ -8,6 +8,7 @@ import {
   type AuthoringRunTrace,
   type CompositionPlan,
   type ExportHandle,
+  type InformationDesignModeResolution,
   type InformationPlan,
   type RenderTree,
   type SlideIR,
@@ -37,6 +38,7 @@ export type AuthoringHarnessContext = {
   informationPlanCandidate?: InformationPlan;
   informationPlan?: InformationPlan;
   mode?: StudioDesignInput['mode'];
+  modeResolution?: InformationDesignModeResolution;
   retrieval?: unknown;
   teacherSelection?: unknown;
   selectedTeacherIds: string[];
@@ -57,7 +59,7 @@ export type AuthoringHarnessPorts = {
   ingest(input: StudioDesignInput): Promise<unknown> | unknown;
   interpret(context: AuthoringHarnessContext): Promise<{ slide: SlideIR; informationPlanCandidate: InformationPlan }> | { slide: SlideIR; informationPlanCandidate: InformationPlan };
   validateSemantic(context: AuthoringHarnessContext): Promise<void> | void;
-  resolveMode(context: AuthoringHarnessContext): Promise<StudioDesignInput['mode']> | StudioDesignInput['mode'];
+  resolveMode(context: AuthoringHarnessContext): Promise<InformationDesignModeResolution> | InformationDesignModeResolution;
   designInformation(context: AuthoringHarnessContext): Promise<InformationPlan> | InformationPlan;
   retrieveReferences(context: AuthoringHarnessContext): Promise<unknown> | unknown;
   selectTeachers(context: AuthoringHarnessContext): Promise<{ selection: unknown; selectedTeacherIds: string[]; guidance: unknown }> | { selection: unknown; selectedTeacherIds: string[]; guidance: unknown };
@@ -169,11 +171,16 @@ export async function runAuthoringHarness(
     trace = { ...trace, slideIR: { id: context.slide.slideId, hash: contentHash(context.slide) } };
 
     await execute('SEMANTIC_VALIDATE', () => options.ports.validateSemantic(context));
-    context.mode = await execute('MODE_RESOLVE', () => options.ports.resolveMode(context));
-    context.informationPlan = await execute('INFORMATION_DESIGN', () => options.ports.designInformation(context));
+    context.modeResolution = await execute('MODE_RESOLVE', () => options.ports.resolveMode(context));
+    context.mode = context.modeResolution.mode;
     trace = {
       ...trace,
       mode: context.mode,
+      modeResolution: { id: context.modeResolution.policyId, hash: contentHash(context.modeResolution) },
+    };
+    context.informationPlan = await execute('INFORMATION_DESIGN', () => options.ports.designInformation(context));
+    trace = {
+      ...trace,
       informationPlan: { id: context.informationPlan.informationPlanId, hash: contentHash(context.informationPlan) },
     };
 
@@ -304,5 +311,16 @@ export function recordHarnessUserDecision(
   return AuthoringRunTraceSchema.parse({
     ...replaceStage(trace, 'USER_DECISION', 'completed'),
     userDecision,
+  });
+}
+
+export function recordHarnessEvaluation(
+  trace: AuthoringRunTrace,
+  evaluation: { eventId: string; hash: string },
+): AuthoringRunTrace {
+  if (trace.userDecision === undefined) throw new Error('사용자 판단 없이 Evaluation을 완료할 수 없습니다.');
+  return AuthoringRunTraceSchema.parse({
+    ...replaceStage(trace, 'EVALUATION', 'completed'),
+    evaluationReference: { id: evaluation.eventId, hash: evaluation.hash },
   });
 }

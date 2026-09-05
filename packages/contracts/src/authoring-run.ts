@@ -50,6 +50,7 @@ export const AuthoringRunTraceSchema = z.strictObject({
   documentId: z.string().min(1),
   mode: StudioDesignInputSchema.shape.mode,
   sourceHash: z.string().regex(/^[a-f0-9]{64}$/),
+  modeResolution: ArtifactIdentitySchema.optional(),
   slideIR: ArtifactIdentitySchema.optional(),
   informationPlan: ArtifactIdentitySchema.optional(),
   selectedTeacherIds: z.array(z.string().min(1)),
@@ -76,6 +77,7 @@ export const AuthoringRunTraceSchema = z.strictObject({
   revisionCount: z.number().int().min(0).max(1),
   revisionReference: z.string().min(1).optional(),
   userDecision: z.enum(['ready', 'reject', 'prefer-A', 'prefer-B']).optional(),
+  evaluationReference: ArtifactIdentitySchema.optional(),
   exportArtifacts: z.array(ExportArtifactTraceSchema),
   startedAt: z.iso.datetime(),
   completedAt: z.iso.datetime().optional(),
@@ -98,6 +100,9 @@ export const AuthoringRunTraceSchema = z.strictObject({
   }
   if (trace.revisionCount === 1 && trace.revisionReference === undefined) {
     context.addIssue({ code: 'custom', path: ['revisionReference'], message: '한 번의 수정에는 추적 가능한 reference가 필요합니다.' });
+  }
+  if (trace.evaluationReference !== undefined && trace.userDecision === undefined) {
+    context.addIssue({ code: 'custom', path: ['evaluationReference'], message: 'Evaluation reference에는 사용자 판단이 선행되어야 합니다.' });
   }
 });
 
