@@ -3,6 +3,7 @@ import { readFile } from 'node:fs/promises';
 import { basename, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { OpenAICompatibleVisualCriticProvider, OpenRouterAIProvider } from '@game-presentation/renderer/studio';
+import { ModelRegistryRouter, runtimeModelRegistry } from '@game-presentation/authoring-harness';
 import { recordStudioUserDecision, runStudioDesignJob, runStudioVisualCritic } from './design-job.js';
 
 const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../../..');
@@ -65,9 +66,13 @@ const server = createServer(async (request, response) => {
       const directory = resolve(repositoryRoot, 'output/studio-jobs', artifactId);
       const metadataPath = resolve(directory, 'job.json');
       const requestBody = await body(request) as { provider?: 'local' | 'openrouter' };
-      const provider = requestBody.provider === 'openrouter'
-        ? new OpenRouterAIProvider({ apiKey: process.env.OPENROUTER_API_KEY ?? '', model: process.env.CRITIC_MODEL_ID ?? '', reasoningEffort: 'medium' })
-        : new OpenAICompatibleVisualCriticProvider({ endpoint: process.env.LOCAL_CRITIC_ENDPOINT ?? 'http://127.0.0.1:8000/v1/chat/completions', model: process.env.LOCAL_CRITIC_MODEL ?? 'afx-team/UI-UX', localExecution: true });
+      const router = new ModelRegistryRouter(runtimeModelRegistry(process.env));
+      const model = router.route(requestBody.provider === 'openrouter'
+        ? { role: 'visual-critic', capabilities: { vision: true, structuredOutput: true }, policy: 'explicit-remote', approvedRemoteModelId: process.env.OPENROUTER_CRITIC_MODEL_ID ?? 'openrouter-critic' }
+        : { role: 'visual-critic', capabilities: { vision: true, structuredOutput: true }, policy: 'explicit-local' });
+      const provider = model.provider === 'openrouter'
+        ? new OpenRouterAIProvider({ apiKey: process.env.OPENROUTER_API_KEY ?? '', model: model.baseModel, reasoningEffort: 'medium' })
+        : new OpenAICompatibleVisualCriticProvider({ endpoint: process.env.LOCAL_CRITIC_ENDPOINT ?? 'http://127.0.0.1:8000/v1/chat/completions', model: model.baseModel, localExecution: true });
       const result = await runStudioVisualCritic({ metadataPath, provider });
       json(response, 200, { output: result.output, run: result.run }); return;
     }

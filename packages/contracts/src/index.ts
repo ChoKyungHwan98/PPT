@@ -6,6 +6,7 @@ export * from './finding.js';
 export * from './hash.js';
 export * from './information-plan.js';
 export * from './information-mode.js';
+export * from './model-registry.js';
 export * from './aligned-feature-spec.js';
 export * from './preference.js';
 export * from './comparison.js';
