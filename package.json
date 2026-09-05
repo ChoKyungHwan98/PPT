@@ -28,6 +28,8 @@
     "export:selected": "tsx packages/renderer/src/proof/export-selected-mec-01.ts",
     "author:balance": "tsx packages/authoring-cli/src/main.ts",
     "dev:workbench": "pnpm --filter @game-presentation/workbench dev",
+    "serve:studio": "tsx packages/studio-integration/src/server.ts",
+    "build:studio": "pnpm --filter @game-presentation/workbench build",
     "build:workbench": "pnpm proof:candidates && pnpm --filter @game-presentation/workbench build"
   },
   "dependencies": {

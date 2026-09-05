@@ -17,3 +17,4 @@ export * from './slide-ir.js';
 export * from './source-ledger.js';
 export * from './teacher-page.js';
 export * from './visual-critique.js';
+export * from './studio.js';

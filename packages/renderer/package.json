@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "exports": {
+    "./studio": "./src/studio-api.ts"
+  },
   "dependencies": {
     "@game-presentation/composition-engine": "workspace:*",
     "@game-presentation/contracts": "workspace:*",

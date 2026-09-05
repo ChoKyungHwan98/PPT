@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type ChangeEvent, type ReactNode } from 'react';
+import { StudioWorkbench } from './StudioWorkbench.js';
 
 type AuthoringResult = {
   jobId: string;
@@ -363,6 +364,7 @@ function ResultScreen({ result, onBack, onUpdate }: { result: AuthoringResult; o
 }
 
 export function App() {
+  if (new URLSearchParams(window.location.search).get('host') === 'studio') return <StudioWorkbench/>;
   const [state, setState] = useState<'dashboard' | 'project' | 'processing' | 'result' | 'error'>('dashboard');
   const [projects, setProjects] = useState<ProjectRecord[]>(() => {
     try {

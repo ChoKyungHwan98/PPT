@@ -163,6 +163,7 @@ function authoringApi(): Plugin {
 }
 
 export default defineConfig({
+  base: './',
   plugins: [react(), authoringApi()],
   build: {
     outDir: 'dist',

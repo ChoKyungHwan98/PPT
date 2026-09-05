@@ -8,6 +8,11 @@
   },
   "dependencies": {
     "@game-presentation/contracts": "workspace:*",
+    "@game-presentation/composition-engine": "workspace:*",
+    "@game-presentation/pptx-exporter": "workspace:*",
+    "@game-presentation/reference-engine": "workspace:*",
+    "@game-presentation/renderer": "workspace:*",
+    "@game-presentation/source-ingestion": "workspace:*",
     "zod": "4.4.3"
   }
 }
