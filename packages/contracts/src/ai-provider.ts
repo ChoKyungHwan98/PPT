@@ -44,6 +44,40 @@ export type ProviderRunRecord = {
   completedAt: string;
 };
 
+export type AIActivityRole = 'interpretation' | 'design-suggestion' | 'visual-critic' | 'revision';
+
+export type AIActivityRecord = ProviderRunRecord & {
+  runId: string;
+  projectId: string;
+  documentId: string;
+  artifactId: string;
+  role: AIActivityRole;
+  execution: 'local' | 'remote';
+  latencyMs: number;
+  retryCount: number;
+  contextBytes: number;
+  maxContextBudget: number | null;
+  maxOutputTokens: number;
+  promptVersion: string;
+  schemaVersion: string;
+  contentHash: string;
+  contextHash: string;
+  imageHash: string | null;
+  cacheKey: string;
+};
+
+export type AIUsageSummary = {
+  totalAICalls: number;
+  totalInputTokens: number;
+  totalOutputTokens: number;
+  totalReasoningTokens: number;
+  totalTokens: number;
+  totalEstimatedCostUsd: number;
+  localCallCount: number;
+  remoteCallCount: number;
+  cacheHitCount: number;
+};
+
 export interface AIProvider {
   readonly kind: ProviderKind;
   readonly model: string;

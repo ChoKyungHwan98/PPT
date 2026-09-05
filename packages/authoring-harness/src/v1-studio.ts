@@ -62,6 +62,7 @@ import {
   type AuthoringHarnessPorts,
   type HarnessExportResult,
 } from './harness.js';
+import { AIUsageManager, withAIUsageManagement } from './ai-usage.js';
 
 type ReferenceRuntime = {
   referenceSet: Awaited<ReturnType<typeof loadExternalMasterReferenceSet>>;
@@ -334,6 +335,7 @@ export async function runV1StudioAuthoring(
 export async function runV1StudioVisualCritic(input: {
   metadataPath: string;
   provider: AIProvider;
+  cacheRoot?: string;
 }): Promise<{ output: StudioDesignOutput; run: Awaited<ReturnType<typeof runVisualCritic>>['run']; trace: AuthoringRunTrace }> {
   const metadata = JSON.parse(await readFile(input.metadataPath, 'utf8')) as Record<string, unknown>;
   const output = StudioDesignOutputSchema.parse(metadata.output);
@@ -344,8 +346,23 @@ export async function runV1StudioVisualCritic(input: {
   const tree = RenderTreeSchema.parse(metadata.tree);
   const pngPath = trace.renderedPng?.path;
   if (pngPath === undefined) throw new Error('Critic이 볼 PNG artifact가 없습니다.');
-  const critic = await runVisualCritic({
+  const manager = new AIUsageManager({
+    runId: trace.runId,
+    projectId: trace.projectId,
+    documentId: trace.documentId,
+    artifactId: output.artifactId,
+  }, input.cacheRoot ?? resolve(dirname(input.metadataPath), '..', '..', 'ai-cache'));
+  const managedProvider = withAIUsageManagement({
+    manager,
     provider: input.provider,
+    role: 'visual-critic',
+    promptVersion: 'visual-critic-v1',
+    schemaVersion: 'visual-critique-report-0.1',
+    canonicalArtifactHashes: [trace.sourceHash, trace.slideIR?.hash ?? '', trace.informationPlan?.hash ?? '', trace.renderTree?.hash ?? '', trace.renderedPng?.hash ?? ''],
+    generationParameters: { maxOutputTokens: 2200 },
+  });
+  const critic = await runVisualCritic({
+    provider: managedProvider,
     pngBytes: new Uint8Array(await readFile(pngPath)),
     artifactId: output.artifactId,
     goal: informationPlan.message.text,
@@ -369,6 +386,8 @@ export async function runV1StudioVisualCritic(input: {
     output: updatedOutput,
     authoringTrace: updatedTrace,
     criticRun: critic.run,
+    aiActivity: manager.activity(),
+    aiUsage: manager.summary(),
     criticInputTrace: critic.inputTrace,
   }, null, 2) + '\n');
   await writeFile(resolve(dirname(input.metadataPath), 'authoring-run.json'), JSON.stringify(updatedTrace, null, 2) + '\n');
