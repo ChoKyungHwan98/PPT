@@ -1,0 +1,52 @@
+{
+  "schemaVersion": "0.1",
+  "datasetId": "visual-critic-human-smoke-v1",
+  "datasetSha256": "df927f31f6ff3905cca7929461f1e3e5bb8100b359f9c4d80d407f56d508b2be",
+  "createdAt": "2026-09-06T00:00:00.000Z",
+  "purpose": "visual-critic-sft-smoke",
+  "splitSeed": 42,
+  "examples": [
+    {
+      "exampleId": "hierarchy-problem",
+      "imagePath": "packages/local-training/fixtures/hierarchy-problem.png",
+      "imageSha256": "6f16882d2c21255e95e4a3683326de6391dbbd1fa208db9aa3805d5cfa5a4ade",
+      "prompt": "이 게임 기획 장표의 시각 위계, 공간 사용, 관계 명확성, 제출 가능성을 평가하고 JSON으로 답하세요. 원문을 고치거나 새 내용을 만들지 마세요.",
+      "response": "{\"submissionReadiness\":\"not-ready\",\"findings\":[{\"issueType\":\"hierarchy\",\"severity\":\"error\",\"reason\":\"모든 단계의 글자 크기와 굵기가 같아 전환점과 결과가 핵심으로 읽히지 않는다.\"},{\"issueType\":\"space-use\",\"severity\":\"warning\",\"reason\":\"정보가 가운데 한 줄에 머물고 상하 공간이 크게 비어 임시 배치처럼 보인다.\"},{\"issueType\":\"relation-clarity\",\"severity\":\"warning\",\"reason\":\"축적, 전환점, 결과의 역할 차이가 충분히 드러나지 않는다.\"},{\"issueType\":\"submission-readiness\",\"severity\":\"error\",\"reason\":\"핵심 메시지 위계와 마감이 부족하다.\"}]}",
+      "readiness": "not-ready",
+      "issueTypes": ["hierarchy", "space-use", "relation-clarity", "submission-readiness"],
+      "humanLabel": true
+    },
+    {
+      "exampleId": "density-problem",
+      "imagePath": "packages/local-training/fixtures/density-problem.png",
+      "imageSha256": "ae62cf89ad5f04d1c18a5a8f72d22253071e21ddc57e7113e9058e2e312c9642",
+      "prompt": "이 게임 기획 장표의 밀도, 공간 사용, 그룹화, 제출 가능성을 평가하고 JSON으로 답하세요. 원문을 고치거나 새 내용을 만들지 마세요.",
+      "response": "{\"submissionReadiness\":\"not-ready\",\"findings\":[{\"issueType\":\"density\",\"severity\":\"error\",\"reason\":\"다섯 단계와 네 관계가 좁은 덩어리에 몰려 숨 쉴 공간과 그룹 경계가 없다.\"},{\"issueType\":\"space-use\",\"severity\":\"error\",\"reason\":\"세로 중앙 열만 사용하고 좌우 대부분을 비워 16:9 화면과 맞지 않는다.\"},{\"issueType\":\"grouping\",\"severity\":\"warning\",\"reason\":\"축적, 전환점, 결과가 같은 목록처럼 보여 역할별 묶음이 약하다.\"},{\"issueType\":\"submission-readiness\",\"severity\":\"error\",\"reason\":\"과도한 중앙 집중과 빈 좌우 공간 때문에 제출용 레이아웃이 아니다.\"}]}",
+      "readiness": "not-ready",
+      "issueTypes": ["density", "space-use", "grouping", "submission-readiness"],
+      "humanLabel": true
+    },
+    {
+      "exampleId": "reading-order-problem",
+      "imagePath": "packages/local-training/fixtures/reading-order-problem.png",
+      "imageSha256": "856c0a7546019a681126dccf9b3b4e9aff8e96211bce0868ae051a2331a13cb8",
+      "prompt": "이 게임 기획 장표의 읽는 순서, 관계 명확성, 그룹화, 제출 가능성을 평가하고 JSON으로 답하세요. 원문을 고치거나 새 내용을 만들지 마세요.",
+      "response": "{\"submissionReadiness\":\"not-ready\",\"findings\":[{\"issueType\":\"reading-order\",\"severity\":\"error\",\"reason\":\"단계가 위아래로 크게 교차하고 연결선이 지그재그로 화면을 가로질러 인과 흐름을 따라가기 어렵다.\"},{\"issueType\":\"relation-clarity\",\"severity\":\"error\",\"reason\":\"긴 대각선이 항목을 이어 관계보다 선의 움직임이 먼저 보인다.\"},{\"issueType\":\"grouping\",\"severity\":\"warning\",\"reason\":\"단계가 흩어져 축적, 전환점, 결과 묶음을 확인하기 어렵다.\"},{\"issueType\":\"submission-readiness\",\"severity\":\"error\",\"reason\":\"독자가 연결선을 해독해야 해 제출용 정보 도식이 아니다.\"}]}",
+      "readiness": "not-ready",
+      "issueTypes": ["reading-order", "relation-clarity", "grouping", "submission-readiness"],
+      "humanLabel": true
+    },
+    {
+      "exampleId": "rough-but-readable",
+      "imagePath": "packages/local-training/fixtures/rough-but-readable.png",
+      "imageSha256": "c1998ffbdfc35a029427cff52374517a665574aa2fabb0f4b2ff4660b9bf9889",
+      "prompt": "이 게임 기획 장표의 공간 사용, 위계, 그룹화, 타이포그래피, 제출 가능성을 평가하고 JSON으로 답하세요. 원문을 고치거나 새 내용을 만들지 마세요.",
+      "response": "{\"submissionReadiness\":\"needs-review\",\"findings\":[{\"issueType\":\"space-use\",\"severity\":\"warning\",\"reason\":\"정보가 얇은 가로 띠에만 배치되고 상하 대부분이 비어 공간 활용이 약하다.\"},{\"issueType\":\"hierarchy\",\"severity\":\"warning\",\"reason\":\"핵심 주장이나 제목이 없고 일부만 강조되어 전체 메시지 위계가 완성되지 않았다.\"},{\"issueType\":\"grouping\",\"severity\":\"warning\",\"reason\":\"영역은 구분되지만 축적감과 전후 의미 차이가 충분히 응집되지 않는다.\"},{\"issueType\":\"typography-hierarchy\",\"severity\":\"warning\",\"reason\":\"주장, 단계, 결과를 구분하는 완성된 타입 체계가 보이지 않는다.\"},{\"issueType\":\"submission-readiness\",\"severity\":\"warning\",\"reason\":\"내용은 이해되지만 자동 배치 프로토타입 인상이 남는다.\"}]}",
+      "readiness": "needs-review",
+      "issueTypes": ["space-use", "hierarchy", "grouping", "typography-hierarchy", "submission-readiness"],
+      "humanLabel": true
+    }
+  ],
+  "trainIds": ["rough-but-readable", "hierarchy-problem", "density-problem"],
+  "validationIds": ["reading-order-problem"]
+}

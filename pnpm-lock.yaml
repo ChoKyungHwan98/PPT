@@ -118,6 +118,15 @@ importers:
         specifier: 1.62.1
         version: 1.62.1
 
+  packages/local-training:
+    dependencies:
+      '@game-presentation/contracts':
+        specifier: workspace:*
+        version: link:../contracts
+      zod:
+        specifier: 4.4.3
+        version: 4.4.3
+
   packages/pptx-exporter:
     dependencies:
       '@game-presentation/contracts':
