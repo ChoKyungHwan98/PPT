@@ -24,6 +24,8 @@ import {
   type ReferenceRecord,
   type StudioDesignInput,
   type StudioDesignOutput,
+  PreferenceEvidenceEventSchema,
+  type PreferenceEvidenceEvent,
 } from '@game-presentation/contracts';
 import { createCompositionPlanFromInformationPlan } from '@game-presentation/composition-engine';
 import { validateEditablePptxArtifact, writeEditablePptxFromRenderTree } from '@game-presentation/pptx-exporter';
@@ -63,6 +65,7 @@ import {
   type HarnessExportResult,
 } from './harness.js';
 import { AIUsageManager, withAIUsageManagement } from './ai-usage.js';
+import { PreferenceEvidenceStore, buildDesignProfile, promotePreferencePatterns } from '@game-presentation/preference-learning';
 
 type ReferenceRuntime = {
   referenceSet: Awaited<ReturnType<typeof loadExternalMasterReferenceSet>>;
@@ -425,4 +428,25 @@ export async function recordV1StudioUserDecision(input: {
   }, null, 2) + '\n');
   await writeFile(resolve(dirname(input.metadataPath), 'authoring-run.json'), JSON.stringify(updatedTrace, null, 2) + '\n');
   return { output, event, trace: updatedTrace, evaluationPath };
+}
+
+export async function recordV1CandidatePreference(input: {
+  metadataPath: string;
+  event: PreferenceEvidenceEvent;
+  preferenceRoot?: string;
+}) {
+  const metadata = JSON.parse(await readFile(input.metadataPath, 'utf8')) as Record<string, unknown>;
+  const output = StudioDesignOutputSchema.parse(metadata.output);
+  const trace = AuthoringRunTraceSchema.parse(metadata.authoringTrace);
+  const event = PreferenceEvidenceEventSchema.parse(input.event);
+  if (event.artifactId !== output.artifactId || event.projectId !== trace.projectId || event.mode !== trace.mode || event.semanticShape !== output.trace.semanticShape) {
+    throw new Error('Preference evidence가 현재 Harness artifact와 일치하지 않습니다.');
+  }
+  const store = new PreferenceEvidenceStore(input.preferenceRoot ?? resolve(dirname(input.metadataPath), '..', '..', 'preference-memory'));
+  await store.append(event);
+  const events = await store.load();
+  const patterns = promotePreferencePatterns(events);
+  const profile = buildDesignProfile(patterns, event.occurredAt);
+  await writeFile(input.metadataPath, JSON.stringify({ ...metadata, preferenceEvidence: event, preferencePatterns: patterns, designProfile: profile }, null, 2) + '\n');
+  return { event, patterns, profile };
 }

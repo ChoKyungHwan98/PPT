@@ -85,6 +85,9 @@ importers:
       '@game-presentation/pptx-exporter':
         specifier: workspace:*
         version: link:../pptx-exporter
+      '@game-presentation/preference-learning':
+        specifier: workspace:*
+        version: link:../preference-learning
       '@game-presentation/reference-engine':
         specifier: workspace:*
         version: link:../reference-engine

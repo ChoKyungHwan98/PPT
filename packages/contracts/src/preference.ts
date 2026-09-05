@@ -72,6 +72,70 @@ export type PreferenceState = {
   observationCount: number;
 };
 
+export const PreferenceEvidenceEventSchema = z.strictObject({
+  schemaVersion: z.literal('0.1'),
+  eventId: z.string().min(1),
+  artifactId: z.string().min(1),
+  comparisonId: z.string().min(1),
+  candidateIds: z.array(z.string().min(1)).min(1).max(3),
+  decision: z.enum(['choose-A', 'choose-B', 'choose-C', 'reject-all']),
+  selectedCandidateId: z.string().min(1).nullable(),
+  semanticShape: z.string().min(1),
+  mode: z.enum(['document', 'presentation']),
+  chosenPatternId: z.string().min(1).nullable(),
+  density: z.enum(['sparse', 'balanced', 'dense']),
+  designSignature: CandidateSignatureSchema.nullable(),
+  reasonTags: z.array(z.string().min(1)),
+  approved: z.boolean(),
+  projectId: z.string().min(1),
+  domain: z.string().min(1),
+  occurredAt: z.iso.datetime(),
+  separation: z.strictObject({
+    teacherQualityChanged: z.literal(false),
+    readyQualityChanged: z.literal(false),
+    criticFindingsChanged: z.literal(false),
+  }),
+}).superRefine((event, context) => {
+  const rejecting = event.decision === 'reject-all';
+  if (rejecting !== (event.selectedCandidateId === null)) {
+    context.addIssue({ code: 'custom', path: ['selectedCandidateId'], message: '선택/전체 거절과 candidate 기록이 일치해야 합니다.' });
+  }
+  if (event.selectedCandidateId !== null && !event.candidateIds.includes(event.selectedCandidateId)) {
+    context.addIssue({ code: 'custom', path: ['selectedCandidateId'], message: '선택 candidate가 비교 대상에 없습니다.' });
+  }
+  if ((event.chosenPatternId === null) !== (event.designSignature === null)) {
+    context.addIssue({ code: 'custom', path: ['chosenPatternId'], message: '선택 pattern과 design signature는 함께 존재해야 합니다.' });
+  }
+});
+export type PreferenceEvidenceEvent = z.infer<typeof PreferenceEvidenceEventSchema>;
+
+export const PreferencePatternSchema = z.strictObject({
+  patternKey: z.string().min(1),
+  semanticShape: z.string().min(1),
+  mode: z.enum(['document', 'presentation']),
+  outcome: z.string().min(1),
+  evidenceCount: z.number().int().positive(),
+  consistentCount: z.number().int().positive(),
+  confidence: z.number().min(0).max(1),
+  strength: z.enum(['weak', 'emerging', 'established']),
+  sourceEventIds: z.array(z.string().min(1)).min(1),
+});
+export type PreferencePattern = z.infer<typeof PreferencePatternSchema>;
+
+export const DesignProfileSchema = z.strictObject({
+  schemaVersion: z.literal('0.1'),
+  profileId: z.string().min(1),
+  establishedPatternKeys: z.array(z.string().min(1)).min(1),
+  preferredPatternIds: z.array(z.string().min(1)),
+  boundaries: z.strictObject({
+    hardGateOverride: z.literal(false),
+    sourceFidelityOverride: z.literal(false),
+    teacherQualityOverride: z.literal(false),
+  }),
+  generatedAt: z.iso.datetime(),
+});
+export type DesignProfile = z.infer<typeof DesignProfileSchema>;
+
 export const PreferenceStateSchema = z.strictObject({
   schemaVersion: z.literal('0.1'),
   contextualWeights: z.record(z.string(), z.record(z.string(), z.number().finite())),
