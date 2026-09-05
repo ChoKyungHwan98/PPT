@@ -34,6 +34,32 @@ export type AccumulationLayoutPolishProfile =
   | 'balanced-runway-final'
   | 'balanced-runway-revision-1';
 
+export type OrganizationPresentationRevision = 'critic-revision-1';
+
+type OrganizationLayoutSpec = {
+  bodyTop: number;
+  bodyHeight: number;
+  explanationBaselineRatio: number;
+};
+
+const ORGANIZATION_LAYOUT_DEFAULT: OrganizationLayoutSpec = {
+  bodyTop: 0.235,
+  bodyHeight: 0.68,
+  explanationBaselineRatio: 0.28,
+};
+
+const ORGANIZATION_LAYOUT_REVISION_1: OrganizationLayoutSpec = {
+  bodyTop: 0.205,
+  bodyHeight: 0.71,
+  explanationBaselineRatio: 0.1,
+};
+
+function organizationLayoutSpec(revision?: OrganizationPresentationRevision): OrganizationLayoutSpec {
+  return revision === 'critic-revision-1'
+    ? ORGANIZATION_LAYOUT_REVISION_1
+    : ORGANIZATION_LAYOUT_DEFAULT;
+}
+
 type AccumulationLayoutPolishSpec = {
   contentTop: number;
   contentHeight: number;
@@ -408,10 +434,120 @@ function accumulationThresholdConsequenceRegions(
   );
 }
 
+function organizationRegions(
+  plan: CompositionPlan,
+  revision?: OrganizationPresentationRevision,
+): RegionPlacement[] {
+  const width = plan.pageProfile.width;
+  const height = plan.pageProfile.height;
+  const spec = organizationLayoutSpec(revision);
+  const heading = plan.regions.find((region) => region.regionId === 'organization-heading');
+  const body = plan.regions.find((region) => region.regionId === 'organization-body');
+  const explanation = plan.regions.find((region) => region.regionId === 'organization-explanation');
+  const hierarchy = plan.regions.find((region) => region.regionId === 'organization-hierarchy-map');
+  if (heading === undefined || body === undefined || explanation === undefined || hierarchy === undefined) {
+    throw new Error('Organization layout에 필요한 region이 없습니다.');
+  }
+  const headingBox = { x: width * 0.07, y: height * 0.065, width: width * 0.86, height: height * 0.13 };
+  const bodyBox = {
+    x: width * 0.07,
+    y: height * spec.bodyTop,
+    width: width * 0.86,
+    height: height * spec.bodyHeight,
+  };
+  const explanationBox = {
+    x: bodyBox.x,
+    y: bodyBox.y,
+    width: bodyBox.width * 0.34,
+    height: bodyBox.height,
+  };
+  const hierarchyBox = {
+    x: bodyBox.x + bodyBox.width * 0.39,
+    y: bodyBox.y,
+    width: bodyBox.width * 0.61,
+    height: bodyBox.height,
+  };
+  const result: RegionPlacement[] = [
+    { region: heading, box: headingBox },
+    { region: body, box: bodyBox },
+    { region: explanation, box: explanationBox },
+    { region: hierarchy, box: hierarchyBox },
+  ];
+  const nodeRegions = plan.regions.filter((region) => region.regionId.startsWith('organization-node-'));
+  const regionById = new Map(plan.regions.map((region) => [region.regionId, region]));
+  const depthByRegion = new Map<string, number>();
+  const depthOf = (regionId: string): number => {
+    const cached = depthByRegion.get(regionId);
+    if (cached !== undefined) return cached;
+    const region = regionById.get(regionId);
+    if (region?.parentRegionId === undefined || region.parentRegionId === 'organization-hierarchy-map') {
+      depthByRegion.set(regionId, 0);
+      return 0;
+    }
+    const depth = depthOf(region.parentRegionId) + 1;
+    depthByRegion.set(regionId, depth);
+    return depth;
+  };
+  const byDepth = new Map<number, Region[]>();
+  nodeRegions.forEach((region) => {
+    const depth = depthOf(region.regionId);
+    const bucket = byDepth.get(depth) ?? [];
+    bucket.push(region);
+    byDepth.set(depth, bucket);
+  });
+  const maxDepth = Math.max(0, ...byDepth.keys());
+  const laneHeight = hierarchyBox.height / Math.max(1, maxDepth + 1);
+  for (const [depth, regions] of byDepth) {
+    const ordered = regions.slice().sort((left, right) => left.order - right.order || left.regionId.localeCompare(right.regionId));
+    const gap = hierarchyBox.width * 0.035;
+    const slotWidth = (hierarchyBox.width - gap * Math.max(0, ordered.length - 1)) / Math.max(1, ordered.length);
+    ordered.forEach((region, index) => {
+      result.push({
+        region,
+        box: {
+          x: hierarchyBox.x + index * (slotWidth + gap),
+          y: hierarchyBox.y + depth * laneHeight + laneHeight * 0.12,
+          width: Math.max(1, slotWidth),
+          height: laneHeight * 0.62,
+        },
+      });
+    });
+  }
+  return result;
+}
+
+function organizationBaselineRegions(plan: CompositionPlan): RegionPlacement[] {
+  const width = plan.pageProfile.width;
+  const height = plan.pageProfile.height;
+  const regions = plan.regions.filter((region) => region.parentRegionId === undefined)
+    .slice().sort((left, right) => left.order - right.order);
+  const messageRegions = regions.filter((region) => region.role === 'message' || region.role === 'annotation');
+  const contentRegions = regions.filter((region) => region.role !== 'message' && region.role !== 'annotation');
+  const result: RegionPlacement[] = [];
+  messageRegions.forEach((region, index) => result.push({
+    region,
+    box: {
+      x: width * 0.07,
+      y: height * (0.06 + index * 0.24),
+      width: width * 0.86,
+      height: height * 0.2,
+    },
+  }));
+  const contentBox = {
+    x: width * 0.07,
+    y: height * (0.06 + messageRegions.length * 0.24),
+    width: width * 0.86,
+    height: height * 0.36,
+  };
+  result.push(...allocateVertical(contentRegions, contentBox, height * 0.025));
+  return result;
+}
+
 /** layoutFamily chooses topology; region order, weight, and role determine actual boxes. */
 function placeRegions(
   plan: CompositionPlan,
   polishProfile: AccumulationLayoutPolishProfile,
+  organizationRevision?: OrganizationPresentationRevision,
 ): RegionPlacement[] {
   const contentRegions = [...plan.regions]
     .filter((region) => !['message', 'navigation', 'annotation'].includes(region.role))
@@ -432,6 +568,11 @@ function placeRegions(
         ACCUMULATION_LAYOUT_POLISH[polishProfile],
       ),
     ];
+  }
+  if (plan.layout.layoutFamily === 'organization-explanation-hierarchy') {
+    return plan.regions.some((region) => region.regionId === 'organization-body')
+      ? organizationRegions(plan, organizationRevision)
+      : organizationBaselineRegions(plan);
   }
   const width = plan.pageProfile.width;
   const height = plan.pageProfile.height;
@@ -504,6 +645,170 @@ function regionGroupNode(placement: RegionPlacement): RenderNode {
     clip: false,
     visible: true,
   };
+}
+
+function organizationBlockPlacements(input: {
+  slide: SlideIR;
+  plan: CompositionPlan;
+  placements: RegionPlacement[];
+  bindings: Binding[];
+  revision?: OrganizationPresentationRevision;
+}): BlockPlacement[] {
+  const spec = organizationLayoutSpec(input.revision);
+  const placementByRegion = new Map(input.placements.map((placement) => [placement.region.regionId, placement]));
+  return [...input.bindings]
+    .sort((left, right) => left.readingOrder - right.readingOrder)
+    .map((binding) => {
+      const regionPlacement = placementByRegion.get(binding.regionId);
+      if (regionPlacement === undefined) throw new Error(`Organization region을 찾을 수 없습니다: ${binding.regionId}`);
+      const scale = input.plan.pageProfile.width / 1920;
+      const padding = paddingFor(regionPlacement.region.paddingToken, scale);
+      const inner = {
+        x: regionPlacement.box.x + padding,
+        y: regionPlacement.box.y + padding,
+        width: Math.max(1, regionPlacement.box.width - padding * 2),
+        height: Math.max(1, regionPlacement.box.height - padding * 2),
+      };
+      const isHeading = regionPlacement.region.regionId === 'organization-heading';
+      const isExplanation = regionPlacement.region.regionId === 'organization-explanation';
+      const baselineY = isHeading
+        ? inner.y + inner.height * 0.62
+        : isExplanation
+          ? inner.y + inner.height * spec.explanationBaselineRatio
+          : inner.y + inner.height * 0.5;
+      return {
+        binding,
+        region: regionPlacement.region,
+        parentId: `region-${regionPlacement.region.regionId}`,
+        x: isHeading || isExplanation ? inner.x : inner.x + inner.width / 2,
+        baselineY,
+        connectorY: inner.y + inner.height,
+      };
+    });
+}
+
+function organizationBaselineBlockPlacements(input: {
+  slide: SlideIR;
+  plan: CompositionPlan;
+  placements: RegionPlacement[];
+  bindings: Binding[];
+}): BlockPlacement[] {
+  const placementByRegion = new Map(input.placements.map((placement) => [placement.region.regionId, placement]));
+  const result: BlockPlacement[] = [];
+  const bindingsByRegion = new Map<string, Binding[]>();
+  for (const binding of input.bindings) {
+    const bucket = bindingsByRegion.get(binding.regionId) ?? [];
+    bucket.push(binding);
+    bindingsByRegion.set(binding.regionId, bucket);
+  }
+  for (const [regionId, regionBindings] of bindingsByRegion) {
+    const regionPlacement = placementByRegion.get(regionId);
+    if (regionPlacement === undefined) throw new Error(`Organization baseline region을 찾을 수 없습니다: ${regionId}`);
+    const scale = input.plan.pageProfile.width / 1920;
+    const padding = paddingFor(regionPlacement.region.paddingToken, scale);
+    const inner = {
+      x: regionPlacement.box.x + padding,
+      y: regionPlacement.box.y + padding,
+      width: Math.max(1, regionPlacement.box.width - padding * 2),
+      height: Math.max(1, regionPlacement.box.height - padding * 2),
+    };
+    const sorted = [...regionBindings].sort((left, right) => left.readingOrder - right.readingOrder);
+    const isHierarchyField = sorted.some((binding) =>
+      input.slide.blocks.find((block) => block.id === binding.blockId)?.kind === 'hierarchy-node');
+    if (!isHierarchyField) {
+      const step = inner.height / Math.max(1, sorted.length);
+      sorted.forEach((binding, index) => {
+        result.push({
+          binding,
+          region: regionPlacement.region,
+          parentId: `region-${regionId}`,
+          x: inner.x,
+          baselineY: inner.y + step * (index + 0.5),
+          connectorY: inner.y + inner.height,
+        });
+      });
+      continue;
+    }
+    const nodes = sorted
+      .map((binding) => input.slide.blocks.find((block) => block.id === binding.blockId))
+      .filter((block): block is Extract<SemanticBlock, { kind: 'hierarchy-node' }> =>
+        block?.kind === 'hierarchy-node');
+    const byId = new Map(nodes.map((node) => [node.id, node]));
+    const depthOf = (node: Extract<SemanticBlock, { kind: 'hierarchy-node' }>): number => {
+      let depth = 0;
+      let current = node;
+      const seen = new Set<string>();
+      while (current.parentId !== undefined && byId.has(current.parentId) && !seen.has(current.id)) {
+        seen.add(current.id);
+        depth += 1;
+        current = byId.get(current.parentId)!;
+      }
+      return depth;
+    };
+    const byDepth = new Map<number, typeof nodes>();
+    nodes.forEach((node) => {
+      const bucket = byDepth.get(depthOf(node)) ?? [];
+      bucket.push(node);
+      byDepth.set(depthOf(node), bucket);
+    });
+    const maxDepth = Math.max(0, ...byDepth.keys());
+    for (const [depth, level] of byDepth) {
+      const ordered = level.slice().sort((left, right) => left.order - right.order);
+      const step = inner.width / Math.max(1, ordered.length);
+      const nodeHeight = inner.height / Math.max(1, maxDepth + 1);
+      for (const [index, node] of ordered.entries()) {
+        const binding = sorted.find((candidate) => candidate.blockId === node.id)!;
+        const x = inner.x + step * (index + 0.5);
+        const baselineY = inner.y + nodeHeight * (depth + 0.5);
+        result.push({
+          binding,
+          region: regionPlacement.region,
+          parentId: `region-${regionId}`,
+          x,
+          baselineY,
+          connectorY: baselineY,
+        });
+      }
+    }
+  }
+  return result;
+}
+
+function organizationHierarchyRelations(input: {
+  slide: SlideIR;
+  plan: CompositionPlan;
+  placements: BlockPlacement[];
+}): RenderNode[] {
+  const byBlock = new Map(input.placements.map((placement) => [placement.binding.blockId, placement]));
+  const carrierParentId = input.plan.regions.some((region) => region.regionId === 'organization-hierarchy-map')
+    ? 'region-organization-hierarchy-map'
+    : `region-${input.placements[0]?.region.regionId ?? 'organization-hierarchy'}`;
+  return input.slide.relations
+    .filter((relation) => relation.type === 'part-of')
+    .flatMap((relation) => {
+      const child = byBlock.get(relation.fromBlockId);
+      const parent = byBlock.get(relation.toBlockId);
+      if (child === undefined || parent === undefined) return [];
+      const x1 = parent.x;
+      const y1 = parent.baselineY + 26;
+      const x2 = child.x;
+      const y2 = child.baselineY - 26;
+      const midY = y1 + Math.max(14, (y2 - y1) * 0.45);
+      return [vectorNode({
+        nodeId: `organization-relation-${relation.id}`,
+        parentId: carrierParentId,
+        relationId: relation.id,
+        compositionRegionId: 'organization-hierarchy-map',
+        visualRole: 'relation-carrier',
+        shape: 'path',
+        box: { x: Math.min(x1, x2), y: Math.min(y1, y2), width: Math.max(1, Math.abs(x2 - x1)), height: Math.max(1, Math.abs(y2 - y1)) },
+        pathData: `M ${x1} ${y1} V ${midY} H ${x2} V ${y2}`,
+        stroke: input.plan.styleIntent.palette.connector,
+        strokeWidth: Math.max(2, input.plan.styleIntent.motif.strokeWidth * 0.45),
+        opacity: 0.72,
+        zIndex: 1,
+      })];
+    });
 }
 
 function motifNodes(input: {
@@ -1452,6 +1757,7 @@ export function buildInformationRenderTree(input: {
   fonts: FontAsset[];
   accumulationLayoutPolish?: AccumulationLayoutPolishProfile;
   alignedFeaturePresentationRevision?: AlignedFeaturePresentationRevision;
+  organizationPresentationRevision?: OrganizationPresentationRevision;
 }) {
   requirePlanForInformation(input.plan, input.informationPlan);
   if (input.plan.layout.layoutFamily === 'aligned-before-after-spec') {
@@ -1463,7 +1769,11 @@ export function buildInformationRenderTree(input: {
     });
   }
   const accumulationLayoutPolish = input.accumulationLayoutPolish ?? DEFAULT_ACCUMULATION_LAYOUT_POLISH;
-  const placements = placeRegions(input.plan, accumulationLayoutPolish);
+  const placements = placeRegions(
+    input.plan,
+    accumulationLayoutPolish,
+    input.organizationPresentationRevision,
+  );
   const placementByRegion = new Map(placements.map((placement) => [placement.region.regionId, placement]));
   const bindingsByRegion = new Map<string, Binding[]>();
   for (const binding of input.plan.bindings) {
@@ -1472,6 +1782,7 @@ export function buildInformationRenderTree(input: {
     bindingsByRegion.set(binding.regionId, bucket);
   }
   const isAccumulationLayout = input.plan.layout.layoutFamily === 'accumulation-threshold-consequence';
+  const isOrganizationLayout = input.plan.layout.layoutFamily === 'organization-explanation-hierarchy';
   const messagePresentation = isAccumulationLayout
     ? resolveMessagePresentation({ message: input.informationPlan.message, slide: input.slide })
     : undefined;
@@ -1529,6 +1840,34 @@ export function buildInformationRenderTree(input: {
       fonts: input.fonts,
       polish: ACCUMULATION_LAYOUT_POLISH[accumulationLayoutPolish],
     }));
+  } else if (isOrganizationLayout) {
+    const isGuidedOrganization = input.plan.regions.some((region) => region.regionId === 'organization-body');
+    const blockPlacements = (isGuidedOrganization ? organizationBlockPlacements : organizationBaselineBlockPlacements)({
+      slide: input.slide,
+      plan: input.plan,
+      placements,
+      bindings: input.plan.bindings,
+      ...(input.organizationPresentationRevision === undefined
+        ? {}
+        : { revision: input.organizationPresentationRevision }),
+    });
+    nodes.push(...organizationHierarchyRelations({
+      slide: input.slide,
+      plan: input.plan,
+      placements: blockPlacements.filter((placement) =>
+        input.slide.blocks.find((block) => block.id === placement.binding.blockId)?.kind === 'hierarchy-node'),
+    }));
+    for (const blockPlacement of blockPlacements) {
+      nodes.push(...blockTextNodes({
+        slide: input.slide,
+        plan: input.plan,
+        placement: blockPlacement,
+        measures: input.measures,
+        fonts: input.fonts,
+        compositionRegionId: blockPlacement.binding.regionId,
+        align: ['message', 'annotation'].includes(blockPlacement.region.role) ? 'start' : 'center',
+      }));
+    }
   } else {
     const rawBlockPlacements = placements.flatMap((placement) => placementsInRegion({
       plan: input.plan,
@@ -1594,9 +1933,14 @@ export function buildInformationRenderTree(input: {
       fonts: input.fonts.map((font) => font.fileHash),
       layoutVersion: isAccumulationLayout
         ? `accumulation-sequence-v1:${accumulationLayoutPolish}`
-        : 'composition-authoritative-v2',
+        : isOrganizationLayout
+          ? `organization-explanation-hierarchy-v1:${input.organizationPresentationRevision ?? 'default'}`
+          : 'composition-authoritative-v2',
       ...(isAccumulationLayout
         ? { accumulationLayoutPolish: ACCUMULATION_LAYOUT_POLISH[accumulationLayoutPolish] }
+        : {}),
+      ...(isOrganizationLayout
+        ? { organizationLayout: organizationLayoutSpec(input.organizationPresentationRevision) }
         : {}),
     }),
   });

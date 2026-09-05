@@ -20,6 +20,8 @@
     "proof:v1-feature-spec": "tsx packages/renderer/src/proof/dodge-feature-spec.ts",
     "proof:v1-reward-teacher-guidance": "tsx packages/renderer/src/proof/reward-feature-spec-teacher-guidance.ts",
     "proof:v1-reward-critic-revision-1": "tsx packages/renderer/src/proof/reward-feature-spec-critic-revision-1.ts",
+    "proof:v1-organization-critic": "tsx packages/renderer/src/proof/organization-structure-visual-critic.ts",
+    "proof:v1-organization-revision-1": "tsx packages/renderer/src/proof/organization-structure-revision-1.ts",
     "proof:v1-visual-critic": "tsx packages/renderer/src/proof/v1-visual-critic.ts",
     "export:selected": "tsx packages/renderer/src/proof/export-selected-mec-01.ts",
     "author:balance": "tsx packages/authoring-cli/src/main.ts",

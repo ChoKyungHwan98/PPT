@@ -1,0 +1,237 @@
+{
+  "schemaVersion": "0.1",
+  "artifactId": "organization-structure-single-critic-revision-cycle",
+  "revisionCount": 1,
+  "criticCallCount": 1,
+  "secondCriticCallPerformed": false,
+  "readyPositiveFixture": false,
+  "sourcePath": "packages/source-ingestion/fixtures/combat-system-organization.source.json",
+  "comparison": {
+    "baseline": "packages/renderer/fixtures/organization-structure/organization-structure-baseline.png",
+    "teacherGuided": "packages/renderer/fixtures/organization-structure/organization-structure-teacher-guided.png",
+    "revision1": "packages/renderer/fixtures/organization-structure/organization-structure-teacher-guided-revision-1.png"
+  },
+  "critic": {
+    "report": {
+      "schemaVersion": "0.1",
+      "artifactId": "render-composition-43f946767cb6104f",
+      "firstFixation": {
+        "target": "block-root",
+        "assessment": "강조된 중앙 타이포그래피로 인해 최상위 노드로 시선이 먼저 이동함"
+      },
+      "readingPathAssessment": "좌측 개요 텍스트 확인 후 우측 계층 구조도로 자연스럽게 연결됨",
+      "submissionReadiness": "needs-review",
+      "findings": [
+        {
+          "findingId": "finding-1",
+          "issueType": "space-use",
+          "severity": "warning",
+          "target": {
+            "kind": "region",
+            "ids": [
+              "authored-explanation"
+            ]
+          },
+          "problem": "좌측 설명 텍스트 간격이 넓고 여백 활용이 비효율적임",
+          "reason": "제목과 본문 사이 간격이 과도하여 응집도가 낮아 보임",
+          "revisionDirection": "좌측 텍스트 그룹 간격을 좁히고 카드 배경 등으로 구역감을 부여"
+        },
+        {
+          "findingId": "finding-2",
+          "issueType": "relation-clarity",
+          "severity": "info",
+          "target": {
+            "kind": "region",
+            "ids": [
+              "authored-hierarchy"
+            ]
+          },
+          "problem": "계층 노드가 텍스트와 단순 실선으로만 구성되어 시각적 구조감이 단순함",
+          "reason": "박스나 컨테이너 형태의 시각적 래퍼가 없어 와이어프레임처럼 느껴짐",
+          "revisionDirection": "각 노드 텍스트에 둥근 사각형 등 가벼운 컨테이너 스타일 적용"
+        }
+      ],
+      "sourceChangeSuggested": false,
+      "hardGateStatus": "passed"
+    },
+    "run": {
+      "requestId": "visual-critic-af8c7a3cf9e2c6c8e2ba",
+      "provider": "openrouter",
+      "model": "google/gemini-3.7-flash",
+      "cacheHit": false,
+      "inputBytes": 49718,
+      "outputBytes": 1518,
+      "estimatedCostUsd": 0.003474,
+      "inputTokens": 2557,
+      "outputTokens": 415,
+      "reasoningTokens": 0,
+      "totalTokens": 2972,
+      "contextArtifactIds": [
+        "generic-combat-system-organization",
+        "information-generic-combat-system-organization",
+        "render-composition-43f946767cb6104f",
+        "png:9af854ebe8ee5d76758656b6a0a8225dd1875d0d93176205e523660d36d2b327"
+      ],
+      "startedAt": "2026-09-05T10:41:50.738Z",
+      "completedAt": "2026-09-05T10:41:55.998Z"
+    },
+    "inputTrace": {
+      "requestId": "visual-critic-af8c7a3cf9e2c6c8e2ba",
+      "artifactId": "render-composition-43f946767cb6104f",
+      "imageSha256": "9af854ebe8ee5d76758656b6a0a8225dd1875d0d93176205e523660d36d2b327",
+      "imageBytes": 43895,
+      "compactContextBytes": 4603,
+      "contextBudgetBytes": 5000000,
+      "contextArtifactIds": [
+        "generic-combat-system-organization",
+        "information-generic-combat-system-organization",
+        "render-composition-43f946767cb6104f",
+        "png:9af854ebe8ee5d76758656b6a0a8225dd1875d0d93176205e523660d36d2b327"
+      ],
+      "includedFields": [
+        "actual PNG",
+        "page goal",
+        "semantic summary",
+        "InformationPlan core",
+        "rubric",
+        "readiness anchors",
+        "Hard Gate PASS"
+      ]
+    },
+    "guardrailIssues": []
+  },
+  "revisionDecision": {
+    "revisedFindingIds": [
+      "finding-1"
+    ],
+    "intentionallyNotRevised": [
+      {
+        "findingId": "finding-2",
+        "reason": "정보성 제안이며, 노드 컨테이너 추가는 새 시각 요소를 늘려 현재 평면 조직도 문법을 바꾸므로 수정하지 않음"
+      }
+    ],
+    "parameters": {
+      "bodyTop": {
+        "before": "23.5%",
+        "after": "20.5%"
+      },
+      "bodyHeight": {
+        "before": "68%",
+        "after": "71%"
+      },
+      "explanationBaselineWithinInnerRegion": {
+        "before": "28%",
+        "after": "10%"
+      }
+    },
+    "invariant": "CompositionPlan, source text, hierarchy 관계, 부모/자식 관계는 변경하지 않음"
+  },
+  "geometryDiff": [
+    {
+      "nodeId": "region-organization-body",
+      "before": {
+        "x": 134.4,
+        "y": 253.79999999999998,
+        "width": 1651.2,
+        "height": 734.4000000000001
+      },
+      "after": {
+        "x": 134.4,
+        "y": 221.39999999999998,
+        "width": 1651.2,
+        "height": 766.8
+      }
+    },
+    {
+      "nodeId": "region-organization-explanation",
+      "before": {
+        "x": 134.4,
+        "y": 253.79999999999998,
+        "width": 561.408,
+        "height": 734.4000000000001
+      },
+      "after": {
+        "x": 134.4,
+        "y": 221.39999999999998,
+        "width": 561.408,
+        "height": 766.8
+      }
+    },
+    {
+      "nodeId": "region-organization-hierarchy-map",
+      "before": {
+        "x": 778.368,
+        "y": 253.79999999999998,
+        "width": 1007.232,
+        "height": 734.4000000000001
+      },
+      "after": {
+        "x": 778.368,
+        "y": 221.39999999999998,
+        "width": 1007.232,
+        "height": 766.8
+      }
+    },
+    {
+      "nodeId": "text-block-message-0",
+      "before": {
+        "x": 184.4,
+        "y": 464.692,
+        "width": 579.5,
+        "height": 37
+      },
+      "after": {
+        "x": 184.4,
+        "y": 322.78,
+        "width": 579.5,
+        "height": 37
+      }
+    },
+    {
+      "nodeId": "text-block-root-0",
+      "before": {
+        "x": 1031.2988437499998,
+        "y": 324.06399999999996,
+        "width": 501.3703125,
+        "height": 70
+      },
+      "after": {
+        "x": 1031.2988437499998,
+        "y": 296.308,
+        "width": 501.3703125,
+        "height": 70
+      }
+    }
+  ],
+  "hardGate": {
+    "passed": true,
+    "programFindingCount": 0,
+    "sourceFidelityFindingCount": 0,
+    "findings": []
+  },
+  "output": {
+    "pngPath": "packages/renderer/fixtures/organization-structure/organization-structure-teacher-guided-revision-1.png",
+    "width": 1920,
+    "height": 1080,
+    "bytes": 44025,
+    "sha256": "b54e4174914b8e7b22604449f610f9c3b9ad9654d7086dbfbcf6ea2b2abb529d",
+    "renderTreeFingerprint": "01c6a6dbd09dca262e86da1c3c125880895f825f1cb0dc2f347ca806d4c3fb2c"
+  },
+  "fontHashes": [
+    {
+      "family": "Pretendard",
+      "weight": 400,
+      "sha256": "6d0af5258997aec7354a6e340fc2325ba321c410ca48b3af858c8c3d6e92a324"
+    },
+    {
+      "family": "Pretendard",
+      "weight": 700,
+      "sha256": "c16b88c670d23e83fa1170c954cbc4822d3b8dad3c3cde15d798a94b43d97985"
+    },
+    {
+      "family": "Pretendard",
+      "weight": 800,
+      "sha256": "eedbd2877218242323bdff816684f7f5c325e54ae820d5b78eec9a5e5c7edef6"
+    }
+  ]
+}

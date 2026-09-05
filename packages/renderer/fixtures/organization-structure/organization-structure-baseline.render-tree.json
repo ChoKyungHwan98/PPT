@@ -1,0 +1,571 @@
+{
+  "schemaVersion": "0.1",
+  "renderTreeId": "render-composition-4018e763acd11e78",
+  "compositionPlanId": "composition-4018e763acd11e78",
+  "slideId": "generic-combat-system-organization",
+  "pageProfile": {
+    "id": "pdf-presentation-16:9",
+    "outputFamily": "pdf-presentation",
+    "width": 1920,
+    "height": 1080,
+    "unit": "css-px",
+    "pixelRatio": 1
+  },
+  "layoutFamily": "organization-explanation-hierarchy",
+  "background": "#F5F3EE",
+  "nodes": [
+    {
+      "nodeId": "region-message-context",
+      "zIndex": 0,
+      "box": {
+        "x": 134.4,
+        "y": 64.8,
+        "width": 1651.2,
+        "height": 216
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "group"
+    },
+    {
+      "nodeId": "region-group-authored-explanation",
+      "zIndex": 0,
+      "box": {
+        "x": 134.4,
+        "y": 324,
+        "width": 1651.2,
+        "height": 216
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "group"
+    },
+    {
+      "nodeId": "region-group-authored-hierarchy",
+      "zIndex": 0,
+      "box": {
+        "x": 134.4,
+        "y": 583.2,
+        "width": 1651.2,
+        "height": 388.79999999999995
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "group"
+    },
+    {
+      "nodeId": "organization-relation-part-of-1",
+      "parentId": "region-group-authored-hierarchy",
+      "relationId": "part-of-1",
+      "compositionRegionId": "organization-hierarchy-map",
+      "visualRole": "relation-carrier",
+      "zIndex": 1,
+      "box": {
+        "x": 556.2,
+        "y": 686,
+        "width": 403.79999999999995,
+        "height": 65.60000000000002
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "shape",
+      "shape": "path",
+      "paint": {
+        "stroke": "#777A76",
+        "strokeWidth": 2.25,
+        "opacity": 0.72
+      },
+      "pathData": "M 960 686 V 715.52 H 556.2 V 751.6"
+    },
+    {
+      "nodeId": "organization-relation-part-of-2",
+      "parentId": "region-group-authored-hierarchy",
+      "relationId": "part-of-2",
+      "compositionRegionId": "organization-hierarchy-map",
+      "visualRole": "relation-carrier",
+      "zIndex": 1,
+      "box": {
+        "x": 354.3,
+        "y": 803.6,
+        "width": 201.90000000000003,
+        "height": 65.60000000000002
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "shape",
+      "shape": "path",
+      "paint": {
+        "stroke": "#777A76",
+        "strokeWidth": 2.25,
+        "opacity": 0.72
+      },
+      "pathData": "M 556.2 803.6 V 833.12 H 354.3 V 869.2"
+    },
+    {
+      "nodeId": "organization-relation-part-of-3",
+      "parentId": "region-group-authored-hierarchy",
+      "relationId": "part-of-3",
+      "compositionRegionId": "organization-hierarchy-map",
+      "visualRole": "relation-carrier",
+      "zIndex": 1,
+      "box": {
+        "x": 556.2,
+        "y": 803.6,
+        "width": 201.89999999999998,
+        "height": 65.60000000000002
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "shape",
+      "shape": "path",
+      "paint": {
+        "stroke": "#777A76",
+        "strokeWidth": 2.25,
+        "opacity": 0.72
+      },
+      "pathData": "M 556.2 803.6 V 833.12 H 758.1 V 869.2"
+    },
+    {
+      "nodeId": "organization-relation-part-of-4",
+      "parentId": "region-group-authored-hierarchy",
+      "relationId": "part-of-4",
+      "compositionRegionId": "organization-hierarchy-map",
+      "visualRole": "relation-carrier",
+      "zIndex": 1,
+      "box": {
+        "x": 960,
+        "y": 686,
+        "width": 403.8000000000002,
+        "height": 65.60000000000002
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "shape",
+      "shape": "path",
+      "paint": {
+        "stroke": "#777A76",
+        "strokeWidth": 2.25,
+        "opacity": 0.72
+      },
+      "pathData": "M 960 686 V 715.52 H 1363.8000000000002 V 751.6"
+    },
+    {
+      "nodeId": "organization-relation-part-of-5",
+      "parentId": "region-group-authored-hierarchy",
+      "relationId": "part-of-5",
+      "compositionRegionId": "organization-hierarchy-map",
+      "visualRole": "relation-carrier",
+      "zIndex": 1,
+      "box": {
+        "x": 1161.9,
+        "y": 803.6,
+        "width": 201.9000000000001,
+        "height": 65.60000000000002
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "shape",
+      "shape": "path",
+      "paint": {
+        "stroke": "#777A76",
+        "strokeWidth": 2.25,
+        "opacity": 0.72
+      },
+      "pathData": "M 1363.8000000000002 803.6 V 833.12 H 1161.9 V 869.2"
+    },
+    {
+      "nodeId": "organization-relation-part-of-6",
+      "parentId": "region-group-authored-hierarchy",
+      "relationId": "part-of-6",
+      "compositionRegionId": "organization-hierarchy-map",
+      "visualRole": "relation-carrier",
+      "zIndex": 1,
+      "box": {
+        "x": 1363.8000000000002,
+        "y": 803.6,
+        "width": 201.89999999999986,
+        "height": 65.60000000000002
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "shape",
+      "shape": "path",
+      "paint": {
+        "stroke": "#777A76",
+        "strokeWidth": 2.25,
+        "opacity": 0.72
+      },
+      "pathData": "M 1363.8000000000002 803.6 V 833.12 H 1565.7 V 869.2"
+    },
+    {
+      "nodeId": "text-block-title-0",
+      "parentId": "region-group-authored-explanation",
+      "semanticBlockId": "block-title",
+      "compositionRegionId": "group-authored-explanation",
+      "zIndex": 3,
+      "box": {
+        "x": 164.4,
+        "y": 375,
+        "width": 292.5234375,
+        "height": 40
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "text",
+      "text": "전투 시스템 역할 구조",
+      "sourceSpanIds": [
+        "title"
+      ],
+      "sourceTransform": {
+        "kind": "exact"
+      },
+      "font": {
+        "family": "Pretendard",
+        "fileHash": "eedbd2877218242323bdff816684f7f5c325e54ae820d5b78eec9a5e5c7edef6",
+        "size": 34,
+        "weight": 800,
+        "lineHeight": 43,
+        "letterSpacing": -0.25
+      },
+      "color": "#222522",
+      "align": "start",
+      "lines": [
+        {
+          "text": "전투 시스템 역할 구조",
+          "x": 168.4,
+          "baselineY": 407,
+          "advanceWidth": 284.5234375
+        }
+      ]
+    },
+    {
+      "nodeId": "text-block-message-0",
+      "parentId": "region-group-authored-explanation",
+      "semanticBlockId": "block-message",
+      "compositionRegionId": "group-authored-explanation",
+      "zIndex": 3,
+      "box": {
+        "x": 164.4,
+        "y": 450.5,
+        "width": 579.5,
+        "height": 37
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "text",
+      "text": "전투 규칙의 책임 범위를 기능 단위로 분리한다.",
+      "sourceSpanIds": [
+        "message"
+      ],
+      "sourceTransform": {
+        "kind": "exact"
+      },
+      "font": {
+        "family": "Pretendard",
+        "fileHash": "eedbd2877218242323bdff816684f7f5c325e54ae820d5b78eec9a5e5c7edef6",
+        "size": 32,
+        "weight": 800,
+        "lineHeight": 40,
+        "letterSpacing": -0.25
+      },
+      "color": "#222522",
+      "align": "start",
+      "lines": [
+        {
+          "text": "전투 규칙의 책임 범위를 기능 단위로 분리한다.",
+          "x": 168.4,
+          "baselineY": 480.5,
+          "advanceWidth": 571.5
+        }
+      ]
+    },
+    {
+      "nodeId": "text-block-root-0",
+      "parentId": "region-group-authored-hierarchy",
+      "semanticBlockId": "block-root",
+      "compositionRegionId": "group-authored-hierarchy",
+      "zIndex": 3,
+      "box": {
+        "x": 709.31484375,
+        "y": 625,
+        "width": 501.3703125,
+        "height": 70
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "text",
+      "text": "전투 시스템 책임자",
+      "sourceSpanIds": [
+        "root"
+      ],
+      "sourceTransform": {
+        "kind": "exact"
+      },
+      "font": {
+        "family": "Pretendard",
+        "fileHash": "eedbd2877218242323bdff816684f7f5c325e54ae820d5b78eec9a5e5c7edef6",
+        "size": 68,
+        "weight": 800,
+        "lineHeight": 85,
+        "letterSpacing": -0.8
+      },
+      "color": "#5B5C8D",
+      "align": "center",
+      "lines": [
+        {
+          "text": "전투 시스템 책임자",
+          "x": 960,
+          "baselineY": 684,
+          "advanceWidth": 493.3703125
+        }
+      ]
+    },
+    {
+      "nodeId": "text-block-player-0",
+      "parentId": "region-group-authored-hierarchy",
+      "semanticBlockId": "block-player",
+      "compositionRegionId": "group-authored-hierarchy",
+      "zIndex": 3,
+      "box": {
+        "x": 370.687890625,
+        "y": 742.6,
+        "width": 371.02421875,
+        "height": 70
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "text",
+      "text": "플레이어 전투",
+      "sourceSpanIds": [
+        "player"
+      ],
+      "sourceTransform": {
+        "kind": "exact"
+      },
+      "font": {
+        "family": "Pretendard",
+        "fileHash": "eedbd2877218242323bdff816684f7f5c325e54ae820d5b78eec9a5e5c7edef6",
+        "size": 68,
+        "weight": 800,
+        "lineHeight": 85,
+        "letterSpacing": -0.8
+      },
+      "color": "#5B5C8D",
+      "align": "center",
+      "lines": [
+        {
+          "text": "플레이어 전투",
+          "x": 556.2,
+          "baselineY": 801.6,
+          "advanceWidth": 363.02421875
+        }
+      ]
+    },
+    {
+      "nodeId": "text-block-boss-0",
+      "parentId": "region-group-authored-hierarchy",
+      "semanticBlockId": "block-boss",
+      "compositionRegionId": "group-authored-hierarchy",
+      "zIndex": 3,
+      "box": {
+        "x": 1236.257421875,
+        "y": 742.6,
+        "width": 255.08515625,
+        "height": 70
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "text",
+      "text": "보스 전투",
+      "sourceSpanIds": [
+        "boss"
+      ],
+      "sourceTransform": {
+        "kind": "exact"
+      },
+      "font": {
+        "family": "Pretendard",
+        "fileHash": "eedbd2877218242323bdff816684f7f5c325e54ae820d5b78eec9a5e5c7edef6",
+        "size": 68,
+        "weight": 800,
+        "lineHeight": 85,
+        "letterSpacing": -0.8
+      },
+      "color": "#5B5C8D",
+      "align": "center",
+      "lines": [
+        {
+          "text": "보스 전투",
+          "x": 1363.8000000000002,
+          "baselineY": 801.6,
+          "advanceWidth": 247.08515625
+        }
+      ]
+    },
+    {
+      "nodeId": "text-block-move-dodge-0",
+      "parentId": "region-group-authored-hierarchy",
+      "semanticBlockId": "block-move-dodge",
+      "compositionRegionId": "group-authored-hierarchy",
+      "zIndex": 3,
+      "box": {
+        "x": 221.312109375,
+        "y": 859.7,
+        "width": 265.97578125,
+        "height": 71
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "text",
+      "text": "이동/회피",
+      "sourceSpanIds": [
+        "move-dodge"
+      ],
+      "sourceTransform": {
+        "kind": "exact"
+      },
+      "font": {
+        "family": "Pretendard",
+        "fileHash": "eedbd2877218242323bdff816684f7f5c325e54ae820d5b78eec9a5e5c7edef6",
+        "size": 68,
+        "weight": 800,
+        "lineHeight": 85,
+        "letterSpacing": -0.8
+      },
+      "color": "#5B5C8D",
+      "align": "center",
+      "lines": [
+        {
+          "text": "이동/회피",
+          "x": 354.3,
+          "baselineY": 918.7,
+          "advanceWidth": 257.97578125
+        }
+      ]
+    },
+    {
+      "nodeId": "text-block-attack-defense-0",
+      "parentId": "region-group-authored-hierarchy",
+      "semanticBlockId": "block-attack-defense",
+      "compositionRegionId": "group-authored-hierarchy",
+      "zIndex": 3,
+      "box": {
+        "x": 625.112109375,
+        "y": 859.7,
+        "width": 265.97578125,
+        "height": 71
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "text",
+      "text": "공격/방어",
+      "sourceSpanIds": [
+        "attack-defense"
+      ],
+      "sourceTransform": {
+        "kind": "exact"
+      },
+      "font": {
+        "family": "Pretendard",
+        "fileHash": "eedbd2877218242323bdff816684f7f5c325e54ae820d5b78eec9a5e5c7edef6",
+        "size": 68,
+        "weight": 800,
+        "lineHeight": 85,
+        "letterSpacing": -0.8
+      },
+      "color": "#5B5C8D",
+      "align": "center",
+      "lines": [
+        {
+          "text": "공격/방어",
+          "x": 758.1,
+          "baselineY": 918.7,
+          "advanceWidth": 257.97578125
+        }
+      ]
+    },
+    {
+      "nodeId": "text-block-pattern-0",
+      "parentId": "region-group-authored-hierarchy",
+      "semanticBlockId": "block-pattern",
+      "compositionRegionId": "group-authored-hierarchy",
+      "zIndex": 3,
+      "box": {
+        "x": 1034.357421875,
+        "y": 860.2,
+        "width": 255.08515625,
+        "height": 70
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "text",
+      "text": "패턴 선택",
+      "sourceSpanIds": [
+        "pattern"
+      ],
+      "sourceTransform": {
+        "kind": "exact"
+      },
+      "font": {
+        "family": "Pretendard",
+        "fileHash": "eedbd2877218242323bdff816684f7f5c325e54ae820d5b78eec9a5e5c7edef6",
+        "size": 68,
+        "weight": 800,
+        "lineHeight": 85,
+        "letterSpacing": -0.8
+      },
+      "color": "#5B5C8D",
+      "align": "center",
+      "lines": [
+        {
+          "text": "패턴 선택",
+          "x": 1161.9,
+          "baselineY": 919.2,
+          "advanceWidth": 247.08515625
+        }
+      ]
+    },
+    {
+      "nodeId": "text-block-phase-0",
+      "parentId": "region-group-authored-hierarchy",
+      "semanticBlockId": "block-phase",
+      "compositionRegionId": "group-authored-hierarchy",
+      "zIndex": 3,
+      "box": {
+        "x": 1409.17265625,
+        "y": 860.2,
+        "width": 313.0546875,
+        "height": 70
+      },
+      "clip": false,
+      "visible": true,
+      "kind": "text",
+      "text": "페이즈 전환",
+      "sourceSpanIds": [
+        "phase"
+      ],
+      "sourceTransform": {
+        "kind": "exact"
+      },
+      "font": {
+        "family": "Pretendard",
+        "fileHash": "eedbd2877218242323bdff816684f7f5c325e54ae820d5b78eec9a5e5c7edef6",
+        "size": 68,
+        "weight": 800,
+        "lineHeight": 85,
+        "letterSpacing": -0.8
+      },
+      "color": "#5B5C8D",
+      "align": "center",
+      "lines": [
+        {
+          "text": "페이즈 전환",
+          "x": 1565.7,
+          "baselineY": 919.2,
+          "advanceWidth": 305.0546875
+        }
+      ]
+    }
+  ],
+  "deterministicFingerprint": "46f1727383c3611f8cecf91608bbcf7f3b6e237b770cc9dabbc983c8c27505cb"
+}

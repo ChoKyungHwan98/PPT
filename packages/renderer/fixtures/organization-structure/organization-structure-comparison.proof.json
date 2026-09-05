@@ -1,0 +1,74 @@
+{
+  "artifactId": "organization-structure-teacher-guidance-comparison",
+  "sourcePath": "packages/source-ingestion/fixtures/combat-system-organization.source.json",
+  "criticCalled": false,
+  "readyPositiveFixture": false,
+  "teacherGuidance": {
+    "primaryTeacher": {
+      "referenceId": "ext-2025-pokemon-initiative-team-structure",
+      "semanticShape": "hierarchy"
+    },
+    "structureLock": {
+      "authority": "primary-teacher-only",
+      "semanticShape": "hierarchy",
+      "sourceReferenceId": "ext-2025-pokemon-initiative-team-structure",
+      "rule": "정보 구조, 그룹, reading path, 정렬 축은 Primary Teacher만 결정한다."
+    }
+  },
+  "sourceParity": {
+    "sourceSpanCount": 9,
+    "relationCount": 6
+  },
+  "variants": [
+    {
+      "name": "baseline",
+      "pngPath": "packages/renderer/fixtures/organization-structure/organization-structure-baseline.png",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 53987,
+      "sha256": "82656b4b1daa448664e12ebe223b7a675b7f4216484c79a4b860b66e81b60adb",
+      "compositionPlanId": "composition-4018e763acd11e78",
+      "renderTreeFingerprint": "46f1727383c3611f8cecf91608bbcf7f3b6e237b770cc9dabbc983c8c27505cb",
+      "hardGate": {
+        "passed": true,
+        "programFindings": [],
+        "sourceFidelityFindings": [],
+        "findings": []
+      }
+    },
+    {
+      "name": "teacher-guided",
+      "pngPath": "packages/renderer/fixtures/organization-structure/organization-structure-teacher-guided.png",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 43895,
+      "sha256": "9af854ebe8ee5d76758656b6a0a8225dd1875d0d93176205e523660d36d2b327",
+      "compositionPlanId": "composition-43f946767cb6104f",
+      "renderTreeFingerprint": "cb4260b4c2298b19b8a82582cfaf4107bcbd8aefa4d12935696bcd2aab92ca5d",
+      "hardGate": {
+        "passed": true,
+        "programFindings": [],
+        "sourceFidelityFindings": [],
+        "findings": []
+      }
+    }
+  ],
+  "fontHashes": [
+    {
+      "family": "Pretendard",
+      "weight": 400,
+      "sha256": "6d0af5258997aec7354a6e340fc2325ba321c410ca48b3af858c8c3d6e92a324"
+    },
+    {
+      "family": "Pretendard",
+      "weight": 700,
+      "sha256": "c16b88c670d23e83fa1170c954cbc4822d3b8dad3c3cde15d798a94b43d97985"
+    },
+    {
+      "family": "Pretendard",
+      "weight": 800,
+      "sha256": "eedbd2877218242323bdff816684f7f5c325e54ae820d5b78eec9a5e5c7edef6"
+    }
+  ],
+  "renderer": "RenderTree → SVG/HTML → Chromium screenshot"
+}
