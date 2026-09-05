@@ -1,5 +1,5 @@
 {
-  "name": "@game-presentation/studio-integration",
+  "name": "@game-presentation/authoring-harness",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -7,8 +7,10 @@
     ".": "./src/index.ts"
   },
   "dependencies": {
-    "@game-presentation/authoring-harness": "workspace:*",
+    "@game-presentation/composition-engine": "workspace:*",
     "@game-presentation/contracts": "workspace:*",
+    "@game-presentation/pptx-exporter": "workspace:*",
+    "@game-presentation/reference-engine": "workspace:*",
     "@game-presentation/renderer": "workspace:*",
     "@game-presentation/source-ingestion": "workspace:*"
   }

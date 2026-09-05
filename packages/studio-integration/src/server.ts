@@ -1,10 +1,9 @@
 import { createServer, type IncomingMessage, type ServerResponse } from 'node:http';
-import { readFile, writeFile } from 'node:fs/promises';
+import { readFile } from 'node:fs/promises';
 import { basename, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { InformationPlanSchema, RenderTreeSchema, SlideIRSchema, StudioDesignOutputSchema } from '@game-presentation/contracts';
-import { OpenAICompatibleVisualCriticProvider, OpenRouterAIProvider, runVisualCritic } from '@game-presentation/renderer/studio';
-import { runStudioDesignJob } from './design-job.js';
+import { OpenAICompatibleVisualCriticProvider, OpenRouterAIProvider } from '@game-presentation/renderer/studio';
+import { runStudioDesignJob, runStudioVisualCritic } from './design-job.js';
 
 const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../../..');
 const port = Number(process.env.PPT_DESIGNER_PORT ?? '8766');
@@ -65,21 +64,12 @@ const server = createServer(async (request, response) => {
       if (!/^slide-[0-9]+-[a-z0-9]+$/iu.test(artifactId)) throw new Error('잘못된 작업 번호입니다.');
       const directory = resolve(repositoryRoot, 'output/studio-jobs', artifactId);
       const metadataPath = resolve(directory, 'job.json');
-      const metadata = JSON.parse(await readFile(metadataPath, 'utf8')) as Record<string, unknown>;
       const requestBody = await body(request) as { provider?: 'local' | 'openrouter' };
-      const output = StudioDesignOutputSchema.parse(metadata.output);
-      if (!output.validation.hardGatePassed) throw new Error('Hard Gate FAIL 결과는 AI 검토로 보낼 수 없습니다.');
-      const slide = SlideIRSchema.parse(metadata.slide);
-      const informationPlan = InformationPlanSchema.parse(metadata.informationPlan);
-      const tree = RenderTreeSchema.parse(metadata.tree);
       const provider = requestBody.provider === 'openrouter'
         ? new OpenRouterAIProvider({ apiKey: process.env.OPENROUTER_API_KEY ?? '', model: process.env.CRITIC_MODEL_ID ?? '', reasoningEffort: 'medium' })
         : new OpenAICompatibleVisualCriticProvider({ endpoint: process.env.LOCAL_CRITIC_ENDPOINT ?? 'http://127.0.0.1:8000/v1/chat/completions', model: process.env.LOCAL_CRITIC_MODEL ?? 'afx-team/UI-UX', localExecution: true });
-      const run = await runVisualCritic({ provider, pngBytes: new Uint8Array(await readFile(resolve(directory, `${artifactId}.png`))), artifactId, goal: informationPlan.message.text, slide, informationPlan, hardGate: metadata.hardGate as never });
-      if (run.guardrailIssues.length > 0) throw new Error(`AI 검토 안전 규칙 실패: ${run.guardrailIssues.join(', ')}`);
-      const updated = StudioDesignOutputSchema.parse({ ...output, critic: run.report, readiness: run.report.submissionReadiness });
-      await writeFile(metadataPath, JSON.stringify({ ...metadata, output: updated, criticRun: run.run, criticInputTrace: run.inputTrace }, null, 2) + '\n');
-      json(response, 200, { output: updated, run: run.run }); return;
+      const result = await runStudioVisualCritic({ metadataPath, provider });
+      json(response, 200, { output: result.output, run: result.run }); return;
     }
     json(response, 404, { error: 'Not found' });
   } catch (error) { json(response, 400, { error: error instanceof Error ? error.message : String(error) }); }

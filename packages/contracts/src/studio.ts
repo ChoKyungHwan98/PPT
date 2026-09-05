@@ -13,11 +13,12 @@ export const StudioDesignInputSchema = z.strictObject({
 });
 export type StudioDesignInput = z.infer<typeof StudioDesignInputSchema>;
 
-const ExportHandleSchema = z.strictObject({
+export const ExportHandleSchema = z.strictObject({
   kind: z.enum(['png', 'html', 'pdf', 'pptx']),
   url: z.string().min(1),
   editable: z.boolean(),
 });
+export type ExportHandle = z.infer<typeof ExportHandleSchema>;
 
 export const StudioDesignOutputSchema = z.strictObject({
   schemaVersion: z.literal('0.1'),

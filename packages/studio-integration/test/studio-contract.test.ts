@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { DesignEvaluationEventSchema, StudioDesignInputSchema } from '@game-presentation/contracts';
+import { readFile } from 'node:fs/promises';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { buildCritiqueDataset, parseAuthoredComparison, parseAuthoredHierarchy } from '../src/index.js';
+
+const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../../..');
 
 describe('Studio designer integration contracts', () => {
   it('parses authored before/after pairs without changing source text', () => {
@@ -23,5 +28,13 @@ describe('Studio designer integration contracts', () => {
 
   it('validates the public input contract', () => {
     expect(StudioDesignInputSchema.parse({ schemaVersion: '0.1', projectId: 'p', documentId: 'd', mode: 'document', authoredContent: 'text', authoredStructure: 'hierarchy', outputProfile: 'screen-16:9' }).projectId).toBe('p');
+  });
+
+  it('delegates domain pipeline orchestration to authoring-harness', async () => {
+    const designJob = await readFile(resolve(repositoryRoot, 'packages/studio-integration/src/design-job.ts'), 'utf8');
+    expect(designJob).toContain("from '@game-presentation/authoring-harness'");
+    for (const directDomain of ['composition-engine', 'reference-engine', 'pptx-exporter', 'source-ingestion', "runHardGate", "runVisualCritic"]) {
+      expect(designJob).not.toContain(directDomain);
+    }
   });
 });

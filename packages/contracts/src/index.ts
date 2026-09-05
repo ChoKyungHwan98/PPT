@@ -1,5 +1,6 @@
 export * from './ai-provider.js';
 export * from './authoring.js';
+export * from './authoring-run.js';
 export * from './composition.js';
 export * from './finding.js';
 export * from './hash.js';

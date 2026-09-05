@@ -74,6 +74,27 @@ importers:
         specifier: workspace:*
         version: link:../story-planner
 
+  packages/authoring-harness:
+    dependencies:
+      '@game-presentation/composition-engine':
+        specifier: workspace:*
+        version: link:../composition-engine
+      '@game-presentation/contracts':
+        specifier: workspace:*
+        version: link:../contracts
+      '@game-presentation/pptx-exporter':
+        specifier: workspace:*
+        version: link:../pptx-exporter
+      '@game-presentation/reference-engine':
+        specifier: workspace:*
+        version: link:../reference-engine
+      '@game-presentation/renderer':
+        specifier: workspace:*
+        version: link:../renderer
+      '@game-presentation/source-ingestion':
+        specifier: workspace:*
+        version: link:../source-ingestion
+
   packages/composition-engine:
     dependencies:
       '@game-presentation/contracts':
@@ -171,27 +192,18 @@ importers:
 
   packages/studio-integration:
     dependencies:
-      '@game-presentation/composition-engine':
+      '@game-presentation/authoring-harness':
         specifier: workspace:*
-        version: link:../composition-engine
+        version: link:../authoring-harness
       '@game-presentation/contracts':
         specifier: workspace:*
         version: link:../contracts
-      '@game-presentation/pptx-exporter':
-        specifier: workspace:*
-        version: link:../pptx-exporter
-      '@game-presentation/reference-engine':
-        specifier: workspace:*
-        version: link:../reference-engine
       '@game-presentation/renderer':
         specifier: workspace:*
         version: link:../renderer
       '@game-presentation/source-ingestion':
         specifier: workspace:*
         version: link:../source-ingestion
-      zod:
-        specifier: 4.4.3
-        version: 4.4.3
 
 packages:
 
