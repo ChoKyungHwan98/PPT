@@ -11,7 +11,7 @@ const context: PreferenceContext = {
   outputProfile: 'pdf-presentation',
 };
 
-function evidence(id: string, topologyFamily: string, readingPath: 'left-to-right' | 'center-out'): CandidateEvidence {
+function evidence(id: string, topologyFamily: string, readingPath: 'left-to-right' | 'center-out' | 'guided-sequence'): CandidateEvidence {
   return {
     candidateId: id,
     signature: {
@@ -58,6 +58,21 @@ describe('candidate comparison package', () => {
     });
     expect(comparison.mode).toBe('single');
     expect(comparison.selectionOptions).toEqual(['accept', 'reject']);
+  });
+
+  it('exposes choose A/B/C and reject-all for three structurally distinct candidates', () => {
+    const comparison = buildCandidateComparison({
+      slideId: 'slide-1', sourceContentHash: 'd'.repeat(64), context,
+      candidates: [
+        evidence('candidate-a', 'editorial-spine', 'left-to-right'),
+        evidence('candidate-b', 'threshold-field', 'center-out'),
+        evidence('candidate-c', 'phase-field', 'guided-sequence'),
+      ],
+      presentationSeed: 2, createdAt: '2026-08-29T02:00:00.000Z',
+    });
+    expect(comparison.mode).toBe('triple');
+    if (comparison.mode !== 'triple') throw new Error('fixture error');
+    expect(comparison.selectionOptions).toEqual(['A', 'B', 'C', 'reject-all']);
   });
 
   it('can reverse presentation order without changing candidate identities', () => {

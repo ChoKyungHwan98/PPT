@@ -63,10 +63,40 @@ const PairwiseCandidateComparisonSchema = z
     }
   });
 
+const TripleCandidateComparisonSchema = z
+  .strictObject({
+    ...ComparisonBaseShape,
+    mode: z.literal('triple'),
+    slots: z.strictObject({ A: CandidateEvidenceSchema, B: CandidateEvidenceSchema, C: CandidateEvidenceSchema }),
+    selectionOptions: z.tuple([z.literal('A'), z.literal('B'), z.literal('C'), z.literal('reject-all')]),
+  })
+  .superRefine((comparison, context) => {
+    const candidates = Object.values(comparison.slots);
+    if (new Set(candidates.map((candidate) => candidate.candidateId)).size !== 3) {
+      context.addIssue({ code: 'custom', path: ['slots'], message: 'A/B/C는 서로 다른 candidate여야 합니다.' });
+    }
+    const structural = new Set(candidates.map((candidate) => `${candidate.signature.topologyFamily}:${candidate.signature.readingPath}`));
+    if (structural.size !== 3) {
+      context.addIssue({ code: 'custom', path: ['slots'], message: 'A/B/C는 구조 또는 읽기 경로가 실제로 달라야 합니다.' });
+    }
+  });
+
 export const CandidateComparisonSchema = z.discriminatedUnion('mode', [
   NoCandidateComparisonSchema,
   SingleCandidateComparisonSchema,
   PairwiseCandidateComparisonSchema,
+  TripleCandidateComparisonSchema,
 ]);
 
 export type CandidateComparison = z.infer<typeof CandidateComparisonSchema>;
+
+export const CandidateSelectionEventSchema = z.strictObject({
+  schemaVersion: z.literal('0.1'),
+  eventId: z.string().min(1),
+  comparisonId: z.string().min(1),
+  decision: z.enum(['choose-A', 'choose-B', 'choose-C', 'reject-all']),
+  candidateIds: z.array(z.string().min(1)).min(1).max(3),
+  reasonTags: z.array(z.string().min(1)),
+  decidedAt: z.iso.datetime(),
+});
+export type CandidateSelectionEvent = z.infer<typeof CandidateSelectionEventSchema>;

@@ -16,8 +16,8 @@ export function buildCandidateComparison(input: {
   presentationSeed: number;
   createdAt: string;
 }): CandidateComparison {
-  if (input.candidates.length > 2) {
-    throw new Error('첫 vertical slice는 통과 후보를 최대 2개만 비교합니다.');
+  if (input.candidates.length > 3) {
+    throw new Error('통과 후보는 최대 3개만 비교합니다.');
   }
   const candidates = input.candidates.map((candidate) => CandidateEvidenceSchema.parse(candidate));
   if (candidates.length === 2 && input.presentationSeed % 2 !== 0) candidates.reverse();
@@ -52,6 +52,14 @@ export function buildCandidateComparison(input: {
       mode: 'single',
       slots: { A: candidates[0] },
       selectionOptions: ['accept', 'reject'],
+    });
+  }
+  if (candidates.length === 3) {
+    return CandidateComparisonSchema.parse({
+      ...base,
+      mode: 'triple',
+      slots: { A: candidates[0], B: candidates[1], C: candidates[2] },
+      selectionOptions: ['A', 'B', 'C', 'reject-all'],
     });
   }
   return CandidateComparisonSchema.parse({

@@ -146,12 +146,12 @@ function selectionReferenceIds(fragment: PatternFragment): string[] {
   return [...fragment.sourceReferenceIds, ...(fragment.retrievalSupportReferenceIds ?? [])];
 }
 
-function matchingFragment(input: {
+function matchingFragments(input: {
   slide: SlideIR;
   informationPlan: InformationPlan;
   retrieval: { brief: ReferenceRetrievalBrief; results: ReferenceSearchResult[] };
   fragments: PatternFragment[];
-}): { fragment: PatternFragment; referenceIds: string[] } {
+}): Array<{ fragment: PatternFragment; referenceIds: string[]; score: number }> {
   const resultScores = new Map(input.retrieval.results.map((result) => [result.referenceId, result.score]));
   const candidates = input.fragments
     .filter((fragment) =>
@@ -172,11 +172,10 @@ function matchingFragment(input: {
       return { fragment, referenceIds, score };
     })
     .sort((left, right) => right.score - left.score || left.fragment.fragmentId.localeCompare(right.fragment.fragmentId));
-  const selected = candidates[0];
-  if (selected === undefined) {
+  if (candidates.length === 0) {
     throw new Error('현재 SlideIR과 InformationPlan에 맞는 허용된 pattern fragment를 찾지 못했습니다.');
   }
-  return selected;
+  return candidates;
 }
 
 function phaseComposition(input: {
@@ -245,6 +244,7 @@ export function createCompositionPlanFromInformationPlan(input: {
   retrieval: { brief: ReferenceRetrievalBrief; results: ReferenceSearchResult[] };
   fragments: PatternFragment[];
   teacherGuidance?: TeacherDesignGuidance;
+  patternFragmentId?: string;
 }): CompositionPlan {
   const informationIssues = validateInformationPlan(input.informationPlan, input.slide);
   if (informationIssues.length > 0) {
@@ -262,7 +262,11 @@ export function createCompositionPlanFromInformationPlan(input: {
     throw new Error('Teacher Guidance가 다른 SlideIR 또는 InformationPlan을 가리킵니다.');
   }
 
-  const selected = matchingFragment(input);
+  const matches = matchingFragments(input);
+  const selected = input.patternFragmentId === undefined
+    ? matches[0]!
+    : matches.find((candidate) => candidate.fragment.fragmentId === input.patternFragmentId);
+  if (selected === undefined) throw new Error('지정한 pattern은 현재 semantic/retrieval 계약에서 허용되지 않습니다.');
   const alignedTeacherGuidance = selected.fragment.comparisonContract !== undefined
     && input.teacherGuidance?.structureLock.semanticShape === 'aligned-before-after-spec'
     ? input.teacherGuidance
@@ -360,4 +364,25 @@ export function createCompositionPlanFromInformationPlan(input: {
       allowCandidateOmission: true,
     },
   });
+}
+
+export function createCompositionPlanCandidatesFromInformationPlan(input: {
+  slide: SlideIR;
+  informationPlan: InformationPlan;
+  retrieval: { brief: ReferenceRetrievalBrief; results: ReferenceSearchResult[] };
+  fragments: PatternFragment[];
+  teacherGuidance?: TeacherDesignGuidance;
+  maximumCandidates?: number;
+}): CompositionPlan[] {
+  const maximum = Math.max(1, Math.min(3, input.maximumCandidates ?? 3));
+  const distinct: CompositionPlan[] = [];
+  for (const match of matchingFragments(input)) {
+    if (distinct.some((plan) => plan.layout.layoutFamily === match.fragment.topology.family && plan.layout.readingPath === match.fragment.readingPath)) continue;
+    distinct.push(createCompositionPlanFromInformationPlan({
+      ...input,
+      patternFragmentId: match.fragment.fragmentId,
+    }));
+    if (distinct.length >= maximum) break;
+  }
+  return distinct;
 }
