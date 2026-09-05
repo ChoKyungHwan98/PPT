@@ -7,5 +7,6 @@ tmp/
 .env.*
 !.env.example
 *.tsbuildinfo
+packages/renderer/fixtures/**/qa-*/
 .DS_Store
 Thumbs.db

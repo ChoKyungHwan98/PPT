@@ -1,0 +1,18 @@
+{
+  "schemaVersion": "0.1",
+  "judgementId": "judgement-organization-structure-best-known-not-ready",
+  "artifactId": "organization-structure-candidate-b-hierarchy-focus",
+  "evaluatedPng": {
+    "path": "packages/renderer/fixtures/organization-structure/organization-structure-candidate-b-hierarchy-focus.png",
+    "sha256": "528237fc7e4aa2165aad500706901dc3f315d1703e54757dd44dfdc0326bfc12"
+  },
+  "decidedBy": "user",
+  "decision": "rejected-as-ready",
+  "decidedAt": "2026-09-05T00:00:00.000Z",
+  "readyPositiveFixture": false,
+  "reason": "구조와 정보 전달은 정상이나 현재 시각 품질은 portfolio-ready 수준으로 승인하지 않음",
+  "separation": {
+    "teacherQualityAffected": false,
+    "preferenceEventRecorded": false
+  }
+}

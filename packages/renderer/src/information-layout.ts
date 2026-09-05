@@ -34,30 +34,103 @@ export type AccumulationLayoutPolishProfile =
   | 'balanced-runway-final'
   | 'balanced-runway-revision-1';
 
-export type OrganizationPresentationRevision = 'critic-revision-1';
+export type OrganizationPresentationRevision =
+  | 'critic-revision-1'
+  | 'candidate-a-cohesive-bridge'
+  | 'candidate-b-hierarchy-focus';
 
 type OrganizationLayoutSpec = {
   bodyTop: number;
   bodyHeight: number;
   explanationBaselineRatio: number;
+  explanationWidthRatio: number;
+  hierarchyStartRatio: number;
+  hierarchyWidthRatio: number;
+  nodeGapRatio: number;
+  nodeTopRatio: number;
+  nodeHeightRatio: number;
+  connectorStrokeFactor: number;
+  connectorOpacity: number;
+  depth1TextSize?: number;
+  depth1TextWeight?: number;
+  depth2TextSize?: number;
+  depth2TextWeight?: number;
+  muteLeafText: boolean;
 };
 
 const ORGANIZATION_LAYOUT_DEFAULT: OrganizationLayoutSpec = {
   bodyTop: 0.235,
   bodyHeight: 0.68,
   explanationBaselineRatio: 0.28,
+  explanationWidthRatio: 0.34,
+  hierarchyStartRatio: 0.39,
+  hierarchyWidthRatio: 0.61,
+  nodeGapRatio: 0.035,
+  nodeTopRatio: 0.12,
+  nodeHeightRatio: 0.62,
+  connectorStrokeFactor: 0.45,
+  connectorOpacity: 0.72,
+  muteLeafText: false,
 };
 
 const ORGANIZATION_LAYOUT_REVISION_1: OrganizationLayoutSpec = {
   bodyTop: 0.205,
   bodyHeight: 0.71,
   explanationBaselineRatio: 0.1,
+  explanationWidthRatio: 0.34,
+  hierarchyStartRatio: 0.39,
+  hierarchyWidthRatio: 0.61,
+  nodeGapRatio: 0.035,
+  nodeTopRatio: 0.12,
+  nodeHeightRatio: 0.62,
+  connectorStrokeFactor: 0.45,
+  connectorOpacity: 0.72,
+  muteLeafText: false,
+};
+
+const ORGANIZATION_LAYOUT_CANDIDATE_A: OrganizationLayoutSpec = {
+  bodyTop: 0.185,
+  bodyHeight: 0.735,
+  explanationBaselineRatio: 0.11,
+  explanationWidthRatio: 0.31,
+  hierarchyStartRatio: 0.34,
+  hierarchyWidthRatio: 0.66,
+  nodeGapRatio: 0.03,
+  nodeTopRatio: 0.1,
+  nodeHeightRatio: 0.66,
+  connectorStrokeFactor: 0.58,
+  connectorOpacity: 0.8,
+  depth1TextSize: 42,
+  depth1TextWeight: 700,
+  depth2TextSize: 36,
+  depth2TextWeight: 500,
+  muteLeafText: true,
+};
+
+const ORGANIZATION_LAYOUT_CANDIDATE_B: OrganizationLayoutSpec = {
+  bodyTop: 0.17,
+  bodyHeight: 0.76,
+  explanationBaselineRatio: 0.12,
+  explanationWidthRatio: 0.28,
+  hierarchyStartRatio: 0.31,
+  hierarchyWidthRatio: 0.69,
+  nodeGapRatio: 0.038,
+  nodeTopRatio: 0.08,
+  nodeHeightRatio: 0.7,
+  connectorStrokeFactor: 0.62,
+  connectorOpacity: 0.82,
+  depth1TextSize: 44,
+  depth1TextWeight: 700,
+  depth2TextSize: 37,
+  depth2TextWeight: 500,
+  muteLeafText: true,
 };
 
 function organizationLayoutSpec(revision?: OrganizationPresentationRevision): OrganizationLayoutSpec {
-  return revision === 'critic-revision-1'
-    ? ORGANIZATION_LAYOUT_REVISION_1
-    : ORGANIZATION_LAYOUT_DEFAULT;
+  if (revision === 'critic-revision-1') return ORGANIZATION_LAYOUT_REVISION_1;
+  if (revision === 'candidate-a-cohesive-bridge') return ORGANIZATION_LAYOUT_CANDIDATE_A;
+  if (revision === 'candidate-b-hierarchy-focus') return ORGANIZATION_LAYOUT_CANDIDATE_B;
+  return ORGANIZATION_LAYOUT_DEFAULT;
 }
 
 type AccumulationLayoutPolishSpec = {
@@ -260,15 +333,58 @@ function styleForBinding(input: {
   return { weight, size, letterSpacing: size >= 60 ? -0.8 : size >= 40 ? -0.5 : -0.25 };
 }
 
+function hierarchyDepthByBlockId(slide: SlideIR): Map<string, number> {
+  const nodes = slide.blocks.filter((block): block is Extract<SemanticBlock, { kind: 'hierarchy-node' }> =>
+    block.kind === 'hierarchy-node');
+  const byId = new Map(nodes.map((node) => [node.id, node]));
+  const result = new Map<string, number>();
+  const depthOf = (node: Extract<SemanticBlock, { kind: 'hierarchy-node' }>): number => {
+    const cached = result.get(node.id);
+    if (cached !== undefined) return cached;
+    const parent = node.parentId === undefined ? undefined : byId.get(node.parentId);
+    const depth = parent === undefined ? 0 : depthOf(parent) + 1;
+    result.set(node.id, depth);
+    return depth;
+  };
+  nodes.forEach(depthOf);
+  return result;
+}
+
+function organizationTypography(
+  style: Pick<TextMeasureRequest, 'weight' | 'size' | 'letterSpacing'>,
+  block: SemanticBlock,
+  depthByBlockId: Map<string, number>,
+  revision?: OrganizationPresentationRevision,
+): Pick<TextMeasureRequest, 'weight' | 'size' | 'letterSpacing'> {
+  if (block.kind !== 'hierarchy-node') return style;
+  const spec = organizationLayoutSpec(revision);
+  const depth = depthByBlockId.get(block.id) ?? 0;
+  const size = depth === 1
+    ? spec.depth1TextSize ?? style.size
+    : depth >= 2
+      ? spec.depth2TextSize ?? style.size
+      : style.size;
+  const weight = depth === 1
+    ? spec.depth1TextWeight ?? style.weight
+    : depth >= 2
+      ? spec.depth2TextWeight ?? style.weight
+      : style.weight;
+  return { weight, size, letterSpacing: size >= 60 ? -0.8 : size >= 40 ? -0.5 : -0.25 };
+}
+
 /** Text measurement follows Composition bindings and hierarchy, not InformationPlan readingOrder. */
 export function informationMeasureRequests(input: {
   slide: SlideIR;
   informationPlan: InformationPlan;
   plan: CompositionPlan;
+  organizationPresentationRevision?: OrganizationPresentationRevision;
 }): TextMeasureRequest[] {
   requirePlanForInformation(input.plan, input.informationPlan);
   if (input.plan.layout.layoutFamily === 'aligned-before-after-spec') return alignedFeatureMeasureRequests(input);
   const regions = new Map(input.plan.regions.map((region) => [region.regionId, region]));
+  const organizationDepths = input.plan.layout.layoutFamily === 'organization-explanation-hierarchy'
+    ? hierarchyDepthByBlockId(input.slide)
+    : new Map<string, number>();
   const blockRequests = [...input.plan.bindings]
     .sort((left, right) => left.readingOrder - right.readingOrder)
     .flatMap((binding) => {
@@ -276,12 +392,23 @@ export function informationMeasureRequests(input: {
       const region = regions.get(binding.regionId);
       if (block === undefined) throw new Error(`SlideIR block을 찾을 수 없습니다: ${binding.blockId}`);
       if (region === undefined) throw new Error(`Composition region을 찾을 수 없습니다: ${binding.regionId}`);
-      return contentRefsForBlock(block).map((ref, index) => ({
-        key: measureKey(block.id, index),
-        text: ref.text,
-        family: 'Pretendard',
-        ...styleForBinding({ plan: input.plan, binding, region, refIndex: index, block }),
-      }));
+      return contentRefsForBlock(block).map((ref, index) => {
+        const baseStyle = styleForBinding({ plan: input.plan, binding, region, refIndex: index, block });
+        const style = input.plan.layout.layoutFamily === 'organization-explanation-hierarchy'
+          ? organizationTypography(
+              baseStyle,
+              block,
+              organizationDepths,
+              input.organizationPresentationRevision,
+            )
+          : baseStyle;
+        return {
+          key: measureKey(block.id, index),
+          text: ref.text,
+          family: 'Pretendard',
+          ...style,
+        };
+      });
     });
   if (input.plan.layout.layoutFamily !== 'accumulation-threshold-consequence') {
     return blockRequests;
@@ -458,13 +585,13 @@ function organizationRegions(
   const explanationBox = {
     x: bodyBox.x,
     y: bodyBox.y,
-    width: bodyBox.width * 0.34,
+    width: bodyBox.width * spec.explanationWidthRatio,
     height: bodyBox.height,
   };
   const hierarchyBox = {
-    x: bodyBox.x + bodyBox.width * 0.39,
+    x: bodyBox.x + bodyBox.width * spec.hierarchyStartRatio,
     y: bodyBox.y,
-    width: bodyBox.width * 0.61,
+    width: bodyBox.width * spec.hierarchyWidthRatio,
     height: bodyBox.height,
   };
   const result: RegionPlacement[] = [
@@ -499,16 +626,16 @@ function organizationRegions(
   const laneHeight = hierarchyBox.height / Math.max(1, maxDepth + 1);
   for (const [depth, regions] of byDepth) {
     const ordered = regions.slice().sort((left, right) => left.order - right.order || left.regionId.localeCompare(right.regionId));
-    const gap = hierarchyBox.width * 0.035;
+    const gap = hierarchyBox.width * spec.nodeGapRatio;
     const slotWidth = (hierarchyBox.width - gap * Math.max(0, ordered.length - 1)) / Math.max(1, ordered.length);
     ordered.forEach((region, index) => {
       result.push({
         region,
         box: {
           x: hierarchyBox.x + index * (slotWidth + gap),
-          y: hierarchyBox.y + depth * laneHeight + laneHeight * 0.12,
+          y: hierarchyBox.y + depth * laneHeight + laneHeight * spec.nodeTopRatio,
           width: Math.max(1, slotWidth),
-          height: laneHeight * 0.62,
+          height: laneHeight * spec.nodeHeightRatio,
         },
       });
     });
@@ -778,7 +905,9 @@ function organizationHierarchyRelations(input: {
   slide: SlideIR;
   plan: CompositionPlan;
   placements: BlockPlacement[];
+  revision?: OrganizationPresentationRevision;
 }): RenderNode[] {
+  const spec = organizationLayoutSpec(input.revision);
   const byBlock = new Map(input.placements.map((placement) => [placement.binding.blockId, placement]));
   const carrierParentId = input.plan.regions.some((region) => region.regionId === 'organization-hierarchy-map')
     ? 'region-organization-hierarchy-map'
@@ -804,8 +933,8 @@ function organizationHierarchyRelations(input: {
         box: { x: Math.min(x1, x2), y: Math.min(y1, y2), width: Math.max(1, Math.abs(x2 - x1)), height: Math.max(1, Math.abs(y2 - y1)) },
         pathData: `M ${x1} ${y1} V ${midY} H ${x2} V ${y2}`,
         stroke: input.plan.styleIntent.palette.connector,
-        strokeWidth: Math.max(2, input.plan.styleIntent.motif.strokeWidth * 0.45),
-        opacity: 0.72,
+        strokeWidth: Math.max(2, input.plan.styleIntent.motif.strokeWidth * spec.connectorStrokeFactor),
+        opacity: spec.connectorOpacity,
         zIndex: 1,
       })];
     });
@@ -1229,6 +1358,7 @@ function blockTextNodes(input: {
   visualRole?: 'ordered-step' | 'threshold-event' | 'consequence-result';
   align?: 'start' | 'center' | 'end';
   lineGap?: number;
+  colorOverride?: string;
 }): RenderNode[] {
   const block = input.slide.blocks.find((candidate) => candidate.id === input.placement.binding.blockId);
   if (block === undefined) throw new Error(`SlideIR block을 찾을 수 없습니다: ${input.placement.binding.blockId}`);
@@ -1257,11 +1387,11 @@ function blockTextNodes(input: {
       x: input.placement.x,
       baselineY: baseline,
       align: input.align ?? 'center',
-      color: accented || isResultValue
+      color: input.colorOverride ?? (accented || isResultValue
         ? input.plan.styleIntent.accent.color
         : input.placement.binding.prominence <= 2
           ? input.plan.styleIntent.palette.mutedInk
-          : input.plan.styleIntent.palette.ink,
+          : input.plan.styleIntent.palette.ink),
       measurement,
       fonts: input.fonts,
       zIndex: 3,
@@ -1842,6 +1972,8 @@ export function buildInformationRenderTree(input: {
     }));
   } else if (isOrganizationLayout) {
     const isGuidedOrganization = input.plan.regions.some((region) => region.regionId === 'organization-body');
+    const organizationSpec = organizationLayoutSpec(input.organizationPresentationRevision);
+    const organizationDepths = hierarchyDepthByBlockId(input.slide);
     const blockPlacements = (isGuidedOrganization ? organizationBlockPlacements : organizationBaselineBlockPlacements)({
       slide: input.slide,
       plan: input.plan,
@@ -1856,8 +1988,13 @@ export function buildInformationRenderTree(input: {
       plan: input.plan,
       placements: blockPlacements.filter((placement) =>
         input.slide.blocks.find((block) => block.id === placement.binding.blockId)?.kind === 'hierarchy-node'),
+      ...(input.organizationPresentationRevision === undefined
+        ? {}
+        : { revision: input.organizationPresentationRevision }),
     }));
     for (const blockPlacement of blockPlacements) {
+      const block = input.slide.blocks.find((candidate) => candidate.id === blockPlacement.binding.blockId);
+      const hierarchyDepth = block === undefined ? undefined : organizationDepths.get(block.id);
       nodes.push(...blockTextNodes({
         slide: input.slide,
         plan: input.plan,
@@ -1866,6 +2003,9 @@ export function buildInformationRenderTree(input: {
         fonts: input.fonts,
         compositionRegionId: blockPlacement.binding.regionId,
         align: ['message', 'annotation'].includes(blockPlacement.region.role) ? 'start' : 'center',
+        ...(organizationSpec.muteLeafText && hierarchyDepth !== undefined && hierarchyDepth >= 2
+          ? { colorOverride: input.plan.styleIntent.palette.mutedInk }
+          : {}),
       }));
     }
   } else {

@@ -6,6 +6,7 @@
   "dependencies": {
     "@game-presentation/composition-engine": "workspace:*",
     "@game-presentation/contracts": "workspace:*",
+    "@game-presentation/pptx-exporter": "workspace:*",
     "@game-presentation/preference-learning": "workspace:*",
     "@game-presentation/reference-engine": "workspace:*"
   }

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  ArtifactReadinessJudgementSchema,
   FakeAIProvider,
   VisualCriticFixtureSchema,
   VisualCritiqueReportSchema,
@@ -42,6 +43,36 @@ function report(artifactId: string) {
 }
 
 describe('visual critic benchmark', () => {
+  it('stores a rejected readiness judgement without changing Teacher quality or preference', () => {
+    const judgement = ArtifactReadinessJudgementSchema.parse({
+      schemaVersion: '0.1',
+      judgementId: 'judgement-organization-structure-best-known-not-ready',
+      artifactId: 'organization-structure-candidate-b-hierarchy-focus',
+      evaluatedPng: {
+        path: 'packages/renderer/fixtures/organization-structure/organization-structure-candidate-b-hierarchy-focus.png',
+        sha256: '528237fc7e4aa2165aad500706901dc3f315d1703e54757dd44dfdc0326bfc12',
+      },
+      decidedBy: 'user',
+      decision: 'rejected-as-ready',
+      decidedAt: '2026-09-05T00:00:00.000Z',
+      readyPositiveFixture: false,
+      reason: '구조와 정보 전달은 정상이나 현재 시각 품질은 portfolio-ready 수준으로 승인하지 않음',
+      separation: {
+        teacherQualityAffected: false,
+        preferenceEventRecorded: false,
+      },
+    });
+    expect(judgement).toMatchObject({
+      decision: 'rejected-as-ready',
+      readyPositiveFixture: false,
+      separation: { teacherQualityAffected: false, preferenceEventRecorded: false },
+    });
+    expect(() => ArtifactReadinessJudgementSchema.parse({
+      ...judgement,
+      readyPositiveFixture: true,
+    })).toThrow('Ready Positive 상태는 사용자의 명시적 승인/거절 판단과 일치해야 합니다.');
+  });
+
   it('matches human-labelled core issue and checks suggestion specificity', () => {
     const fixture = VisualCriticFixtureSchema.parse({
       schemaVersion: '0.1',

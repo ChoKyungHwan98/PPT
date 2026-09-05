@@ -1,6 +1,7 @@
 # 기획서 디자이너 V1 구현 계획서
 
-상태: 단계 0 부분 완료 · 단계 1~5 완료 · 단계 6 미완료
+상태: 단계 0 부분 완료 · 단계 1~5 완료 · 단계 6 부분 완료 · 단계 7~9 완료  
+종합: **V1 functional vertical slice complete · portfolio-quality generation not yet complete**
 작성 기준: V5 + V6 + Architecture Polish + 현재 저장소 조사 결과  
 원칙: 기존 코드를 최대한 재사용하고, Balance 전용 경로는 확장하지 않는다.
 
@@ -291,7 +292,7 @@ MEC-01 전용 Retrieval, Composition, Renderer 경로는 만들지 않는다.
 
 ### 단계 6 — 실제 화면 디자인 검토
 
-현재 상태: **calibration 미완료**. 실제 PNG 입력, 작은 context, 구조화 결과, token·비용 trace는 구현됐다. 그러나 Ready Positive Fixture가 0개이므로 calibration을 완료할 수 없다. MEC-01 Stage 7 단일 revision cycle은 완료됐으며 다시 실행하지 않는다. Dodge Before/After artifact도 사용자 평가에서 `portfolio-not-ready / rejected-as-ready-candidate`로 판정됐으므로 Positive 확보나 단계 6 완료의 근거로 사용하지 않는다.
+현재 상태: **부분 완료 · calibration 미완료**. 실제 PNG 입력, 작은 context, 구조화 결과, token·비용 trace와 targeted revision 연결은 검증됐다. 그러나 Ready Positive Fixture가 0개이므로 제출 품질 calibration은 완료할 수 없다. MEC-01과 Organization의 Stage 7 단일 revision cycle은 완료됐으며 다시 실행하지 않는다. Dodge Before/After artifact도 사용자 평가에서 `portfolio-not-ready / rejected-as-ready-candidate`로 판정됐으므로 Positive 확보나 단계 6 완료의 근거로 사용하지 않는다.
 
 - 실제 PNG와 작은 구조 요약만 AI에 전달한다.
 - 디자인 품질을 정해진 항목으로 평가한다.
@@ -305,7 +306,7 @@ MEC-01 전용 Retrieval, Composition, Renderer 경로는 만들지 않는다.
 
 ### 단계 7 — 최대 한 번의 부분 수정
 
-현재 상태: **MEC-01 artifact 사이클 완료**. `f-relation-clarity-2`는 해결됐고 `f-space-use-1`은 미해결로 남았다. Hard Gate와 Source Fidelity는 PASS를 유지했으며 새 error는 없다. 결과는 `intermediate-golden-case / revised-needs-review`로 보존하고 추가 자동 수정 또는 `ready` 강제 승격을 금지한다. 이 완료는 ready Positive Fixture 확보를 뜻하지 않는다.
+현재 상태: **완료**. MEC-01과 Organization에서 최대 1회의 targeted revision cycle을 증명했다. MEC-01의 `f-relation-clarity-2`는 해결됐고 `f-space-use-1`은 미해결로 남았다. Organization 결과는 구조·원문·관계를 보존한 채 revision cycle을 닫았지만 사용자가 portfolio-ready가 아니라고 판정했다. 두 결과 모두 추가 자동 수정 또는 `ready` 강제 승격을 금지한다.
 
 - 검토 결과 중 안전하게 적용할 수 있는 수정만 반영한다.
 - 다시 렌더링하고 Hard Gate를 다시 실행한다.
@@ -319,19 +320,24 @@ MEC-01 전용 Retrieval, Composition, Renderer 경로는 만들지 않는다.
 
 ### 단계 8 — 사용자 승인과 선택 기록
 
+현재 상태: **완료**. Organization best-known artifact에 대한 사용자 판단을 `rejected-as-ready`로 기록했다. 이 기록은 Teacher 평가나 Preference Event로 변환하지 않는다.
+
 - 사용자는 승인 또는 거절할 수 있다.
 - 선택 이유는 선택 사항이다.
-- 결과와 당시 조건을 Preference Event로 저장한다.
-- 이 기록은 즉시 디자인 규칙을 바꾸지 않는다.
+- 제출 가능성 판단과 당시 artifact를 별도 readiness judgement로 저장한다.
+- 상대적 취향 선택이 명시된 경우에만 별도 Preference Event를 만들 수 있으며, readiness 판단을 즉시 디자인 규칙으로 바꾸지 않는다.
 
 완료 기준:
 
-- 승인과 거절이 모두 저장된다.
+- 승인 또는 거절 판단을 저장할 수 있다.
 - 어떤 내용과 어떤 구성에 대한 판단이었는지 나중에 확인할 수 있다.
+- Teacher 품질, 사용자 취향, Ready 품질 상태가 서로 분리된다.
 
 ### 단계 9 — 출력 증거 생성
 
-승인된 한 장에서 다음을 생성한다.
+현재 상태: **완료**. `best-known / not-ready` Organization artifact를 출력 기능 검증 전용으로 사용해 네 형식을 생성했다. 이 출력 성공은 Ready Positive 승격 근거가 아니다.
+
+사용자가 판단을 마친 한 장에서 다음을 생성한다.
 
 - PNG 실제 렌더
 - HTML 한 페이지
@@ -458,7 +464,7 @@ Local과 OpenRouter 중 무엇을 먼저 붙일지는 실제 시험 결과와 �
 
 새 package는 실행 순서를 관리하는 `authoring-harness` 하나만 허용한다.
 
-Balance 전용 `story-planner`, `html-exporter`, `pptx-exporter`는 기존 baseline 보호에 필요한 수정 외에는 확장하지 않는다.
+Balance 전용 `story-planner`, `html-exporter`는 기존 baseline 보호에 필요한 수정 외에는 확장하지 않는다. `pptx-exporter`는 기존 Balance 출력을 유지하면서 Stage 9의 범용 RenderTree 호환 출력만 최소 확장한다.
 
 ## 12. 전체 완료 조건
 
@@ -472,7 +478,7 @@ Balance 전용 `story-planner`, `html-exporter`, `pptx-exporter`는 기존 basel
 6. AI Critic은 Hard Gate 통과 후에만 실행된다.
 7. 수정은 최대 한 번이며 원문을 바꾸지 않는다.
 8. 사용자가 승인하거나 거절할 수 있다.
-9. 선택 결과가 Preference Event로 저장된다.
+9. 사용자 승인 또는 거절이 별도 readiness judgement로 저장된다.
 10. PNG, HTML, PDF, 편집 가능한 PPTX 한 장이 Output Parity를 만족한다.
 11. Balance baseline이 깨지지 않는다.
 12. 기존 테스트와 신규 테스트가 모두 통과한다.
@@ -490,17 +496,12 @@ Balance 전용 `story-planner`, `html-exporter`, `pptx-exporter`는 기존 basel
 - 테이블 디자이너 저장소와 실제 코드를 공유해야 하는 경우
 - 계획에 없는 대규모 UI 변경이 필요한 경우
 
-## 14. 승인 후 첫 작업 묶음
+## 14. V1 종료 상태
 
-승인 직후에는 단계 0부터 단계 2까지만 먼저 구현한다.
+V1은 입력부터 사용자 판단과 네 가지 출력까지 기능 흐름을 닫았다. Ready Positive Fixture는 아직 0개이므로 자동 디자인 품질이 완성됐다는 뜻은 아니다.
 
-첫 보고 내용:
-
-- 고정한 fixture
-- 생성된 SlideIR
-- 생성된 Information Plan
-- 원문·숫자·관계 보존 테스트
-- 변경한 파일
-- 다음 단계에서 필요한 판단
-
-이 결과가 통과하면 Reference Retrieval과 Composition 연결로 진행한다.
+- 기능 흐름: 완료
+- portfolio-quality generation: 미완료
+- Organization best-known artifact: `best-known / not-ready`
+- Ready Positive Fixture: 0개
+- 다음 품질 작업: V1.1에서 별도 진행

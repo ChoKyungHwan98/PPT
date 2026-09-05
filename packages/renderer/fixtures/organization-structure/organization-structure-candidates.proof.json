@@ -1,0 +1,103 @@
+{
+  "schemaVersion": "0.1",
+  "artifactId": "organization-structure-targeted-candidates",
+  "baseArtifact": "packages/renderer/fixtures/organization-structure/organization-structure-teacher-guided-revision-1.png",
+  "candidateGenerationPasses": 1,
+  "automaticAdditionalRevisionAllowed": false,
+  "readyPositiveFixture": false,
+  "semanticInvariant": {
+    "slideId": "generic-combat-system-organization",
+    "informationPlanId": "information-generic-combat-system-organization",
+    "compositionPlanId": "composition-43f946767cb6104f",
+    "sourceSpanIds": [
+      "title",
+      "message",
+      "root",
+      "player",
+      "move-dodge",
+      "attack-defense",
+      "boss",
+      "pattern",
+      "phase"
+    ],
+    "relationIds": [
+      "part-of-1",
+      "part-of-2",
+      "part-of-3",
+      "part-of-4",
+      "part-of-5",
+      "part-of-6"
+    ],
+    "changed": false
+  },
+  "candidates": [
+    {
+      "id": "candidate-a",
+      "name": "Cohesive Bridge",
+      "intent": "설명과 구조도 사이 간격을 줄이고 두 영역의 시작 높이를 맞춰 하나의 논지로 묶는다.",
+      "pngPath": "packages/renderer/fixtures/organization-structure/organization-structure-candidate-a-cohesive-bridge.png",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 43513,
+      "sha256": "d190d2a2aea7e9fad981798c31e0429fdf1221db8d267f4cc12a1bfa3d19af0e",
+      "renderTreeFingerprint": "8900baee8dfddb35777fd280e6b3469e7945dfa3f2ae6fd9f0385c619a5acc58",
+      "hardGate": {
+        "passed": true,
+        "programFindingCount": 0,
+        "sourceFidelityFindingCount": 0
+      }
+    },
+    {
+      "id": "candidate-b",
+      "name": "Hierarchy Focus",
+      "intent": "구조도 면적과 계층별 글자 위계를 조금 더 키워 책임·소속 구조의 존재감을 높인다.",
+      "pngPath": "packages/renderer/fixtures/organization-structure/organization-structure-candidate-b-hierarchy-focus.png",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 43563,
+      "sha256": "528237fc7e4aa2165aad500706901dc3f315d1703e54757dd44dfdc0326bfc12",
+      "renderTreeFingerprint": "ad12a55e19b6e157b4772db9bdf7adc02a1f1b46e56cab6dc3f2b0adf2c33633",
+      "hardGate": {
+        "passed": true,
+        "programFindingCount": 0,
+        "sourceFidelityFindingCount": 0
+      }
+    }
+  ],
+  "criticComparison": {
+    "prepared": true,
+    "executed": false,
+    "allowedFutureCallCount": 1,
+    "singleImageInput": "packages/renderer/fixtures/organization-structure/organization-structure-candidates-comparison.png",
+    "candidateOrder": [
+      "candidate-a",
+      "candidate-b"
+    ],
+    "rubric": [
+      "설명 영역과 구조도의 응집력",
+      "구조도의 존재감과 계층 위계",
+      "공간 활용",
+      "관계선 가독성",
+      "portfolio submission readiness"
+    ],
+    "note": "사용자 확인 후 한 번의 비교 Critic 호출에만 사용한다."
+  },
+  "comparisonPngPath": "packages/renderer/fixtures/organization-structure/organization-structure-candidates-comparison.png",
+  "fontHashes": [
+    {
+      "family": "Pretendard",
+      "weight": 400,
+      "sha256": "6d0af5258997aec7354a6e340fc2325ba321c410ca48b3af858c8c3d6e92a324"
+    },
+    {
+      "family": "Pretendard",
+      "weight": 700,
+      "sha256": "c16b88c670d23e83fa1170c954cbc4822d3b8dad3c3cde15d798a94b43d97985"
+    },
+    {
+      "family": "Pretendard",
+      "weight": 800,
+      "sha256": "eedbd2877218242323bdff816684f7f5c325e54ae820d5b78eec9a5e5c7edef6"
+    }
+  ]
+}

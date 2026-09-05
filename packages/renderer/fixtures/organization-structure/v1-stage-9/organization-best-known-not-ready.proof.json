@@ -1,0 +1,115 @@
+{
+  "schemaVersion": "0.1",
+  "artifactId": "organization-structure-candidate-b-hierarchy-focus",
+  "classification": "best-known / not-ready",
+  "purpose": "V1 output-pipeline verification only",
+  "readyPositiveFixture": false,
+  "furtherRevisionAllowed": false,
+  "sourceArtifact": {
+    "png": "packages/renderer/fixtures/organization-structure/organization-structure-candidate-b-hierarchy-focus.png",
+    "renderTree": "packages/renderer/fixtures/organization-structure/organization-structure-candidate-b-hierarchy-focus.render-tree.json",
+    "renderTreeFingerprint": "ad12a55e19b6e157b4772db9bdf7adc02a1f1b46e56cab6dc3f2b0adf2c33633"
+  },
+  "stage8": {
+    "schemaVersion": "0.1",
+    "judgementId": "judgement-organization-structure-best-known-not-ready",
+    "artifactId": "organization-structure-candidate-b-hierarchy-focus",
+    "evaluatedPng": {
+      "path": "packages/renderer/fixtures/organization-structure/organization-structure-candidate-b-hierarchy-focus.png",
+      "sha256": "528237fc7e4aa2165aad500706901dc3f315d1703e54757dd44dfdc0326bfc12"
+    },
+    "decidedBy": "user",
+    "decision": "rejected-as-ready",
+    "decidedAt": "2026-09-05T00:00:00.000Z",
+    "readyPositiveFixture": false,
+    "reason": "구조와 정보 전달은 정상이나 현재 시각 품질은 portfolio-ready 수준으로 승인하지 않음",
+    "separation": {
+      "teacherQualityAffected": false,
+      "preferenceEventRecorded": false
+    }
+  },
+  "stage9": {
+    "outputs": {
+      "png": "packages/renderer/fixtures/organization-structure/v1-stage-9/organization-best-known-not-ready.png",
+      "html": "packages/renderer/fixtures/organization-structure/v1-stage-9/organization-best-known-not-ready.html",
+      "pdf": "packages/renderer/fixtures/organization-structure/v1-stage-9/organization-best-known-not-ready.pdf",
+      "editablePptx": "packages/renderer/fixtures/organization-structure/v1-stage-9/organization-best-known-not-ready.editable.pptx",
+      "renderTree": "packages/renderer/fixtures/organization-structure/v1-stage-9/organization-best-known-not-ready.render-tree.json"
+    },
+    "semanticParity": {
+      "requiredText": [
+        "전투 시스템 역할 구조",
+        "전투 규칙의 책임 범위를 기능 단위로 분리한다.",
+        "전투 시스템 책임자",
+        "플레이어 전투",
+        "이동/회피",
+        "공격/방어",
+        "보스 전투",
+        "패턴 선택",
+        "페이즈 전환"
+      ],
+      "relationIds": [
+        "part-of-1",
+        "part-of-2",
+        "part-of-3",
+        "part-of-4",
+        "part-of-5",
+        "part-of-6"
+      ],
+      "missingHtmlText": [],
+      "changed": false
+    },
+    "hardGate": {
+      "passed": true,
+      "programFindingCount": 0,
+      "sourceFidelityFindingCount": 0
+    },
+    "pngValidation": {
+      "width": 1920,
+      "height": 1080,
+      "bytes": 43563,
+      "sha256": "528237fc7e4aa2165aad500706901dc3f315d1703e54757dd44dfdc0326bfc12"
+    },
+    "pdfValidation": {
+      "pageCount": 1,
+      "widthPoints": 1440,
+      "heightPoints": 810,
+      "extractedText": "전투 시스템 역할 구조 전투 규칙의 책임 범위를 기능 단위로 분리한다.   전투 시스템 책임자 플레이어 전투 이동/회피   공격/방어 보스 전투 패턴 선택   페이즈 전환",
+      "missingRequiredText": [],
+      "embeddedFontProgramCount": 3,
+      "imagePaintCount": 0,
+      "vectorPaintCount": 11,
+      "passed": true
+    },
+    "editablePptxValidation": {
+      "slideCount": 1,
+      "editableTextRunCount": 9,
+      "nativeShapeCount": 27,
+      "nativeLineCount": 18,
+      "pictureCount": 0,
+      "mediaAssetCount": 0,
+      "missingRequiredText": [],
+      "missingRelationIds": [],
+      "pretendardDeclared": true,
+      "oneSlide16By9": true,
+      "passed": true
+    }
+  },
+  "fontHashes": [
+    {
+      "family": "Pretendard",
+      "weight": 400,
+      "sha256": "6d0af5258997aec7354a6e340fc2325ba321c410ca48b3af858c8c3d6e92a324"
+    },
+    {
+      "family": "Pretendard",
+      "weight": 700,
+      "sha256": "c16b88c670d23e83fa1170c954cbc4822d3b8dad3c3cde15d798a94b43d97985"
+    },
+    {
+      "family": "Pretendard",
+      "weight": 800,
+      "sha256": "eedbd2877218242323bdff816684f7f5c325e54ae820d5b78eec9a5e5c7edef6"
+    }
+  ]
+}

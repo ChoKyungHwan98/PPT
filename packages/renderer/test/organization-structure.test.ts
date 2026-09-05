@@ -17,7 +17,11 @@ import {
 } from '../../source-ingestion/src/authored-hierarchy.js';
 import type { FontAsset } from '../src/font.js';
 import { runHardGate } from '../src/hard-gate.js';
-import { buildInformationRenderTree, informationMeasureRequests } from '../src/information-layout.js';
+import {
+  buildInformationRenderTree,
+  informationMeasureRequests,
+  type OrganizationPresentationRevision,
+} from '../src/information-layout.js';
 import type { TextMeasurement } from '../src/measure.js';
 
 const referenceDir = fileURLToPath(new URL('../../reference-engine/references/external-master-2025-v1/', import.meta.url));
@@ -101,5 +105,61 @@ describe('Organization single targeted revision', () => {
       informationPlan: prepared.informationPlan,
       tree: revised,
     })).toMatchObject({ passed: true, programFindings: [], sourceFidelityFindings: [] });
+  });
+
+  it('keeps both targeted candidates source-equivalent while strengthening hierarchy presentation', () => {
+    const prepared = prepare();
+    const buildCandidate = (revision: OrganizationPresentationRevision) => {
+      const measures = measurements(informationMeasureRequests({
+        slide: prepared.slide,
+        informationPlan: prepared.informationPlan,
+        plan: prepared.plan,
+        organizationPresentationRevision: revision,
+      }));
+      return buildInformationRenderTree({
+        slide: prepared.slide,
+        informationPlan: prepared.informationPlan,
+        plan: prepared.plan,
+        measures,
+        fonts,
+        organizationPresentationRevision: revision,
+      });
+    };
+    const revision1 = buildCandidate('critic-revision-1');
+    const candidateA = buildCandidate('candidate-a-cohesive-bridge');
+    const candidateB = buildCandidate('candidate-b-hierarchy-focus');
+    const textContent = (tree: typeof revision1) => tree.nodes
+      .filter((node) => node.kind === 'text')
+      .map((node) => node.text);
+    const relations = (tree: typeof revision1) => tree.nodes
+      .flatMap((node) => node.relationId === undefined ? [] : [node.relationId])
+      .sort();
+    const connectorWidth = (tree: typeof revision1) => {
+      const connector = tree.nodes.find((node) => node.nodeId === 'organization-relation-part-of-1');
+      if (connector?.kind !== 'shape') throw new Error('missing organization connector');
+      if (connector.paint.strokeWidth === undefined) throw new Error('missing organization connector width');
+      return connector.paint.strokeWidth;
+    };
+    const fontSize = (tree: typeof revision1, nodeId: string) => {
+      const node = tree.nodes.find((candidate) => candidate.nodeId === nodeId);
+      if (node?.kind !== 'text') throw new Error(`missing organization text: ${nodeId}`);
+      return node.font.size;
+    };
+    for (const candidate of [candidateA, candidateB]) {
+      expect(candidate.compositionPlanId).toBe(revision1.compositionPlanId);
+      expect(textContent(candidate)).toEqual(textContent(revision1));
+      expect(relations(candidate)).toEqual(relations(revision1));
+      expect(connectorWidth(candidate)).toBeGreaterThan(connectorWidth(revision1));
+      expect(fontSize(candidate, 'text-block-root-0'))
+        .toBeGreaterThan(fontSize(candidate, 'text-block-player-0'));
+      expect(fontSize(candidate, 'text-block-player-0'))
+        .toBeGreaterThan(fontSize(candidate, 'text-block-move-dodge-0'));
+      expect(runHardGate({
+        slide: prepared.slide,
+        informationPlan: prepared.informationPlan,
+        tree: candidate,
+      })).toMatchObject({ passed: true, programFindings: [], sourceFidelityFindings: [] });
+    }
+    expect(candidateA.deterministicFingerprint).not.toBe(candidateB.deterministicFingerprint);
   });
 });

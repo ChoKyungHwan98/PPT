@@ -71,6 +71,40 @@ export const UserPositiveApprovalSchema = z.strictObject({
 
 export type UserPositiveApproval = z.infer<typeof UserPositiveApprovalSchema>;
 
+/**
+ * 한 artifact가 제출 가능한 Ready Positive인지에 대한 사용자의 명시적 판단.
+ * Teacher 품질 및 취향 학습 이벤트와 분리해 저장한다.
+ */
+export const ArtifactReadinessJudgementSchema = z.strictObject({
+  schemaVersion: z.literal('0.1'),
+  judgementId: z.string().min(1),
+  artifactId: z.string().min(1),
+  evaluatedPng: z.strictObject({
+    path: z.string().min(1),
+    sha256: z.string().regex(/^[a-f0-9]{64}$/),
+  }),
+  decidedBy: z.literal('user'),
+  decision: z.enum(['approved-as-ready', 'rejected-as-ready']),
+  decidedAt: z.iso.datetime(),
+  readyPositiveFixture: z.boolean(),
+  reason: z.string().min(1),
+  separation: z.strictObject({
+    teacherQualityAffected: z.literal(false),
+    preferenceEventRecorded: z.literal(false),
+  }),
+}).superRefine((judgement, context) => {
+  const expectedReady = judgement.decision === 'approved-as-ready';
+  if (judgement.readyPositiveFixture !== expectedReady) {
+    context.addIssue({
+      code: 'custom',
+      path: ['readyPositiveFixture'],
+      message: 'Ready Positive 상태는 사용자의 명시적 승인/거절 판단과 일치해야 합니다.',
+    });
+  }
+});
+
+export type ArtifactReadinessJudgement = z.infer<typeof ArtifactReadinessJudgementSchema>;
+
 export const PositiveFixtureAuditSchema = z.strictObject({
   hierarchyClear: z.literal(true),
   readingOrderClear: z.literal(true),

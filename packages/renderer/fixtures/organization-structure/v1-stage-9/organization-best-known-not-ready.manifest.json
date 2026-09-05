@@ -1,0 +1,12 @@
+{
+  "schemaVersion": "0.1",
+  "renderTreeId": "render-composition-43f946767cb6104f",
+  "deterministicFingerprint": "ad12a55e19b6e157b4772db9bdf7adc02a1f1b46e56cab6dc3f2b0adf2c33633",
+  "outputFingerprint": "882cd3549edc63b8ccc2598de0db21552d89d2006678edc0241a2fd1d1052cd2",
+  "outputs": {
+    "html": "organization-best-known-not-ready.html",
+    "png": "organization-best-known-not-ready.png",
+    "pdf": "organization-best-known-not-ready.pdf",
+    "renderTree": "organization-best-known-not-ready.render-tree.json"
+  }
+}
