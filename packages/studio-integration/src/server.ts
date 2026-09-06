@@ -14,7 +14,7 @@ import { LocalProjectStore } from './project-store.js';
 import { trainingStartDecision } from './training-workflow.js';
 import { assessQualityRuntimeEnvironment, prepareQualityTrainingRun, requireProductionDatasetId } from './training-workflow.js';
 import { buildCurrentProductionDataset, productionTrainingSummary } from './training-data.js';
-import { runTrainedVisualCriticBenchmark } from './model-benchmark.js';
+import { resolveBenchmarkDatasetForModel, runTrainedVisualCriticBenchmark } from './model-benchmark.js';
 
 const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../../..');
 const port = Number(process.env.PPT_DESIGNER_PORT ?? '8766');
@@ -194,13 +194,13 @@ const server = createServer(async (request, response) => {
     }
     const benchmarkModelMatch = url.pathname.match(/^\/api\/designer\/models\/([^/]+)\/benchmark$/u);
     if (request.method === 'POST' && benchmarkModelMatch) {
-      const manifest = CriticDatasetManifestSchema.parse(JSON.parse(await readFile(resolve(repositoryRoot, 'packages/local-training/data/critic-smoke-v1.manifest.json'), 'utf8')));
-      const eligibility = assessTrainingEligibility(manifest);
       const modelId = decodeURIComponent(benchmarkModelMatch[1]!); const registry = await readTrainedRegistry(); const model = registry.models.find((entry) => entry.modelId === modelId);
       if (model === undefined) throw new Error('등록되지 않은 학습 모델입니다.');
-      if (!eligibility.benchmark) { json(response, 409, { error: '현재 자료로는 신뢰할 수 있는 모델 평가를 실행할 수 없습니다.', eligibility, modelId }); return; }
+      let benchmarkDataset;
+      try { benchmarkDataset = await resolveBenchmarkDatasetForModel({ trainingDataRoot, model }); }
+      catch (error) { json(response, 409, { error: error instanceof Error ? error.message : String(error), modelId, trainingDatasetId: model.trainingDatasetId }); return; }
       const pythonExecutable = process.env.LOCAL_TRAINING_PYTHON ?? 'python'; const launcherPath = resolve(repositoryRoot, 'packages/local-training/scripts/infer_visual_critic.py');
-      const benchmark = await runTrainedVisualCriticBenchmark({ manifest, repositoryRoot,
+      const benchmark = await runTrainedVisualCriticBenchmark({ manifest: benchmarkDataset.manifest, repositoryRoot,
         modelProvider: new PeftVisualCriticProvider({ pythonExecutable, launcherPath, baseModel: model.baseModel, adapterPath: resolve(repositoryRoot, model.adapterPath), modelId }),
         baselineProvider: new BaseTransformersVisualCriticProvider({ pythonExecutable, launcherPath, baseModel: model.baseModel, modelId: `${model.baseModel}:baseline` }),
       });

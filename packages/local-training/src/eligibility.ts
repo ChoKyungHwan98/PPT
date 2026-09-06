@@ -15,5 +15,5 @@ export function assessTrainingEligibility(manifest: CriticDatasetManifest | Prod
   if (humanLabelCount < 20) reasons.push('품질 학습에는 사람 평가 20건 이상이 필요합니다.');
   if (readyPositiveCount < 3) reasons.push('품질 기준을 잡을 Ready Positive 3건 이상이 필요합니다.');
   if (validationCount < 2) reasons.push('독립 검증 자료가 2건 이상 필요합니다.');
-  return { qualityTraining: production && reasons.length === 0, smokeTraining: !production && humanLabelCount >= 2 && trainCount > 0 && validationCount > 0, benchmark: production && humanLabelCount >= 8 && readyPositiveCount >= 2, humanLabelCount, readyPositiveCount, rejectCount, pairwiseCount, trainCount, validationCount, reasons };
+  return { qualityTraining: production && reasons.length === 0, smokeTraining: !production && humanLabelCount >= 2 && trainCount > 0 && validationCount > 0, benchmark: production && humanLabelCount >= 8 && readyPositiveCount >= 2 && validationCount >= 2, humanLabelCount, readyPositiveCount, rejectCount, pairwiseCount, trainCount, validationCount, reasons };
 }
