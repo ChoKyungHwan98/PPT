@@ -8,6 +8,8 @@ on:
 jobs:
   verify:
     runs-on: ubuntu-latest
+    env:
+      LOCALAPPDATA: ${{ runner.temp }}/localappdata
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -19,4 +21,13 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec playwright install --with-deps chromium
+      - name: Install pinned Pretendard fonts
+        run: |
+          FONT_DIR="$LOCALAPPDATA/Microsoft/Windows/Fonts"
+          mkdir -p "$FONT_DIR"
+          for WEIGHT in Regular Bold ExtraBold; do
+            curl --fail --location --silent --show-error \
+              "https://raw.githubusercontent.com/orioncactus/pretendard/v1.3.9/packages/pretendard/dist/public/static/Pretendard-${WEIGHT}.otf" \
+              --output "$FONT_DIR/Pretendard-${WEIGHT}.otf"
+          done
       - run: pnpm verify
