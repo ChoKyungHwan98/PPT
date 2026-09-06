@@ -1,15 +1,25 @@
 import { createServer, type IncomingMessage, type ServerResponse } from 'node:http';
-import { readFile } from 'node:fs/promises';
+import { readFile, writeFile } from 'node:fs/promises';
 import { basename, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { OpenAICompatibleVisualCriticProvider, OpenRouterAIProvider } from '@game-presentation/renderer/studio';
-import { ModelRegistryRouter, runtimeModelRegistry } from '@game-presentation/authoring-harness';
+import { activateTrainedModel, ModelRegistryRouter, rollbackTrainedModel, runtimeModelRegistry } from '@game-presentation/authoring-harness';
 import { CriticDatasetManifestSchema, TrainingRunRecordSchema } from '@game-presentation/local-training';
+import { TrainedModelRegistrySchema } from '@game-presentation/contracts';
 import { recordStudioUserDecision, runStudioDesignJob, runStudioVisualCritic } from './design-job.js';
 
 const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../../..');
 const port = Number(process.env.PPT_DESIGNER_PORT ?? '8766');
 const origin = `http://127.0.0.1:${port}`;
+const trainedRegistryPath = resolve(repositoryRoot, 'packages/local-training/artifacts/r9-model-registry.json');
+
+async function readTrainedRegistry() {
+  return TrainedModelRegistrySchema.parse(JSON.parse(await readFile(trainedRegistryPath, 'utf8')));
+}
+
+async function saveTrainedRegistry(registry: ReturnType<typeof TrainedModelRegistrySchema.parse>) {
+  await writeFile(trainedRegistryPath, `${JSON.stringify(registry, null, 2)}\n`, 'utf8');
+}
 
 function json(response: ServerResponse, status: number, value: unknown) {
   response.statusCode = status;
@@ -59,6 +69,20 @@ const server = createServer(async (request, response) => {
         latestRun: run,
       });
       return;
+    }
+    if (request.method === 'GET' && url.pathname === '/api/designer/models') {
+      const registry = await readTrainedRegistry();
+      json(response, 200, registry);
+      return;
+    }
+    const activateModelMatch = url.pathname.match(/^\/api\/designer\/models\/([^/]+)\/activate$/u);
+    if (request.method === 'POST' && activateModelMatch) {
+      const registry = activateTrainedModel(await readTrainedRegistry(), decodeURIComponent(activateModelMatch[1]!), new Date().toISOString());
+      await saveTrainedRegistry(registry); json(response, 200, registry); return;
+    }
+    if (request.method === 'POST' && url.pathname === '/api/designer/models/rollback') {
+      const registry = rollbackTrainedModel(await readTrainedRegistry(), new Date().toISOString());
+      await saveTrainedRegistry(registry); json(response, 200, registry); return;
     }
     if (request.method === 'POST' && url.pathname === '/api/designer/jobs') {
       const job = await runStudioDesignJob(await body(request) as never, { repositoryRoot, publicBaseUrl: origin });

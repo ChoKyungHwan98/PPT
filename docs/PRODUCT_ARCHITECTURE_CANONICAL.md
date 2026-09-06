@@ -1,6 +1,6 @@
 # Game PPT Designer Next — Canonical Product Architecture
 
-상태: **R0 Canonical**  
+상태: **R0–R9 integrated functional proof**
 적용일: 2026-09-05
 
 이 문서는 Game PPT Designer Next의 최상위 제품·구조 기준이다. 하위 문서나 과거 실험 기록이 이 문서와 충돌하면, 현재 구현 범위에서는 이 문서를 우선한다. 이 문서는 UI 시안이나 특정 장표 스타일을 고정하지 않는다.
@@ -153,7 +153,7 @@ Project
 └─ 모델 관리
 ```
 
-이는 제품 정보 구조의 장기 경계다. R0/R1에서 Dashboard나 Workbench UI를 새로 구현하지 않는다.
+이는 제품 정보 구조의 장기 경계다. R7에서 프로젝트 첫 화면과 네 진입 영역, canvas-first 작업 화면으로 구현됐다.
 
 ## 9. R1 Scope Boundary
 
@@ -188,3 +188,16 @@ R2는 두 개의 끊어진 extension point를 실제 실행 기록에 연결한�
 5. 사용자 판단은 Teacher 품질이나 Preference 규칙으로 자동 변환되지 않는다.
 
 R2에서도 새 Teacher, 새 Visual Grammar, layout 변경, Renderer polish, AI Router는 구현하지 않는다.
+
+## 11. R2–R9 현재 구현 상태
+
+- R2: AI 호출 예산, token/cost 집계, compact context trace, local content-addressed cache 구현.
+- R3: capability/role/benchmark 기반 Registry·Router 구현. qualified local 우선이며 유료 원격 자동 fallback 없음.
+- R4: Document/Presentation이 Information Design부터 실제로 분기하고 두 경로 모두 source parity를 유지.
+- R5: 같은 의미에서 최대 3개의 구조적으로 다른 후보 생성, Hard Gate 실패 후보 제외.
+- R6: 평가, 취향, Teacher 품질, Ready 품질을 분리하고 충분한 반복 근거가 있을 때만 Design Profile 생성.
+- R7: Project → 기획서/발표자료/AI 학습/모델 관리 제품 흐름 구현.
+- R8: human-labelled 4건으로 실제 LoRA optimizer step, adapter 저장·재로딩, vision inference smoke 완료. 데이터 부족으로 품질 향상 주장은 하지 않음.
+- R9: 학습 adapter를 unbenchmarked로 등록하고 benchmark regression gate, 명시적 활성화, 비활성화, rollback, Router 연결 구현.
+
+기능 파이프라인이 연결됐다는 것과 portfolio-ready 디자인 품질은 별개다. 현재 Ready Positive는 0개이며 R8 adapter도 `unbenchmarked`, `active=false`다.

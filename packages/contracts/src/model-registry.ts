@@ -57,3 +57,56 @@ export type ModelRouteRequest = {
   policy: 'local-first' | 'explicit-local' | 'explicit-remote';
   approvedRemoteModelId?: string;
 };
+
+export const VisualCriticBenchmarkSchema = z.strictObject({
+  benchmarkId: z.string().min(1),
+  completedAt: z.iso.datetime(),
+  fixtureCount: z.number().int().nonnegative(),
+  readyPositiveCount: z.number().int().nonnegative(),
+  findingRecall: z.number().min(0).max(1),
+  falsePositiveRate: z.number().min(0).max(1),
+  readinessAccuracy: z.number().min(0).max(1),
+  severityAppropriateness: z.number().min(0).max(1),
+  suggestionSpecificity: z.number().min(0).max(1),
+  latencyMs: z.number().nonnegative(),
+  peakVramMb: z.number().nonnegative().nullable(),
+  estimatedCostUsd: z.number().nonnegative(),
+  sourceFidelityViolations: z.number().int().nonnegative(),
+  hallucinatedContentModifications: z.number().int().nonnegative(),
+  baselineFalsePositiveRate: z.number().min(0).max(1),
+  complete: z.boolean(),
+});
+export type VisualCriticBenchmark = z.infer<typeof VisualCriticBenchmarkSchema>;
+
+export const TrainedModelEntrySchema = z.strictObject({
+  modelId: z.string().min(1),
+  displayName: z.string().min(1),
+  role: z.literal('visual-critic'),
+  baseModel: z.string().min(1),
+  adapterPath: z.string().min(1),
+  version: z.string().min(1),
+  createdAt: z.iso.datetime(),
+  trainingRunId: z.string().min(1),
+  trainingDatasetId: z.string().min(1),
+  sharedGlobalRegistry: z.literal(true),
+  benchmarkStatus: ModelBenchmarkStatusSchema,
+  benchmark: VisualCriticBenchmarkSchema.nullable(),
+  active: z.boolean(),
+  activatedAt: z.iso.datetime().nullable(),
+}).superRefine((entry, context) => {
+  if (entry.active && entry.benchmarkStatus !== 'qualified') context.addIssue({ code: 'custom', path: ['active'], message: 'qualified가 아닌 학습 모델은 활성화할 수 없습니다.' });
+  if (entry.benchmarkStatus === 'qualified' && (entry.benchmark === null || !entry.benchmark.complete)) context.addIssue({ code: 'custom', path: ['benchmark'], message: 'qualified 모델은 완료된 benchmark가 필요합니다.' });
+});
+export type TrainedModelEntry = z.infer<typeof TrainedModelEntrySchema>;
+
+export const TrainedModelRegistrySchema = z.strictObject({
+  schemaVersion: z.literal('0.1'),
+  activeVisualCriticModelId: z.string().min(1).nullable(),
+  rollbackStack: z.array(z.string().min(1)),
+  models: z.array(TrainedModelEntrySchema),
+}).superRefine((registry, context) => {
+  const active = registry.models.filter((model) => model.active);
+  if (active.length > 1) context.addIssue({ code: 'custom', path: ['models'], message: '동시에 하나의 학습 Visual Critic만 활성화할 수 있습니다.' });
+  if ((active[0]?.modelId ?? null) !== registry.activeVisualCriticModelId) context.addIssue({ code: 'custom', path: ['activeVisualCriticModelId'], message: 'active model pointer와 entry 상태가 일치해야 합니다.' });
+});
+export type TrainedModelRegistry = z.infer<typeof TrainedModelRegistrySchema>;

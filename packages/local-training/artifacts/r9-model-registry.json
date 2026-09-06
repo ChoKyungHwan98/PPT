@@ -1,0 +1,23 @@
+{
+  "schemaVersion": "0.1",
+  "activeVisualCriticModelId": null,
+  "rollbackStack": [],
+  "models": [
+    {
+      "modelId": "smolvlm-256m-critic-r8-smoke",
+      "displayName": "Visual Critic 학습 경로 검증 모델",
+      "role": "visual-critic",
+      "baseModel": "HuggingFaceTB/SmolVLM-256M-Instruct",
+      "adapterPath": "packages/local-training/artifacts/r8-smoke/adapter",
+      "version": "r8-smoke-1",
+      "createdAt": "2026-09-05T17:29:14.001706Z",
+      "trainingRunId": "r8-smoke-20260905T172830Z",
+      "trainingDatasetId": "visual-critic-human-smoke-v1",
+      "sharedGlobalRegistry": true,
+      "benchmarkStatus": "unbenchmarked",
+      "benchmark": null,
+      "active": false,
+      "activatedAt": null
+    }
+  ]
+}
