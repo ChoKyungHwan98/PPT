@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "0.1",
+  "purpose": "production-compatible-adapter-load-and-image-inference-proof",
+  "modelId": "smolvlm-256m-critic-r8-smoke",
+  "registryPath": "packages/local-training/artifacts/r9-model-registry.json",
+  "pngPath": "packages/local-training/fixtures/rough-but-readable.png",
+  "baseModel": "HuggingFaceTB/SmolVLM-256M-Instruct",
+  "adapterPath": "packages/local-training/artifacts/r8-smoke/adapter",
+  "resolvedAdapterMatched": true,
+  "adapterLoaded": true,
+  "imageInferenceReturned": true,
+  "generatedText": "The image is a webpage that provides a breakdown of a meal",
+  "latencyMs": 14769.01110000017,
+  "startedAt": "2026-09-06T05:48:33.385Z",
+  "completedAt": "2026-09-06T05:49:06.640Z",
+  "qualityClaim": false
+}

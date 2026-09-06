@@ -7,4 +7,5 @@ export * from './measure.js';
 export * from './openai-compatible-provider.js';
 export * from './openrouter-provider.js';
 export * from './pdf-validation.js';
+export * from './peft-visual-critic-provider.js';
 export * from './visual-critic.js';
