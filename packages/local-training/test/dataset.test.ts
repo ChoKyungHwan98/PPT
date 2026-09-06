@@ -3,6 +3,7 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { CriticDatasetManifestSchema, TrainingRunRecordSchema } from '../src/training-contract.js';
 import { datasetHash, deterministicSplit, loadCriticDatasetManifest } from '../src/dataset.js';
+import { assessTrainingEligibility } from '../src/eligibility.js';
 
 const manifestPath = fileURLToPath(new URL('../data/critic-smoke-v1.manifest.json', import.meta.url));
 
@@ -30,5 +31,10 @@ describe('R8 local critic training data', () => {
     expect(run.adapterReloaded).toBe(true);
     expect(run.inferenceSmoke.passed).toBe(true);
     expect(run.evaluation.meaningfulQualityClaim).toBe(false);
+  });
+
+  it('separates smoke eligibility from meaningful training and benchmark eligibility', () => {
+    const eligibility = assessTrainingEligibility(loadCriticDatasetManifest(manifestPath));
+    expect(eligibility).toMatchObject({ humanLabelCount: 4, readyPositiveCount: 0, smokeTraining: true, qualityTraining: false, benchmark: false });
   });
 });
