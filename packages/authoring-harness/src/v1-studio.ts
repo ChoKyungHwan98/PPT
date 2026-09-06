@@ -250,7 +250,9 @@ function buildPorts(input: StudioDesignInput, options: StudioAuthoringOptions): 
         requiredText,
         requiredRelationIds: slide.relations.map((relation) => relation.id),
       });
-      if (!pdfValidation.passed || !pptxValidation.passed) throw new Error('최종 출력 호환성 검사에 실패했습니다.');
+      if (!pdfValidation.passed || !pptxValidation.passed) {
+        throw new Error(`최종 출력 호환성 검사에 실패했습니다. ${JSON.stringify({ pdfValidation, pptxValidation })}`);
+      }
       const publicFile = (path: string) => `${options.publicBaseUrl}/api/designer/jobs/${encodeURIComponent(artifactId)}/${encodeURIComponent(basename(path))}`;
       const files = [
         { kind: 'png' as const, path: outputs.pngPath, url: publicFile(outputs.pngPath), editable: false },
@@ -554,7 +556,9 @@ export async function recordV1CandidatePreference(input: {
       const requiredText = selectedTree.nodes.flatMap((node) => node.kind === 'text' && node.visible ? [node.text] : []);
       const pdf = await validatePdfArtifact({ pdfPath: rendered.pdfPath, requiredText, expectedPageCount: 1, expectedAspectRatio: 16 / 9 });
       const pptx = await validateEditablePptxArtifact({ pptxPath, requiredText, requiredRelationIds: slide.relations.map((relation) => relation.id) });
-      if (!pdf.passed || !pptx.passed) throw new Error('선택 candidate의 최종 출력 호환성 검사에 실패했습니다.');
+      if (!pdf.passed || !pptx.passed) {
+        throw new Error(`선택 candidate의 최종 출력 호환성 검사에 실패했습니다. ${JSON.stringify({ pdf, pptx })}`);
+      }
     } finally { await browser.close(); }
     selectedOutput = StudioDesignOutputSchema.parse({ ...output, previewPngUrl: selected.previewPngUrl, trace: { ...output.trace, renderTreeFingerprint: selected.renderTreeFingerprint, pngSha256: selected.pngSha256 } });
   }
