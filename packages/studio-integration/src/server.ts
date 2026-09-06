@@ -1,16 +1,19 @@
 import { createServer, type IncomingMessage, type ServerResponse } from 'node:http';
 import { randomUUID } from 'node:crypto';
-import { spawn } from 'node:child_process';
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { execFile, spawn } from 'node:child_process';
+import { mkdir, readFile, readdir, statfs, writeFile } from 'node:fs/promises';
 import { basename, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { promisify } from 'node:util';
 import { BaseTransformersVisualCriticProvider, OpenAICompatibleVisualCriticProvider, OpenRouterAIProvider, PeftVisualCriticProvider } from '@game-presentation/renderer/studio';
-import { activateTrainedModel, mergeTrainedModelsForRouting, ModelRegistryRouter, recordVisualCriticBenchmark, rollbackTrainedModel, runtimeModelRegistry } from '@game-presentation/authoring-harness';
-import { assessTrainingEligibility, CriticDatasetManifestSchema, TrainingRunRecordSchema } from '@game-presentation/local-training';
+import { activateTrainedModel, mergeTrainedModelsForRouting, ModelRegistryRouter, recordVisualCriticBenchmark, registerCompletedAdapter, rollbackTrainedModel, runtimeModelRegistry } from '@game-presentation/authoring-harness';
+import { assessTrainingEligibility, CriticDatasetManifestSchema, HumanTrainingEventStore, ProductionTrainingRunStatusSchema, QualityTrainingRunRecordSchema } from '@game-presentation/local-training';
 import { TrainedModelRegistrySchema } from '@game-presentation/contracts';
 import { recordStudioCandidatePreference, recordStudioUserDecision, runStudioDesignJob, runStudioVisualCritic } from './design-job.js';
 import { LocalProjectStore } from './project-store.js';
 import { trainingStartDecision } from './training-workflow.js';
+import { assessQualityRuntimeEnvironment, prepareQualityTrainingRun, requireProductionDatasetId } from './training-workflow.js';
+import { buildCurrentProductionDataset, productionTrainingSummary } from './training-data.js';
 import { runTrainedVisualCriticBenchmark } from './model-benchmark.js';
 
 const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../../..');
@@ -18,7 +21,10 @@ const port = Number(process.env.PPT_DESIGNER_PORT ?? '8766');
 const origin = `http://127.0.0.1:${port}`;
 const trainedRegistryPath = resolve(repositoryRoot, 'packages/local-training/artifacts/r9-model-registry.json');
 const projectStore = new LocalProjectStore(resolve(repositoryRoot, 'workspace/projects'));
-const trainingRunsRoot = resolve(repositoryRoot, 'workspace/training-runs');
+const trainingDataRoot = resolve(repositoryRoot, 'workspace/training-data');
+const trainingRunsRoot = resolve(trainingDataRoot, 'runs');
+const humanTrainingStore = new HumanTrainingEventStore(trainingDataRoot, repositoryRoot);
+const execFileAsync = promisify(execFile);
 
 async function readTrainedRegistry() {
   return TrainedModelRegistrySchema.parse(JSON.parse(await readFile(trainedRegistryPath, 'utf8')));
@@ -36,6 +42,33 @@ async function modelRegistryView() {
     routerVisualCriticModelId = router.route({ role: 'visual-critic', capabilities: { vision: true, structuredOutput: true }, policy: 'local-first' }).modelId;
   } catch { routerVisualCriticModelId = null; }
   return { ...trained, routerVisualCriticModelId };
+}
+
+async function latestTrainingRun() {
+  let entries: string[] = [];
+  try { entries = await readdir(trainingRunsRoot); } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
+  }
+  const statuses = await Promise.all(entries.map(async (entry) => {
+    try { return ProductionTrainingRunStatusSchema.parse(JSON.parse(await readFile(resolve(trainingRunsRoot, entry, 'status.json'), 'utf8'))); } catch { return null; }
+  }));
+  return statuses.filter((value): value is NonNullable<typeof value> => value !== null).sort((left, right) => right.startedAt.localeCompare(left.startedAt))[0] ?? null;
+}
+
+async function qualityRuntimeAssessment() {
+  const disk = await statfs(repositoryRoot);
+  let gpuName: string | null = null;
+  let gpuMemoryMb: number | null = null;
+  try {
+    const { stdout } = await execFileAsync('nvidia-smi', ['--query-gpu=name,memory.total', '--format=csv,noheader,nounits'], { windowsHide: true });
+    const [name, memory] = stdout.trim().split(',').map((value) => value.trim());
+    gpuName = name || null; gpuMemoryMb = Number.isFinite(Number(memory)) ? Number(memory) : null;
+  } catch { /* A missing NVIDIA runtime is reported by the assessment. */ }
+  return assessQualityRuntimeEnvironment({
+    baseModel: process.env.PPT_QUALITY_BASE_MODEL ?? 'afx-team/UI-UX', platform: process.platform,
+    gpuName, gpuMemoryMb, diskFreeGb: disk.bavail * disk.bsize / 1024 / 1024 / 1024,
+    runtimeVerified: process.env.PPT_QUALITY_RUNTIME_VERIFIED === 'true',
+  });
 }
 
 function json(response: ServerResponse, status: number, value: unknown) {
@@ -72,39 +105,65 @@ const server = createServer(async (request, response) => {
       return;
     }
     if (request.method === 'GET' && url.pathname === '/api/designer/training/status') {
-      const manifest = CriticDatasetManifestSchema.parse(JSON.parse(await readFile(resolve(repositoryRoot, 'packages/local-training/data/critic-smoke-v1.manifest.json'), 'utf8')));
-      const run = TrainingRunRecordSchema.parse(JSON.parse(await readFile(resolve(repositoryRoot, 'packages/local-training/artifacts/r8-smoke/run-record.json'), 'utf8')));
-      const reasonTags = Object.entries(manifest.examples.flatMap((example) => example.issueTypes).reduce<Record<string, number>>((counts, tag) => ({ ...counts, [tag]: (counts[tag] ?? 0) + 1 }), {})).sort((left, right) => right[1] - left[1]);
+      const summary = await productionTrainingSummary({ repositoryRoot, trainingDataRoot });
+      const runtime = await qualityRuntimeAssessment();
+      const reasonTags = Object.entries(summary.dataset?.distributions.reasonTag ?? {}).sort((left, right) => right[1] - left[1]);
       json(response, 200, {
-        evaluationCount: manifest.examples.length,
-        readyCount: manifest.examples.filter((example) => example.readiness === 'ready').length,
-        rejectCount: manifest.examples.filter((example) => example.readiness === 'not-ready').length,
-        pairwiseCount: 0,
+        evaluationCount: summary.evaluations.length,
+        readyCount: summary.evaluations.filter((item) => item.sourceEvent.userDecision === 'ready').length,
+        rejectCount: summary.evaluations.filter((item) => item.sourceEvent.userDecision === 'reject').length,
+        preferenceCount: summary.preferences.length,
+        pairwiseCount: summary.eligibility.pairwiseCount,
         reasonTags,
-        dataset: { datasetId: manifest.datasetId, sha256: manifest.datasetSha256, trainCount: manifest.trainIds.length, validationCount: manifest.validationIds.length },
-        eligibility: { meaningfulTraining: assessTrainingEligibility(manifest).qualityTraining, smokeTraining: assessTrainingEligibility(manifest).smokeTraining, reason: assessTrainingEligibility(manifest).reasons.join(' ') },
-        latestRun: run,
+        dataset: summary.dataset === null ? null : { datasetId: summary.dataset.datasetId, sha256: summary.dataset.datasetSha256, trainCount: summary.dataset.trainIds.length, validationCount: summary.dataset.validationIds.length },
+        eligibility: { meaningfulTraining: summary.eligibility.qualityTraining && runtime.supported, dataEligible: summary.eligibility.qualityTraining, runtimeEligible: runtime.supported, smokeTraining: false, reasons: [...summary.eligibility.reasons, ...runtime.reasons], reason: [...summary.eligibility.reasons, ...runtime.reasons].join(' ') },
+        runtime,
+        latestRun: await latestTrainingRun(),
+        developerSmoke: { manifest: 'packages/local-training/data/critic-smoke-v1.manifest.json', includedInProductionCounts: false },
       });
       return;
     }
     if (request.method === 'POST' && url.pathname === '/api/designer/training/dataset/build') {
-      const manifest = CriticDatasetManifestSchema.parse(JSON.parse(await readFile(resolve(repositoryRoot, 'packages/local-training/data/critic-smoke-v1.manifest.json'), 'utf8')));
-      json(response, 200, { datasetId: manifest.datasetId, datasetSha256: manifest.datasetSha256, trainCount: manifest.trainIds.length, validationCount: manifest.validationIds.length, eligibility: assessTrainingEligibility(manifest) }); return;
+      const built = await buildCurrentProductionDataset({ repositoryRoot, trainingDataRoot });
+      const eligibility = assessTrainingEligibility(built.manifest);
+      json(response, 200, { datasetId: built.manifest.datasetId, datasetSha256: built.manifest.datasetSha256, humanLabelCount: built.manifest.humanLabelCount, readyPositiveCount: built.manifest.readyPositiveCount, rejectCount: built.manifest.rejectCount, preferenceCount: built.manifest.preferenceEventCount, pairwiseCount: built.manifest.pairwiseCount, trainCount: built.manifest.trainIds.length, validationCount: built.manifest.validationIds.length, eligibility, reused: built.reused }); return;
     }
     if (request.method === 'POST' && url.pathname === '/api/designer/training/start') {
-      const requestBody = await body(request) as { mode?: 'quality' | 'smoke' };
-      const manifest = CriticDatasetManifestSchema.parse(JSON.parse(await readFile(resolve(repositoryRoot, 'packages/local-training/data/critic-smoke-v1.manifest.json'), 'utf8')));
-      const eligibility = assessTrainingEligibility(manifest);
+      const requestBody = await body(request) as { mode?: 'quality' | 'smoke'; datasetId?: string };
       const mode = requestBody.mode === 'smoke' ? 'smoke' : 'quality';
-      const decision = trainingStartDecision({ mode, eligibility, smokeEnabled: process.env.PPT_ALLOW_SMOKE_TRAINING === 'true' });
-      if (!decision.allowed) { json(response, 409, { error: decision.reason, eligibility }); return; }
-      if (mode === 'quality') { json(response, 409, { error: '의미 있는 품질 학습은 충분한 데이터와 별도 승인된 학습 설정이 모두 준비된 뒤 실행합니다.', eligibility }); return; }
-      const runId = `training-${Date.now()}-${randomUUID().slice(0, 8)}`; const runDirectory = resolve(trainingRunsRoot, runId); await mkdir(runDirectory, { recursive: true });
-      const statusPath = resolve(runDirectory, 'status.json'); await writeFile(statusPath, JSON.stringify({ runId, mode, status: 'running', startedAt: new Date().toISOString() }, null, 2));
+      const runId = `training-${Date.now()}-${randomUUID().slice(0, 8)}`; const runDirectory = resolve(trainingRunsRoot, runId);
       const python = process.env.LOCAL_TRAINING_PYTHON ?? 'python';
-      const child = spawn(python, [resolve(repositoryRoot, 'packages/local-training/scripts/train_visual_critic.py'), '--root', repositoryRoot, '--manifest', 'packages/local-training/data/critic-smoke-v1.manifest.json', '--output', `workspace/training-runs/${runId}/artifact`], { windowsHide: true, detached: false, stdio: 'ignore' });
-      child.on('close', (code) => { void writeFile(statusPath, JSON.stringify({ runId, mode, status: code === 0 ? 'completed-smoke' : 'failed', exitCode: code, finishedAt: new Date().toISOString() }, null, 2)); });
-      json(response, 202, { runId, mode, status: 'running' }); return;
+      if (mode === 'smoke') {
+        const smokeManifest = CriticDatasetManifestSchema.parse(JSON.parse(await readFile(resolve(repositoryRoot, 'packages/local-training/data/critic-smoke-v1.manifest.json'), 'utf8')));
+        const eligibility = assessTrainingEligibility(smokeManifest);
+        const decision = trainingStartDecision({ mode, eligibility, smokeEnabled: process.env.PPT_ALLOW_SMOKE_TRAINING === 'true' });
+        if (!decision.allowed) { json(response, 409, { error: decision.reason, eligibility }); return; }
+        await mkdir(runDirectory, { recursive: true });
+        const statusPath = resolve(runDirectory, 'status.json'); await writeFile(statusPath, JSON.stringify({ runId, mode, status: 'running', startedAt: new Date().toISOString() }, null, 2));
+        const child = spawn(python, [resolve(repositoryRoot, 'packages/local-training/scripts/train_visual_critic.py'), '--mode', 'smoke', '--root', repositoryRoot, '--manifest', 'packages/local-training/data/critic-smoke-v1.manifest.json', '--output', `workspace/training-data/runs/${runId}/artifact`], { windowsHide: true, detached: false, stdio: 'ignore' });
+        child.on('close', (code) => { void writeFile(statusPath, JSON.stringify({ runId, mode, status: code === 0 ? 'completed-smoke' : 'failed', exitCode: code, finishedAt: new Date().toISOString() }, null, 2)); });
+        json(response, 202, { runId, mode, status: 'running' }); return;
+      }
+      let requestedDatasetId: string;
+      try { requestedDatasetId = requireProductionDatasetId(requestBody.datasetId); }
+      catch (error) { json(response, 409, { error: error instanceof Error ? error.message : String(error) }); return; }
+      const runtime = await qualityRuntimeAssessment();
+      let prepared;
+      try { prepared = await prepareQualityTrainingRun({ repositoryRoot, trainingDataRoot, datasetId: requestedDatasetId, runId, startedAt: new Date().toISOString(), runtime }); }
+      catch (error) { json(response, 409, { error: error instanceof Error ? error.message : String(error), runtime }); return; }
+      const child = spawn(python, [prepared.command.script, ...prepared.command.args], { windowsHide: true, detached: false, stdio: 'ignore' });
+      child.on('close', (code) => { void (async () => {
+        const finishedAt = new Date().toISOString();
+        if (code !== 0) { await writeFile(prepared.statusPath, `${JSON.stringify({ ...prepared.status, status: 'failed', modelStatus: 'failed', exitCode: code, finishedAt }, null, 2)}\n`); return; }
+        try {
+          const record = QualityTrainingRunRecordSchema.parse(JSON.parse(await readFile(resolve(repositoryRoot, prepared.status.outputPath, 'run-record.json'), 'utf8')));
+          await writeFile(prepared.statusPath, `${JSON.stringify({ ...prepared.status, status: 'completed', modelStatus: 'trained-unbenchmarked', exitCode: 0, finishedAt }, null, 2)}\n`);
+          const registry = await readTrainedRegistry();
+          const model = registerCompletedAdapter({ modelId: `quality-critic-${record.trainingRunId}`, displayName: '사용자 평가 기반 Visual Critic', baseModel: record.baseModel, adapterPath: record.adapterPath, version: record.datasetId, createdAt: record.finishedAt, trainingRunId: record.trainingRunId, trainingDatasetId: record.datasetId });
+          if (!registry.models.some((entry) => entry.modelId === model.modelId)) await saveTrainedRegistry(TrainedModelRegistrySchema.parse({ ...registry, models: [...registry.models, model] }));
+        } catch (error) { await writeFile(prepared.statusPath, `${JSON.stringify({ ...prepared.status, status: 'failed', modelStatus: 'failed', exitCode: code, finishedAt, error: error instanceof Error ? error.message : String(error) }, null, 2)}\n`); }
+      })(); });
+      json(response, 202, prepared.status); return;
     }
     const trainingRunMatch = url.pathname.match(/^\/api\/designer\/training\/runs\/([^/]+)$/u);
     if (request.method === 'GET' && trainingRunMatch) {
@@ -192,6 +251,7 @@ const server = createServer(async (request, response) => {
       if (!/^slide-[0-9]+-[a-z0-9]+$/iu.test(artifactId)) throw new Error('잘못된 작업 번호입니다.');
       const metadataPath = resolve(repositoryRoot, 'output/studio-jobs', artifactId, 'job.json');
       const result = await recordStudioUserDecision({ metadataPath, event: await body(request) as never });
+      await humanTrainingStore.appendEvaluation(result.event, metadataPath);
       json(response, 200, { output: result.output, eventId: result.event.eventId }); return;
     }
     const preferenceMatch = url.pathname.match(/^\/api\/designer\/jobs\/([^/]+)\/preference$/u);
@@ -200,6 +260,7 @@ const server = createServer(async (request, response) => {
       if (!/^slide-[0-9]+-[a-z0-9]+$/iu.test(artifactId)) throw new Error('잘못된 작업 번호입니다.');
       const metadataPath = resolve(repositoryRoot, 'output/studio-jobs', artifactId, 'job.json');
       const result = await recordStudioCandidatePreference({ metadataPath, event: await body(request) as never, preferenceRoot: resolve(repositoryRoot, 'workspace/preference-memory') });
+      await humanTrainingStore.appendPreference(result.event, metadataPath);
       json(response, 200, { output: result.output, event: result.event, patterns: result.patterns, profile: result.profile }); return;
     }
     json(response, 404, { error: 'Not found' });

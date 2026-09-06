@@ -2,7 +2,7 @@
 
 ## 최종 통합 결과
 
-R2부터 R9까지의 기능 계약을 실제 제품 경로에 연결했다. `/jobs`는 Hard Gate를 통과한 실제 후보 1~3개를 반환하고, 사용자의 후보 선택/전체 거절은 Ready 판단과 분리된 Preference evidence로 저장된다. 프로젝트 목록·검색·최근 작업은 로컬 영구 저장소를 사용한다.
+R2부터 R9까지의 기능 계약을 실제 제품 경로에 연결했다. R8은 smoke proof가 아니라 production 사용자 근거에서 시작하는 경로로 마감했다.
 
 ```text
 프로젝트
@@ -16,29 +16,40 @@ R2부터 R9까지의 기능 계약을 실제 제품 경로에 연결했다. `/jo
 → 사용자 승인/거절과 Preference evidence
 → PNG / HTML / PDF / editable PPTX
 
-사람 평가
-→ 고정 dataset
-→ 서버 eligibility 검사
-→ bounded LoRA smoke
-→ adapter 저장·재로딩
-→ global trained-model registry (unbenchmarked)
+명시적 사용자 평가/선호
+→ append-only human-event store
+→ 실제 artifact/PNG/hash 검증
+→ immutable production dataset snapshot
+→ data eligibility + hardware/runtime eligibility
+→ 지정 dataset으로 quality LoRA/QLoRA job
+→ adapter 저장·재로딩·inference smoke
+→ global trained-model registry (trained-unbenchmarked)
 → benchmark regression gate
 → 사용자 활성화
-→ runtime registry와 trained registry merge
 → qualified active local model만 Router 후보
-→ base model + 실제 adapter path로 Visual Critic 추론
 ```
 
-모델 평가 API는 현재 자료 부족을 실제로 거부하며 registry를 `unbenchmarked`로 유지한다. 후보 비교, Preference 갱신, 프로젝트 저장, 학습 자료 점검/학습 guard, 모델 활성화/rollback, AI usage 표시까지 UI와 서버가 같은 artifact를 사용한다.
+## R8 현재 실측 상태
 
-## 실제 한계
+- 실제 사용자 평가: 1건
+- Ready Positive: 0건
+- Reject: 1건
+- Preference: 1건
+- Pairwise: 0건
+- production dataset: `critic-production-fd55742035311270`
+- train / validation: 1 / 0
+- quality training: 자료 부족 및 현재 runtime 미검증으로 미실행
 
-Visual Critic 학습 자료는 human-labelled 4건, Ready Positive 0건이다. 따라서 실행한 것은 1 optimizer step의 adapter pipeline smoke이며 실제 품질 개선 학습이 아니다. 저장된 모델을 unbenchmarked로 등록했고 자동 활성화하지 않았다.
+R8의 production path는 완료됐다. 데이터가 기준을 충족하면 특정 immutable dataset을 사용해 실제 quality job을 만들고, 완료 adapter를 자동 활성화 없이 `trained-unbenchmarked`로 등록한다. 현재처럼 데이터가 부족하면 409로 거부하는 것이 정상 동작이다.
 
-`afx-team/UI-UX`는 조사했지만 5B/약 9.1 GB 모델 저장소를 현재 8 GB VRAM과 14.71 GB 디스크 여유의 Windows 환경에서 안전한 학습 proof로 실행하지 않았다. smoke에는 256M multimodal base model을 사용했다.
+기존 `critic-smoke-v1.manifest.json`, R8 smoke adapter, runtime adapter proof는 회귀/개발 proof로 유지한다. Smoke의 human-labelled fixture 4건은 production count, Ready Positive, production dataset, quality eligibility에 포함되지 않는다.
 
-## 다음 품질 과제
+## Model/runtime 경계
 
-R2–R9 functional end-to-end integration은 완료됐지만 portfolio-ready 생성 품질은 완료되지 않았다. 실제 사용자 승인 Ready Positive를 확보하고, 더 많은 exhaustive visual labels와 pairwise 선택을 수집한 뒤에야 의미 있는 Critic 학습과 benchmark가 가능하다.
+`afx-team/UI-UX`는 quality 후보로 유지하지만 현재 RTX 4060 Ti 8 GB, Windows, 약 23.98 GB disk free 환경에서는 4-bit QLoRA runtime을 안전하다고 검증하지 않았다. 따라서 의미 있는 quality run을 강행하지 않았다. Smoke에는 기존 256M multimodal base만 사용한다.
+
+## 현재 한계
+
+R2–R9 functional integration과 R8 production training path는 완료됐지만 portfolio-ready 생성 품질은 완료되지 않았다. 실제 사용자 승인 Ready Positive와 독립 validation 자료를 더 확보하고, 안전한 quality runtime에서 학습한 뒤 R9 benchmark를 통과해야 한다.
 
 **Functional integration complete ≠ Portfolio-quality generation complete.** 현재 Ready Positive는 0개다.

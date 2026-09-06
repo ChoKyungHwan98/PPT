@@ -197,7 +197,7 @@ R2에서도 새 Teacher, 새 Visual Grammar, layout 변경, Renderer polish, AI 
 - R5: 같은 의미에서 최대 3개의 구조적으로 다른 후보 생성, Hard Gate 실패 후보 제외.
 - R6: 평가, 취향, Teacher 품질, Ready 품질을 분리하고 충분한 반복 근거가 있을 때만 Design Profile 생성.
 - R7: Project → 기획서/발표자료/AI 학습/모델 관리 제품 흐름 구현.
-- R8: human-labelled 4건으로 실제 LoRA optimizer step, adapter 저장·재로딩, vision inference smoke 완료. 데이터 부족으로 품질 향상 주장은 하지 않음.
+- R8: 실제 사용자 평가/선호 → append-only store → immutable production dataset → eligibility → quality LoRA job 경로 완료. 현재 실측은 평가 1건(Ready 0 / Reject 1), Preference 1건, train/validation 1/0이므로 quality run은 실행하지 않음. 기존 human-labelled smoke 4건과 adapter proof는 회귀용으로 분리 유지.
 - R9: 학습 adapter를 unbenchmarked로 등록하고 benchmark regression gate, 명시적 활성화, 비활성화, rollback, Router 연결 구현.
 
-기능 파이프라인이 연결됐다는 것과 portfolio-ready 디자인 품질은 별개다. 현재 Ready Positive는 0개이며 R8 adapter도 `unbenchmarked`, `active=false`다.
+기능 파이프라인이 연결됐다는 것과 portfolio-ready 디자인 품질은 별개다. 현재 Ready Positive는 0개이며, 향후 quality adapter도 benchmark 전에는 `trained-unbenchmarked`, `active=false`로만 등록된다.
