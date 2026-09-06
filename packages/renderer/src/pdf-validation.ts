@@ -35,6 +35,13 @@ export async function validatePdfArtifact(input: {
   const compactText = compact(extractedText);
   const missingRequiredText = input.requiredText.filter((text) => !compactText.includes(compact(text)));
   const operatorList = await page.getOperatorList();
+  const usedFontObjectIds = operatorList.fnArray
+    .map((operation, index) => operation === OPS.setFont ? String(operatorList.argsArray[index]?.[0] ?? '') : '')
+    .filter((objectId) => objectId.length > 0);
+  const embeddedSubsetFontNames = [...new Set(usedFontObjectIds)]
+    .map((objectId) => page.commonObjs.get(objectId) as { name?: unknown })
+    .map((font) => typeof font.name === 'string' ? font.name : '')
+    .filter((name) => /^[A-Z]{6}\+.+/u.test(name));
   const imageOps = new Set<number>([
     OPS.paintImageMaskXObject,
     OPS.paintImageMaskXObjectGroup,
@@ -54,8 +61,16 @@ export async function validatePdfArtifact(input: {
   const imagePaintCount = operatorList.fnArray.filter((operation) => imageOps.has(operation)).length;
   const vectorPaintCount = operatorList.fnArray.filter((operation) => vectorOps.has(operation)).length;
   const pdfLatin = bytes.toString('latin1');
-  const embeddedFontProgramCount =
+  const directlyVisibleEmbeddedFontProgramCount =
     (pdfLatin.match(/\/FontFile2\b/g) ?? []).length + (pdfLatin.match(/\/FontFile3\b/g) ?? []).length;
+  // Chromium may place the font descriptor inside a compressed object stream.
+  // In that case a byte-string search cannot see /FontFile2 or /FontFile3 even
+  // though PDF.js resolves the embedded subset and exposes its six-letter
+  // subset prefix. Use the resolved font objects as the cross-platform proof.
+  const embeddedFontProgramCount = Math.max(
+    directlyVisibleEmbeddedFontProgramCount,
+    embeddedSubsetFontNames.length,
+  );
   const aspectRatio = viewport.width / viewport.height;
   const aspectMatches = Math.abs(aspectRatio - input.expectedAspectRatio) < 0.001;
   const passed =
