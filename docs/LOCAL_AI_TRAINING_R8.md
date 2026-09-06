@@ -26,3 +26,7 @@
 실행 결과는 `packages/local-training/artifacts/r8-smoke/run-record.json`에 기록한다. adapter는 저장 후 새 base model에 다시 불러오고 한 번의 image inference를 수행한다. 이 proof의 유일한 결론은 `학습 경로가 실제로 닫힌다`이다. 성능 향상이나 benchmark 통과를 주장하지 않는다.
 
 학습 완료 adapter는 자동 활성화되지 않는다. R9에서 먼저 unbenchmarked로 등록한 뒤 별도 benchmark와 사용자 활성화를 거쳐야 한다.
+
+## 제품 연결 상태
+
+학습 자료 점검, quality/smoke 모드 구분, 실행 eligibility, 학습 run 상태 조회가 서버 API에 연결됐다. 현재 4개의 human label과 Ready Positive 0개로는 quality training 및 신뢰할 수 있는 benchmark를 실행하지 않는다. 개발자 smoke는 명시적인 환경 설정이 있을 때만 별도 경로로 실행된다.
