@@ -80,6 +80,7 @@ export const PreferenceEvidenceEventSchema = z.strictObject({
   candidateIds: z.array(z.string().min(1)).min(1).max(3),
   decision: z.enum(['choose-A', 'choose-B', 'choose-C', 'reject-all']),
   selectedCandidateId: z.string().min(1).nullable(),
+  selectedCandidateHash: z.string().regex(/^[a-f0-9]{64}$/).nullable(),
   semanticShape: z.string().min(1),
   mode: z.enum(['document', 'presentation']),
   chosenPatternId: z.string().min(1).nullable(),
@@ -99,6 +100,9 @@ export const PreferenceEvidenceEventSchema = z.strictObject({
   const rejecting = event.decision === 'reject-all';
   if (rejecting !== (event.selectedCandidateId === null)) {
     context.addIssue({ code: 'custom', path: ['selectedCandidateId'], message: '선택/전체 거절과 candidate 기록이 일치해야 합니다.' });
+  }
+  if (rejecting !== (event.selectedCandidateHash === null)) {
+    context.addIssue({ code: 'custom', path: ['selectedCandidateHash'], message: '선택/전체 거절과 candidate hash 기록이 일치해야 합니다.' });
   }
   if (event.selectedCandidateId !== null && !event.candidateIds.includes(event.selectedCandidateId)) {
     context.addIssue({ code: 'custom', path: ['selectedCandidateId'], message: '선택 candidate가 비교 대상에 없습니다.' });

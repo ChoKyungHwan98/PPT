@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { copyFile, mkdir, readFile, writeFile } from 'node:fs/promises';
 import { basename, dirname, resolve } from 'node:path';
 import {
   AuthoringRunTraceSchema,
@@ -66,6 +66,7 @@ import {
 } from './harness.js';
 import { AIUsageManager, withAIUsageManagement } from './ai-usage.js';
 import { PreferenceEvidenceStore, buildDesignProfile, promotePreferencePatterns } from '@game-presentation/preference-learning';
+import { candidateComparisonFromArtifacts, generateValidatedCandidateArtifacts, type ValidatedCandidateArtifact } from './candidate-generation.js';
 
 type ReferenceRuntime = {
   referenceSet: Awaited<ReturnType<typeof loadExternalMasterReferenceSet>>;
@@ -225,6 +226,7 @@ function buildPorts(input: StudioDesignInput, options: StudioAuthoringOptions): 
     async export(context): Promise<HarnessExportResult> {
       const slide = requireContext(context.slide, 'SlideIR');
       const informationPlan = requireContext(context.informationPlan, 'InformationPlan');
+      const plan = requireContext(context.compositionPlan, 'CompositionPlan');
       const tree = requireContext(context.renderTree, 'RenderTree');
       const hardGate = requireContext(context.hardGate, 'Hard Gate');
       const runtime = context.renderRuntime as RenderRuntime;
@@ -262,12 +264,26 @@ function buildPorts(input: StudioDesignInput, options: StudioAuthoringOptions): 
       })));
       const pngHash = tracedFiles.find((file) => file.kind === 'png')!.hash;
       const teacher = { selection: context.teacherSelection, guidance: context.teacherGuidance } as TeacherRuntime;
+      const primaryCandidateId = `candidate-${contentHash({ plan: plan.planId, tree: tree.deterministicFingerprint }).slice(0, 12)}`;
+      const comparisonId = `comparison-${contentHash({ artifactId, source: slide.source.contentHash }).slice(0, 12)}`;
       const output = StudioDesignOutputSchema.parse({
         schemaVersion: '0.1',
         artifactId,
         projectId: input.projectId,
         documentId: input.documentId,
         previewPngUrl: publicFile(outputs.pngPath),
+        comparisonId,
+        candidates: [{
+          candidateId: primaryCandidateId,
+          label: '구조 A',
+          compositionPlanHash: contentHash(plan),
+          renderTreeFingerprint: tree.deterministicFingerprint,
+          renderTreeHash: contentHash(tree),
+          previewPngUrl: publicFile(outputs.pngPath),
+          pngSha256: pngHash,
+          provenance: { patternFragmentIds: plan.patternFragmentIds, referenceIds: plan.referenceIds, layoutFamily: plan.layout.layoutFamily, readingPath: plan.layout.readingPath },
+          validation: { hardGatePassed: true, programFindingCount: 0, sourceFidelityFindingCount: 0 },
+        }],
         exports: tracedFiles.map(({ kind, url, editable }) => ({ kind, url, editable })),
         validation: {
           hardGatePassed: hardGate.passed,
@@ -278,6 +294,7 @@ function buildPorts(input: StudioDesignInput, options: StudioAuthoringOptions): 
         readiness: 'not-reviewed',
         trace: {
           semanticShape: teacher.guidance.structureLock.semanticShape,
+          domain: slide.domain.topic,
           selectedTeacherIds: context.selectedTeacherIds,
           appliedGuidanceIds: Object.values(teacher.guidance.guidance).flat().map((item, index) => `${item.sourceReferenceId}:${item.sourceField}:${index}`),
           renderTreeFingerprint: tree.deterministicFingerprint,
@@ -330,25 +347,93 @@ export async function runV1StudioAuthoring(
       await writeFile(tracePath, JSON.stringify(trace, null, 2) + '\n');
     },
   });
-  const metadata = requireContext(result.context.exported, 'Export').metadata;
-  await writeFile(metadataPath, JSON.stringify({ ...metadata, authoringTrace: result.trace }, null, 2) + '\n');
-  return { output: result.output, metadataPath, tracePath, outputDirectory, trace: result.trace };
+  const exported = requireContext(result.context.exported, 'Export');
+  const metadata = exported.metadata;
+  const slide = requireContext(result.context.slide, 'SlideIR');
+  const informationPlan = requireContext(result.context.informationPlan, 'InformationPlan');
+  const primaryPlan = requireContext(result.context.compositionPlan, 'CompositionPlan');
+  const primaryTree = requireContext(result.context.renderTree, 'RenderTree');
+  const references = result.context.retrieval as ReferenceRuntime;
+  const primary: ValidatedCandidateArtifact = {
+    candidateId: result.output.candidates[0]!.candidateId,
+    provenance: result.output.candidates[0]!.provenance,
+    compositionPlan: primaryPlan,
+    renderTree: primaryTree,
+    pngPath: exported.pngPath,
+    pngHash: exported.pngHash,
+    validation: { hardGatePassed: true, programFindingCount: 0, sourceFidelityFindingCount: 0 },
+  };
+  const generated = await generateValidatedCandidateArtifacts({
+    slide,
+    informationPlan,
+    retrieval: references.retrieval,
+    outputRoot: resolve(outputDirectory, 'candidate-renders'),
+    fragments: SEED_PATTERN_FRAGMENTS,
+    corpus: references.corpus,
+    teacherGuidance: result.context.teacherGuidance as TeacherRuntime['guidance'],
+    maximumCandidates: 3,
+  });
+  const candidates = [primary, ...generated.accepted].filter((candidate, index, all) => all.findIndex((other) => other.provenance.layoutFamily === candidate.provenance.layoutFamily && other.provenance.readingPath === candidate.provenance.readingPath) === index).slice(0, 3);
+  const publicFile = (filename: string) => `${options.publicBaseUrl}/api/designer/jobs/${encodeURIComponent(artifactId)}/${encodeURIComponent(filename)}`;
+  const studioCandidates = await Promise.all(candidates.map(async (candidate, index) => {
+    const filename = index === 0 ? basename(exported.pngPath) : `${candidate.candidateId}.png`;
+    if (index > 0) await copyFile(candidate.pngPath, resolve(outputDirectory, filename));
+    return {
+      candidateId: candidate.candidateId,
+      label: `구조 ${String.fromCharCode(65 + index)}`,
+      compositionPlanHash: contentHash(candidate.compositionPlan),
+      renderTreeFingerprint: candidate.renderTree.deterministicFingerprint,
+      renderTreeHash: contentHash(candidate.renderTree),
+      previewPngUrl: publicFile(filename),
+      pngSha256: candidate.pngHash,
+      provenance: candidate.provenance,
+      validation: candidate.validation,
+    };
+  }));
+  const comparison = candidateComparisonFromArtifacts({
+    slide,
+    context: {
+      intent: slide.intent.communicationGoal.text,
+      semanticShape: result.output.trace.semanticShape,
+      relationshipShape: slide.relations.map((relation) => relation.type),
+      primaryArtifact: informationPlan.primaryArtifactBlockId,
+      audience: 'game-design-reviewer',
+      outputProfile: input.mode === 'document' ? 'pdf-document' : 'pdf-presentation',
+    },
+    artifacts: candidates,
+    createdAt: new Date().toISOString(),
+  });
+  const output = StudioDesignOutputSchema.parse({ ...result.output, comparisonId: comparison.comparisonId, candidates: studioCandidates, previewPngUrl: studioCandidates[0]!.previewPngUrl, trace: { ...result.output.trace, pngSha256: studioCandidates[0]!.pngSha256 } });
+  await writeFile(metadataPath, JSON.stringify({ ...metadata, output, candidates, comparison, rejectedCandidates: generated.rejected, authoringTrace: result.trace }, null, 2) + '\n');
+  return { output, metadataPath, tracePath, outputDirectory, trace: result.trace };
 }
 
 export async function runV1StudioVisualCritic(input: {
   metadataPath: string;
   provider: AIProvider;
   cacheRoot?: string;
-}): Promise<{ output: StudioDesignOutput; run: Awaited<ReturnType<typeof runVisualCritic>>['run']; trace: AuthoringRunTrace }> {
+}): Promise<{
+  output: StudioDesignOutput;
+  run: Awaited<ReturnType<typeof runVisualCritic>>['run'];
+  trace: AuthoringRunTrace;
+  aiActivity: ReturnType<AIUsageManager['activity']>;
+  aiUsage: ReturnType<AIUsageManager['summary']>;
+}> {
   const metadata = JSON.parse(await readFile(input.metadataPath, 'utf8')) as Record<string, unknown>;
-  const output = StudioDesignOutputSchema.parse(metadata.output);
+  const storedOutput = StudioDesignOutputSchema.parse(metadata.output);
   const trace = AuthoringRunTraceSchema.parse(metadata.authoringTrace);
-  if (!output.validation.hardGatePassed) throw new Error('Hard Gate FAIL 결과는 AI 검토로 보낼 수 없습니다.');
+  if (!storedOutput.validation.hardGatePassed) throw new Error('Hard Gate FAIL 결과는 AI 검토로 보낼 수 없습니다.');
   const slide = SlideIRSchema.parse(metadata.slide);
   const informationPlan = InformationPlanSchema.parse(metadata.informationPlan);
-  const tree = RenderTreeSchema.parse(metadata.tree);
-  const pngPath = trace.renderedPng?.path;
+  const selectedCandidateId = typeof metadata.selectedCandidateId === 'string' ? metadata.selectedCandidateId : storedOutput.candidates[0]!.candidateId;
+  const selectedOutput = storedOutput.candidates.find((candidate) => candidate.candidateId === selectedCandidateId);
+  const candidateArtifacts = Array.isArray(metadata.candidates) ? metadata.candidates as Array<Record<string, unknown>> : [];
+  const selectedArtifact = candidateArtifacts.find((candidate) => candidate.candidateId === selectedCandidateId);
+  const tree = selectedArtifact === undefined ? RenderTreeSchema.parse(metadata.tree) : RenderTreeSchema.parse(selectedArtifact.renderTree);
+  const pngPath = selectedArtifact === undefined ? trace.renderedPng?.path : String(selectedArtifact.pngPath);
   if (pngPath === undefined) throw new Error('Critic이 볼 PNG artifact가 없습니다.');
+  if (selectedOutput === undefined || !selectedOutput.validation.hardGatePassed) throw new Error('선택 candidate가 없거나 Hard Gate를 통과하지 못했습니다.');
+  const output = StudioDesignOutputSchema.parse({ ...storedOutput, previewPngUrl: selectedOutput.previewPngUrl, trace: { ...storedOutput.trace, renderTreeFingerprint: selectedOutput.renderTreeFingerprint, pngSha256: selectedOutput.pngSha256 } });
   const manager = new AIUsageManager({
     runId: trace.runId,
     projectId: trace.projectId,
@@ -361,7 +446,7 @@ export async function runV1StudioVisualCritic(input: {
     role: 'visual-critic',
     promptVersion: 'visual-critic-v1',
     schemaVersion: 'visual-critique-report-0.1',
-    canonicalArtifactHashes: [trace.sourceHash, trace.slideIR?.hash ?? '', trace.informationPlan?.hash ?? '', trace.renderTree?.hash ?? '', trace.renderedPng?.hash ?? ''],
+    canonicalArtifactHashes: [trace.sourceHash, trace.slideIR?.hash ?? '', trace.informationPlan?.hash ?? '', contentHash(tree), output.trace.pngSha256],
     generationParameters: { maxOutputTokens: 2200 },
   });
   const critic = await runVisualCritic({
@@ -384,17 +469,19 @@ export async function runV1StudioVisualCritic(input: {
     provider: critic.run.provider,
     model: critic.run.model,
   });
+  const aiActivity = manager.activity();
+  const aiUsage = manager.summary();
   await writeFile(input.metadataPath, JSON.stringify({
     ...metadata,
     output: updatedOutput,
     authoringTrace: updatedTrace,
     criticRun: critic.run,
-    aiActivity: manager.activity(),
-    aiUsage: manager.summary(),
+    aiActivity,
+    aiUsage,
     criticInputTrace: critic.inputTrace,
   }, null, 2) + '\n');
   await writeFile(resolve(dirname(input.metadataPath), 'authoring-run.json'), JSON.stringify(updatedTrace, null, 2) + '\n');
-  return { output: updatedOutput, run: critic.run, trace: updatedTrace };
+  return { output: updatedOutput, run: critic.run, trace: updatedTrace, aiActivity, aiUsage };
 }
 
 function sameList(left: readonly string[], right: readonly string[]): boolean {
@@ -442,11 +529,40 @@ export async function recordV1CandidatePreference(input: {
   if (event.artifactId !== output.artifactId || event.projectId !== trace.projectId || event.mode !== trace.mode || event.semanticShape !== output.trace.semanticShape) {
     throw new Error('Preference evidence가 현재 Harness artifact와 일치하지 않습니다.');
   }
+  if (event.comparisonId !== output.comparisonId) throw new Error('Preference evidence가 현재 candidate comparison과 일치하지 않습니다.');
+  if (!sameList(event.candidateIds, output.candidates.map((candidate) => candidate.candidateId))) throw new Error('Preference evidence의 candidate 목록이 현재 comparison과 일치하지 않습니다.');
+  const selectedIndex = event.decision === 'reject-all' ? -1 : ['choose-A', 'choose-B', 'choose-C'].indexOf(event.decision);
+  const selected = selectedIndex < 0 ? null : output.candidates[selectedIndex] ?? null;
+  if ((selected?.candidateId ?? null) !== event.selectedCandidateId || (selected?.pngSha256 ?? null) !== event.selectedCandidateHash) throw new Error('선택 candidate ID/hash가 실제 candidate와 일치하지 않습니다.');
+  if ((selected?.provenance.patternFragmentIds[0] ?? null) !== event.chosenPatternId) throw new Error('선택 candidate의 pattern trace가 일치하지 않습니다.');
+  if ((selected === null) !== (event.designSignature === null)) throw new Error('선택 candidate signature가 누락되었습니다.');
+  if (selected !== null && (event.designSignature?.candidateId !== selected.candidateId || event.designSignature.topologyFamily !== selected.provenance.layoutFamily || event.designSignature.readingPath !== selected.provenance.readingPath)) throw new Error('선택 candidate signature가 실제 candidate와 일치하지 않습니다.');
+  const slide = SlideIRSchema.parse(metadata.slide);
+  if (event.domain !== slide.domain.topic) throw new Error('Preference evidence의 domain이 현재 source와 일치하지 않습니다.');
+  let selectedOutput = output;
+  let selectedTree: ReturnType<typeof RenderTreeSchema.parse> | undefined;
+  let selectedPlan: unknown;
+  if (selected !== null && selected.candidateId !== output.candidates[0]!.candidateId) {
+    const artifacts = Array.isArray(metadata.candidates) ? metadata.candidates as Array<Record<string, unknown>> : [];
+    const artifact = artifacts.find((candidate) => candidate.candidateId === selected.candidateId);
+    if (artifact === undefined) throw new Error('선택 candidate의 render artifact가 없습니다.');
+    selectedTree = RenderTreeSchema.parse(artifact.renderTree); selectedPlan = artifact.compositionPlan;
+    const browser = await launchRenderBrowser(); const fonts = await loadSystemPretendard(); const directory = dirname(input.metadataPath);
+    try {
+      const rendered = await exportRenderTree({ browser, tree: selectedTree, fonts, outputDir: directory, basename: output.artifactId });
+      const pptxPath = resolve(directory, `${output.artifactId}.editable.pptx`); await writeEditablePptxFromRenderTree(selectedTree, pptxPath);
+      const requiredText = selectedTree.nodes.flatMap((node) => node.kind === 'text' && node.visible ? [node.text] : []);
+      const pdf = await validatePdfArtifact({ pdfPath: rendered.pdfPath, requiredText, expectedPageCount: 1, expectedAspectRatio: 16 / 9 });
+      const pptx = await validateEditablePptxArtifact({ pptxPath, requiredText, requiredRelationIds: slide.relations.map((relation) => relation.id) });
+      if (!pdf.passed || !pptx.passed) throw new Error('선택 candidate의 최종 출력 호환성 검사에 실패했습니다.');
+    } finally { await browser.close(); }
+    selectedOutput = StudioDesignOutputSchema.parse({ ...output, previewPngUrl: selected.previewPngUrl, trace: { ...output.trace, renderTreeFingerprint: selected.renderTreeFingerprint, pngSha256: selected.pngSha256 } });
+  }
   const store = new PreferenceEvidenceStore(input.preferenceRoot ?? resolve(dirname(input.metadataPath), '..', '..', 'preference-memory'));
   await store.append(event);
   const events = await store.load();
   const patterns = promotePreferencePatterns(events);
   const profile = buildDesignProfile(patterns, event.occurredAt);
-  await writeFile(input.metadataPath, JSON.stringify({ ...metadata, preferenceEvidence: event, preferencePatterns: patterns, designProfile: profile }, null, 2) + '\n');
-  return { event, patterns, profile };
+  await writeFile(input.metadataPath, JSON.stringify({ ...metadata, output: selectedOutput, ...(selectedTree === undefined ? {} : { tree: selectedTree, plan: selectedPlan }), selectedCandidateId: event.selectedCandidateId, preferenceEvidence: event, preferencePatterns: patterns, designProfile: profile }, null, 2) + '\n');
+  return { output: selectedOutput, event, patterns, profile };
 }

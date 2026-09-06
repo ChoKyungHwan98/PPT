@@ -8,7 +8,7 @@ import { PreferenceEvidenceStore, buildDesignProfile, exportPairwisePreferenceDa
 function event(index: number, pattern = 'pattern-a'): PreferenceEvidenceEvent {
   return {
     schemaVersion: '0.1', eventId: `event-${index}`, artifactId: `artifact-${index}`, comparisonId: `comparison-${index}`,
-    candidateIds: ['candidate-a', 'candidate-b', 'candidate-c'], decision: 'choose-A', selectedCandidateId: 'candidate-a', semanticShape: 'comparison', mode: 'presentation', chosenPatternId: pattern,
+    candidateIds: ['candidate-a', 'candidate-b', 'candidate-c'], decision: 'choose-A', selectedCandidateId: 'candidate-a', selectedCandidateHash: 'a'.repeat(64), semanticShape: 'comparison', mode: 'presentation', chosenPatternId: pattern,
     density: 'balanced', designSignature: { candidateId: 'candidate-a', referenceClusterIds: ['teacher-1'], topologyFamily: 'aligned-before-after-spec', readingPath: 'before-after', featureTags: ['balanced'] },
     reasonTags: ['clearer-pairing'], approved: true, projectId: 'project-1', domain: 'combat', occurredAt: `2026-09-0${index}T00:00:00.000Z`,
     separation: { teacherQualityChanged: false, readyQualityChanged: false, criticFindingsChanged: false },

@@ -67,6 +67,8 @@ function fakePorts(calls: string[], hardGatePassed = true): AuthoringHarnessPort
       const output = StudioDesignOutputSchema.parse({
         schemaVersion: '0.1', artifactId: 'artifact-test', projectId: input.projectId, documentId: input.documentId,
         previewPngUrl: 'http://localhost/artifact.png',
+        comparisonId: 'comparison-test',
+        candidates: [{ candidateId: 'candidate-a', label: '구조 A', compositionPlanHash: 'd'.repeat(64), renderTreeFingerprint: 'a'.repeat(64), renderTreeHash: 'e'.repeat(64), previewPngUrl: 'http://localhost/artifact.png', pngSha256: 'c'.repeat(64), provenance: { patternFragmentIds: ['pattern-a'], referenceIds: ['teacher-1'], layoutFamily: 'test-layout', readingPath: 'left-to-right' }, validation: { hardGatePassed: true, programFindingCount: 0, sourceFidelityFindingCount: 0 } }],
         exports: [
           { kind: 'png', url: 'http://localhost/artifact.png', editable: false },
           { kind: 'html', url: 'http://localhost/artifact.html', editable: false },
@@ -76,7 +78,7 @@ function fakePorts(calls: string[], hardGatePassed = true): AuthoringHarnessPort
         validation: { hardGatePassed: true, programFindingCount: 0, sourceFidelityFindingCount: 0 },
         critic: null, readiness: 'not-reviewed',
         trace: {
-          semanticShape: 'comparison', selectedTeacherIds: ['teacher-1'], appliedGuidanceIds: ['guidance-1'],
+          semanticShape: 'comparison', domain: 'test', selectedTeacherIds: ['teacher-1'], appliedGuidanceIds: ['guidance-1'],
           renderTreeFingerprint: 'a'.repeat(64), authoredContentHash: 'b'.repeat(64), pngSha256: 'c'.repeat(64),
         },
       });

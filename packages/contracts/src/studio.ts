@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { VisualCritiqueReportSchema } from './visual-critique.js';
+import { ReadingPathSchema } from './reference.js';
 
 export const StudioDesignInputSchema = z.strictObject({
   schemaVersion: z.literal('0.1'),
@@ -20,12 +21,36 @@ export const ExportHandleSchema = z.strictObject({
 });
 export type ExportHandle = z.infer<typeof ExportHandleSchema>;
 
+export const StudioCandidateSchema = z.strictObject({
+  candidateId: z.string().min(1),
+  label: z.string().min(1),
+  compositionPlanHash: z.string().regex(/^[a-f0-9]{64}$/),
+  renderTreeFingerprint: z.string().min(1),
+  renderTreeHash: z.string().regex(/^[a-f0-9]{64}$/),
+  previewPngUrl: z.string().min(1),
+  pngSha256: z.string().regex(/^[a-f0-9]{64}$/),
+  provenance: z.strictObject({
+    patternFragmentIds: z.array(z.string()),
+    referenceIds: z.array(z.string()),
+    layoutFamily: z.string().min(1),
+    readingPath: ReadingPathSchema,
+  }),
+  validation: z.strictObject({
+    hardGatePassed: z.literal(true),
+    programFindingCount: z.literal(0),
+    sourceFidelityFindingCount: z.literal(0),
+  }),
+});
+export type StudioCandidate = z.infer<typeof StudioCandidateSchema>;
+
 export const StudioDesignOutputSchema = z.strictObject({
   schemaVersion: z.literal('0.1'),
   artifactId: z.string().min(1),
   projectId: z.string().min(1),
   documentId: z.string().min(1),
   previewPngUrl: z.string().min(1),
+  comparisonId: z.string().min(1),
+  candidates: z.array(StudioCandidateSchema).min(1).max(3),
   exports: z.array(ExportHandleSchema).min(4),
   validation: z.strictObject({
     hardGatePassed: z.boolean(),
@@ -36,6 +61,7 @@ export const StudioDesignOutputSchema = z.strictObject({
   readiness: z.enum(['not-reviewed', 'ready', 'needs-review', 'not-ready']),
   trace: z.strictObject({
     semanticShape: z.string().min(1),
+    domain: z.string().min(1),
     selectedTeacherIds: z.array(z.string()),
     appliedGuidanceIds: z.array(z.string()),
     renderTreeFingerprint: z.string().min(1),

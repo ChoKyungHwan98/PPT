@@ -1,6 +1,7 @@
 import {
   runV1StudioAuthoring,
   recordV1StudioUserDecision,
+  recordV1CandidatePreference,
   runV1StudioVisualCritic,
   type StudioAuthoringArtifacts,
   type StudioAuthoringOptions,
@@ -22,4 +23,8 @@ export function runStudioVisualCritic(input: { metadataPath: string; provider: A
 
 export function recordStudioUserDecision(input: { metadataPath: string; event: DesignEvaluationEvent }) {
   return recordV1StudioUserDecision(input);
+}
+
+export function recordStudioCandidatePreference(input: Parameters<typeof recordV1CandidatePreference>[0]) {
+  return recordV1CandidatePreference(input);
 }
