@@ -7,6 +7,7 @@ type DesignOutput = { artifactId: string; previewPngUrl: string; candidates?: Ca
 type CriticRun = { provider: string; model: string; inputTokens?: number; outputTokens?: number; estimatedCostUsd?: number; cacheHit?: boolean };
 type Surface = 'none' | 'source' | 'review' | 'activity' | 'history' | 'compare';
 type ProductArea = '기획서' | '발표자료' | 'AI 학습' | '모델 관리';
+type TrainingStatus = { evaluationCount: number; readyCount: number; rejectCount: number; pairwiseCount: number; reasonTags: Array<[string, number]>; dataset: { datasetId: string; sha256: string; trainCount: number; validationCount: number }; eligibility: { meaningfulTraining: boolean; smokeTraining: boolean; reason: string }; latestRun: { trainingRunId: string; status: string; baseModel: string; finalLoss: number; adapterReloaded: boolean; inferenceSmoke: { passed: boolean } } };
 
 const api = 'http://127.0.0.1:8766';
 const samples = {
@@ -15,6 +16,10 @@ const samples = {
 } as const;
 
 function Mark() { return <span className="product-mark" aria-hidden="true">기</span>; }
+
+function LearningModule({ status, onBack }: { status: TrainingStatus | null; onBack: () => void }) {
+  return <div className="product-shell"><header className="product-top"><button className="crumb" onClick={onBack}>‹ 도로시아</button><b>AI 학습</b><span>기획서 디자이너</span></header><main className="module-overview training-module"><header><h1>AI 학습</h1><p>사람이 남긴 실제 판단만 학습 자료로 묶고, 품질 검증 전에는 모델을 사용하지 않습니다.</p></header><div className="training-grid"><section className="training-summary"><article><small>사람 평가</small><b>{status?.evaluationCount ?? '—'}</b><p>Ready {status?.readyCount ?? 0} · Reject {status?.rejectCount ?? 0}</p></article><article><small>후보 선택쌍</small><b>{status?.pairwiseCount ?? '—'}</b><p>선택과 품질 판정은 별도로 보관</p></article><article><small>고정 데이터</small><b>{status ? `${status.dataset.trainCount} / ${status.dataset.validationCount}` : '—'}</b><p>학습 / 검증</p></article></section><section className="training-run"><div><small>학습 가능 여부</small><strong>{status?.eligibility.meaningfulTraining ? '품질 학습 가능' : '검증용 실행만 가능'}</strong><p>{status?.eligibility.reason ?? '학습 상태를 불러오는 중입니다.'}</p></div><button disabled={!status?.eligibility.meaningfulTraining}>품질 학습 시작</button><em>데이터가 부족할 때는 실행 버튼이 열리지 않습니다.</em></section><section className="training-evidence"><header><b>문제 이유 분포</b><span>{status?.dataset.datasetId ?? '—'}</span></header>{status?.reasonTags.map(([tag, count]) => <div key={tag}><span>{tag}</span><i style={{ width: `${Math.min(100, count * 18)}%` }}/><b>{count}</b></div>)}</section><section className="training-complete"><small>최근 검증 실행</small><b>{status?.latestRun.trainingRunId ?? '없음'}</b><p>{status ? `${status.latestRun.baseModel} · 어댑터 재로딩 ${status.latestRun.adapterReloaded ? '성공' : '실패'} · 추론 ${status.latestRun.inferenceSmoke.passed ? '성공' : '실패'}` : '불러오는 중'}</p><span>완료된 모델은 자동으로 활성화되지 않습니다.</span></section></div><button className="module-back" onClick={onBack}>프로젝트로 돌아가기</button></main></div>;
+}
 
 export function StudioWorkbench() {
   const params = useMemo(() => new URLSearchParams(location.search), []);
@@ -33,7 +38,9 @@ export function StudioWorkbench() {
   const [message, setMessage] = useState('원고를 확인한 뒤 장표를 생성하세요.');
   const [serviceReady, setServiceReady] = useState<boolean | null>(null);
   const [history, setHistory] = useState<Array<{ artifactId: string; at: string; preview: string }>>([]);
+  const [trainingStatus, setTrainingStatus] = useState<TrainingStatus | null>(null);
   useEffect(() => { void fetch(`${api}/api/designer/health`).then((res) => setServiceReady(res.ok)).catch(() => setServiceReady(false)); }, []);
+  useEffect(() => { if (screen === 'learning') void fetch(`${api}/api/designer/training/status`).then((response) => response.ok ? response.json() : null).then((value) => setTrainingStatus(value as TrainingStatus | null)).catch(() => setTrainingStatus(null)); }, [screen]);
 
   const openArea = (next: ProductArea) => {
     setArea(next);
@@ -79,7 +86,8 @@ export function StudioWorkbench() {
 
   if (screen === 'project') return <div className="product-shell"><header className="product-top"><button className="crumb" onClick={() => setScreen('projects')}>‹ 프로젝트</button><b>도로시아</b><span>로컬에 저장됨</span></header><main className="project-overview"><header><small>프로젝트</small><h1>도로시아</h1><p>게임 기획의 논리, 발표자료, AI 검토 기록을 한곳에서 관리합니다.</p></header><section className="area-grid">{(['기획서','발표자료','AI 학습','모델 관리'] as ProductArea[]).map((item, index) => <button key={item} onClick={() => openArea(item)}><span>0{index + 1}</span><h2>{item}</h2><p>{item === '기획서' ? '세부 규칙과 관계를 보존한 문서' : item === '발표자료' ? '핵심 메시지가 먼저 보이는 발표용 페이지' : item === 'AI 학습' ? '내 선택과 검토 기록으로 학습 자료 관리' : '설치된 모델과 검증 상태 관리'}</p><b>열기 →</b></button>)}</section><section className="recent-work"><div><h2>최근 작업</h2><span>{history.length}개</span></div>{history.length ? history.map((item) => <button key={item.artifactId} onClick={() => setScreen('workspace')}><img src={item.preview} alt=""/><span><b>{item.artifactId}</b><small>{new Date(item.at).toLocaleString('ko-KR')}</small></span></button>) : <p>아직 생성한 장표가 없습니다.</p>}</section></main></div>;
 
-  if (screen === 'learning' || screen === 'models') return <div className="product-shell"><header className="product-top"><button className="crumb" onClick={() => setScreen('project')}>‹ 도로시아</button><b>{screen === 'learning' ? 'AI 학습' : '모델 관리'}</b><span>기획서 디자이너</span></header><main className="module-overview"><header><h1>{screen === 'learning' ? 'AI 학습' : '모델 관리'}</h1><p>{screen === 'learning' ? '승인·거절과 후보 선택 기록을 서로 섞지 않고 학습 자료로 준비합니다.' : '설치 여부와 품질 검증 여부를 구분해 실행 모델을 관리합니다.'}</p></header><div className="module-stats"><article><small>{screen === 'learning' ? '평가 기록' : '등록 모델'}</small><b>{screen === 'learning' ? history.length : 2}</b><p>{screen === 'learning' ? '현재 프로젝트에서 만든 결과' : '로컬 1 · 원격 1 프로필'}</p></article><article><small>{screen === 'learning' ? '확정된 취향' : '실행 가능'}</small><b>0</b><p>{screen === 'learning' ? '근거 5회 전에는 확정하지 않음' : '검증 통과와 활성화가 모두 필요'}</p></article></div><button className="module-back" onClick={() => setScreen('project')}>프로젝트로 돌아가기</button></main></div>;
+  if (screen === 'learning') return <LearningModule status={trainingStatus} onBack={() => setScreen('project')}/>;
+  if (screen === 'models') return <div className="product-shell"><header className="product-top"><button className="crumb" onClick={() => setScreen('project')}>‹ 도로시아</button><b>모델 관리</b><span>기획서 디자이너</span></header><main className="module-overview"><header><h1>모델 관리</h1><p>설치 여부와 품질 검증 여부를 구분해 실행 모델을 관리합니다.</p></header><div className="module-stats"><article><small>등록 모델</small><b>2</b><p>로컬 1 · 원격 1 프로필</p></article><article><small>실행 가능</small><b>0</b><p>검증 통과와 활성화가 모두 필요</p></article></div><button className="module-back" onClick={() => setScreen('project')}>프로젝트로 돌아가기</button></main></div>;
 
   return <div className="authoring-shell">
     <header className="authoring-top"><button className="crumb" onClick={() => setScreen('project')}>‹ 도로시아</button><div><b>{area}</b><span>{serviceReady === false ? '생성 서비스 연결 필요' : serviceReady ? '준비됨' : '확인 중'}</span></div><nav><button onClick={() => setSurface(surface === 'source' ? 'none' : 'source')}>원고</button><button disabled={!output} onClick={() => setSurface('compare')}>후보 비교</button><button disabled={!output} onClick={() => setSurface('review')}>검토</button><button onClick={() => setSurface('history')}>기록</button><button className="generate" disabled={busy !== null || !content.trim()} onClick={() => void generate()}>{busy === 'generate' ? '설계 중' : output ? '다시 만들기' : '장표 만들기'}</button></nav></header>

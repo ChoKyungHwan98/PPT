@@ -9,6 +9,7 @@
   "dependencies": {
     "@game-presentation/authoring-harness": "workspace:*",
     "@game-presentation/contracts": "workspace:*",
+    "@game-presentation/local-training": "workspace:*",
     "@game-presentation/renderer": "workspace:*",
     "@game-presentation/source-ingestion": "workspace:*"
   }

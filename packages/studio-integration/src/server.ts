@@ -4,6 +4,7 @@ import { basename, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { OpenAICompatibleVisualCriticProvider, OpenRouterAIProvider } from '@game-presentation/renderer/studio';
 import { ModelRegistryRouter, runtimeModelRegistry } from '@game-presentation/authoring-harness';
+import { CriticDatasetManifestSchema, TrainingRunRecordSchema } from '@game-presentation/local-training';
 import { recordStudioUserDecision, runStudioDesignJob, runStudioVisualCritic } from './design-job.js';
 
 const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../../..');
@@ -41,6 +42,22 @@ const server = createServer(async (request, response) => {
   try {
     if (request.method === 'GET' && url.pathname === '/api/designer/health') {
       json(response, 200, { ok: true, service: 'game-ppt-designer-v1', localCriticEndpoint: process.env.LOCAL_CRITIC_ENDPOINT ?? 'http://127.0.0.1:8000/v1/chat/completions', localCriticModel: process.env.LOCAL_CRITIC_MODEL ?? 'afx-team/UI-UX', openRouterConfigured: Boolean(process.env.OPENROUTER_API_KEY) });
+      return;
+    }
+    if (request.method === 'GET' && url.pathname === '/api/designer/training/status') {
+      const manifest = CriticDatasetManifestSchema.parse(JSON.parse(await readFile(resolve(repositoryRoot, 'packages/local-training/data/critic-smoke-v1.manifest.json'), 'utf8')));
+      const run = TrainingRunRecordSchema.parse(JSON.parse(await readFile(resolve(repositoryRoot, 'packages/local-training/artifacts/r8-smoke/run-record.json'), 'utf8')));
+      const reasonTags = Object.entries(manifest.examples.flatMap((example) => example.issueTypes).reduce<Record<string, number>>((counts, tag) => ({ ...counts, [tag]: (counts[tag] ?? 0) + 1 }), {})).sort((left, right) => right[1] - left[1]);
+      json(response, 200, {
+        evaluationCount: manifest.examples.length,
+        readyCount: manifest.examples.filter((example) => example.readiness === 'ready').length,
+        rejectCount: manifest.examples.filter((example) => example.readiness === 'not-ready').length,
+        pairwiseCount: 0,
+        reasonTags,
+        dataset: { datasetId: manifest.datasetId, sha256: manifest.datasetSha256, trainCount: manifest.trainIds.length, validationCount: manifest.validationIds.length },
+        eligibility: { meaningfulTraining: false, smokeTraining: true, reason: '사람 평가 4건, Ready 사례 0건으로 품질 학습 기준에는 부족합니다.' },
+        latestRun: run,
+      });
       return;
     }
     if (request.method === 'POST' && url.pathname === '/api/designer/jobs') {

@@ -210,6 +210,9 @@ importers:
       '@game-presentation/contracts':
         specifier: workspace:*
         version: link:../contracts
+      '@game-presentation/local-training':
+        specifier: workspace:*
+        version: link:../local-training
       '@game-presentation/renderer':
         specifier: workspace:*
         version: link:../renderer

@@ -1,9 +1,10 @@
 import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { CriticDatasetManifestSchema, TrainingRunRecordSchema } from '../src/training-contract.js';
 import { datasetHash, deterministicSplit, loadCriticDatasetManifest } from '../src/dataset.js';
 
-const manifestPath = new URL('../data/critic-smoke-v1.manifest.json', import.meta.url).pathname.replace(/^\/(.:)/, '$1');
+const manifestPath = fileURLToPath(new URL('../data/critic-smoke-v1.manifest.json', import.meta.url));
 
 describe('R8 local critic training data', () => {
   it('validates the human-labelled snapshot and deterministic split', () => {
@@ -22,7 +23,7 @@ describe('R8 local critic training data', () => {
   });
 
   it('validates the persisted smoke training run when present', () => {
-    const runPath = new URL('../artifacts/r8-smoke/run-record.json', import.meta.url).pathname.replace(/^\/(.:)/, '$1');
+    const runPath = fileURLToPath(new URL('../artifacts/r8-smoke/run-record.json', import.meta.url));
     const raw = JSON.parse(readFileSync(runPath, 'utf8')) as unknown;
     const run = TrainingRunRecordSchema.parse(raw);
     expect(run.claim).toBe('adapter-pipeline-smoke-only');

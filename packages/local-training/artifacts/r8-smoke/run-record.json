@@ -1,0 +1,46 @@
+{
+  "schemaVersion": "0.1",
+  "trainingRunId": "r8-smoke-20260905T172830Z",
+  "status": "completed-smoke",
+  "claim": "adapter-pipeline-smoke-only",
+  "baseModel": "HuggingFaceTB/SmolVLM-256M-Instruct",
+  "baseModelRevision": "main",
+  "datasetId": "visual-critic-human-smoke-v1",
+  "datasetSha256": "df927f31f6ff3905cca7929461f1e3e5bb8100b359f9c4d80d407f56d508b2be",
+  "trainCount": 3,
+  "validationCount": 1,
+  "lora": {
+    "r": 4,
+    "alpha": 8,
+    "dropout": 0.05,
+    "targetModules": [
+      "q_proj",
+      "v_proj"
+    ]
+  },
+  "quantization": "none-cpu-smoke",
+  "epochs": 1,
+  "optimizerSteps": 1,
+  "learningRate": 0.0001,
+  "batchSize": 1,
+  "seed": 42,
+  "device": "cpu",
+  "gpu": "NVIDIA GeForce RTX 4060 Ti (not used by CPU smoke)",
+  "peakVramMb": null,
+  "startedAt": "2026-09-05T17:28:30.518961Z",
+  "finishedAt": "2026-09-05T17:29:14.001706Z",
+  "finalLoss": 13.1790132522583,
+  "adapterPath": "packages/local-training/artifacts/r8-smoke/adapter",
+  "adapterSha256": "40ebcf328fd39ae0e27d462460918d440fcc6bc05b6f2f221b5f4e281b6a06ea",
+  "adapterReloaded": true,
+  "inferenceSmoke": {
+    "passed": true,
+    "generatedText": "원문의 수�",
+    "latencyMs": 9462.407800005167
+  },
+  "evaluation": {
+    "meaningfulQualityClaim": false,
+    "reason": "Human-labelled pages are only sufficient for a bounded adapter pipeline smoke test, not critic quality training."
+  },
+  "codeGitCommit": "4af81d632279f4d198330bf8101e2bd1e03b23af"
+}

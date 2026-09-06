@@ -158,7 +158,10 @@ def main() -> None:
         "codeGitCommit": git_commit(root),
     }
     (output / "run-record.json").write_text(json.dumps(record, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    print(json.dumps(record, ensure_ascii=False, indent=2))
+    # Windows PowerShell may use cp949; escaped output keeps the successful run
+    # from being reported as failed merely because a smoke generation contains
+    # a tokenizer replacement character.
+    print(json.dumps(record, ensure_ascii=True, indent=2))
 
 
 if __name__ == "__main__":
